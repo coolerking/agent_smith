@@ -1,0 +1,11 @@
+env: tensorflow-1.7
+
+task:
+  train:
+    machine: gpu2
+    description: train agent jones with dummy data
+    input:
+      - source: exacorp/datasets/jones_dummy/1
+        destination: data
+    command: python train.py --model /output/dummypilot --tub /data
+

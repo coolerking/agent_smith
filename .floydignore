@@ -1,0 +1,13 @@
+data
+docs
+gpio
+logicool
+logs
+mode
+models
+tests
+site
+tub
+.gitignore
+test_*.py
+__pycache__

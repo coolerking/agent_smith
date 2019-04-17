@@ -1,0 +1,55 @@
+site_name: Agent Jones
+theme:
+    name: material
+    language: 'ja'
+    feature:
+        tabs: true
+
+repo_url: https://github.com/coolerking/jones
+edit_uri: edit/master/docs
+google_analytics: ['UA-99215530-2', 'github.com/coolerking']
+extra_css:
+    - "//fonts.googleapis.com/earlyaccess/notosansjp.css"
+    - "//fonts.googleapis.com/css?family=Open+Sans:600,800"
+    - "https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css"
+    - extra.css
+extra_javascript: 
+    - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+extra:
+    font:
+        text: "Noto Sans JP"
+        code: "Consolas"
+    palette:
+        primary: "indigo"
+        accent: "red"
+    search:
+        language: 'ja'
+markdown_extensions:
+    - admonition
+    - fontawesome_markdown
+    - codehilite
+    - codehilite:
+        use_pygments: true
+        noclasses: true
+        pygments_style: monokai
+    - mdx_math:
+        enable_dollar_delimiter: true
+
+pages:
+    - Home: index.md
+
+    - Parts:
+        - 'circuit': circuit.md
+        - 'pigpio': pigpio.md
+        - 'AWS IoT Core': aws_iot_core_setup.md
+        - 'Tub data': tub.md
+        - 'HedgeHog': hedgehog_setup.md
+
+    - Auto Pilot:
+        - 'Model': default_model.md
+        - 'Floyd Hub': floydhub.md
+
+    - Appendix:
+        - 'Marvelmind I/F': hedgehog_if.md
+        - 'marvelmind.py': marvelmind.md
+
