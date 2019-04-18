@@ -28,8 +28,8 @@ def train(cfg, tub_names, new_model_path, base_model_path=None):
     saves the output trained model as model_name
     """
     X_keys = ['cam/image_array']
-    y_keys = ['user/left/value', 'user/left/status', 'user/right/value', 'user/right/status', 
-    'user/lift/value', 'user/lift/status']
+    y_keys = ['user/left/value', 'user/left/status', 'user/right/value', 'user/right/status'] #, 
+    #'user/lift/value', 'user/lift/status']
 
     new_model_path = os.path.expanduser(new_model_path)
 

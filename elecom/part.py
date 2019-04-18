@@ -14,7 +14,7 @@ pip install -e .
 import time
 import evdev
 from evdev import ecodes
-
+from itertools import cycle
 from donkeypart_bluetooth_game_controller import BluetoothGameController
 
 class JoystickController(BluetoothGameController):
@@ -155,4 +155,283 @@ class JoystickController(BluetoothGameController):
             self.load_device(self.device_search_term)
             # ボタン名, 値ともにNoneを返却
             return None, None
+
+class DozerJoystickController(JoystickController):
+    '''
+    Dozerを操作するためのJC-U3912T ゲームパッド用コントローラクラス。
+    '''
+    def __init__(self, 
+        event_input_device=None, 
+        config_path=None, 
+        device_search_term=None,
+        left_direction = 1,
+        right_direction = 1,
+        verbose=False):
+        """
+        コンストラクタ。
+        親クラスの実装を処理後、フォークリフト固有動作に対応可能な拡張設定
+        を追加する。
+
+        引数
+            event_input_device    イベントキャラクタデバイスのInputDeviceオブジェクト(デフォルトNone→device_search_termで検索する)
+            config_path           設定ファイルパス(デフォルトNull)
+            device_search_term    検索対象文字列(デフォルトNull)
+            left_direction        左駆動輪値正逆反転(1:しない(デフォルト)、-1:する)
+            right_direction        右駆動輪値正逆反転(1:しない(デフォルト)、-1:する)
+            verbose               デバッグモード(デフォルトFalse)
+        戻り値
+            なし
+        """
+        super().__init__(event_input_device, config_path, device_search_term, verbose)
+
+
+        self.user_left_value = 0
+        self.user_right_value = 0
+        #self.user_lift_value = 0
+
+        self.left_direction = left_direction
+        self.right_direction = right_direction
+        #self.lift_direction = lift_direction
+
+        self.user_all_status = ['free', 'move', 'brake']
+        self.user_left_status = self.user_all_status[0]
+        self.user_right_status = self.user_all_status[0]
+        #self.user_lift_status = self.user_all_status[0]
+
+        self.user_mode_toggle = cycle(['user', 'local']) #user:手動、local:自動
+        self.user_mode = next(self.user_mode_toggle)
+
+        self.func_map = {
+            'DPAD_Y':           self.update_user_wheels_move, # 半速前後進
+            'DPAD_X':           self.update_user_wheels_turn, # 半速超信地旋回
+            '5':                self.update_user_left_free, # 左駆動輪動力なし
+            '6':                self.update_user_right_free, # 右駆動輪動力なし
+            '7':                self.update_user_left_brake, # 左駆動輪制動停止
+            '8':                self.update_user_right_brake, # 右駆動輪制動停止
+            'LEFT_STICK_Y':     self.update_user_left_move, # 左駆動輪操作
+            'RIGHT_STICK_Y':    self.update_user_right_move, # 右駆動輪操作
+            '9':                self.update_user_left_lift_free, # 左駆動輪動力なし、リフト動力なし
+            '10':               self.update_user_right_lift_free, # 右駆動輪動力なし、リフト動力なし
+            '12':               self.toggle_recording, # 記録モード変更
+            '11':               self.toggle_user_mode, # 運転モード変更
+            '3':                self.update_user_all_free, # 全動力なし
+            '4':                self.update_user_all_brake, # 全動力制動停止
+            '1':                self.update_user_start, # 手動運転開始
+            '2':                self.update_local_start, # 自動運転開始
+            #'LOGO':             self.update_init, # 手動運転開始（初期状態：記録なし）Dモードでは動作しない
+        }
+
+
+    def run(self):
+        self.update_state_from_loop()
+        return self.user_left_value, self.user_left_status, \
+            self.user_right_value, self.user_right_status, \
+            self.user_mode, self.recording
     
+    def run_threaded(self):
+        return self.user_left_value, self.user_left_status, \
+            self.user_right_value, self.user_right_status, \
+            self.user_mode, self.recording
+
+    def shutdown(self):
+        self.user_left_value = 0
+        self.user_right_value = 0
+        #self.user_lift_value = 0
+        self.user_left_status = self.user_all_status[0]
+        self.user_right_status = self.user_all_status[0]
+        #self.user_lift_status = self.user_all_status[0]
+        self.recording = False
+        self.user_mode = 'user'
+
+    def update_user_left_move(self, val):
+        if val == 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+        else:
+            self.user_left_value = val * self.left_direction
+            self.user_left_status = self.user_all_status[1]
+    
+    def update_user_right_move(self, val):
+        if val == 0:
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+        else:
+            self.user_right_value = val * self.right_direction
+            self.user_right_status = self.user_all_status[1]
+    
+    #def update_user_lift_move(self, val):
+    #    if val == 0:
+    #        self.user_lift_status = self.user_all_status[0]
+    #        self.user_lift_value = 0
+    #    else:
+    #        self.user_lift_value = val * self.lift_direction
+    #        self.user_lift_status = self.user_all_status[1]
+    
+    def update_user_left_free(self, val):
+        if val > 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+    
+    def update_user_right_free(self, val):
+        if val > 0:
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+    
+    #def update_user_lift_free(self, val):
+    #    if val > 0:
+    #        self.user_lift_status = self.user_all_status[0]
+    #        self.user_lift_value = 0
+
+    def update_user_all_free(self, val):
+        if val > 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+            #self.user_lift_status = self.user_all_status[0]
+            #self.user_lift_value = 0
+
+    def update_user_left_lift_free(self, val):
+        if val > 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+            #self.user_lift_status = self.user_all_status[0]
+            #self.user_lift_value = 0
+
+    def update_user_right_lift_free(self, val):
+        if val > 0:
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+            #self.user_lift_status = self.user_all_status[0]
+            #self.user_lift_value = 0
+
+    def update_user_left_brake(self, val):
+        if val > 0:
+            self.user_left_status = self.user_all_status[2]
+            self.user_left_value = 0
+    
+    def update_user_right_brake(self, val):
+        if val > 0:
+            self.user_right_status = self.user_all_status[2]
+            self.user_right_value = 0
+    
+    #def update_user_lift_brake(self, val):
+    #    if val > 0:
+    #        self.user_lift_status = self.user_all_status[2]
+    #        self.user_lift_value = 0
+
+    def update_user_all_brake(self, val):
+        if val > 0:
+            self.user_left_status = self.user_all_status[2]
+            self.user_left_value = 0
+            self.user_right_status = self.user_all_status[2]
+            self.user_right_value = 0
+            #self.user_lift_status = self.user_all_status[2]
+            #self.user_lift_value = 0
+
+    def update_user_wheels_move(self, val):
+        if val == 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+        elif val > 0:
+            self.user_left_value = 0.5 * self.left_direction
+            self.user_left_status = self.user_all_status[1]
+            self.user_right_value = 0.5 * self.right_direction
+            self.user_right_status = self.user_all_status[1]
+        else:
+            self.user_left_value = -0.5 * self.left_direction
+            self.user_left_status = self.user_all_status[1]
+            self.user_right_value = -0.5 * self.right_direction
+            self.user_right_status = self.user_all_status[1]
+
+    def update_user_wheels_turn(self, val):
+        if val == 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+        elif val > 0:
+            self.user_left_value = 0.5 * self.left_direction
+            self.user_left_status = self.user_all_status[1]
+            self.user_right_value = -0.5 * self.right_direction
+            self.user_right_status = self.user_all_status[1]
+        else:
+            self.user_left_value = -0.5 * self.left_direction
+            self.user_left_status = self.user_all_status[1]
+            self.user_right_value = 0.5 * self.right_direction
+            self.user_right_status = self.user_all_status[1]
+
+    #def update_user_lift_up_half(self, val):
+    #    if val > 0:
+    #        self.user_lift_value = 0.5 * self.lift_direction
+    #        self.user_lift_status = self.user_all_status[1]
+    #    else:
+    #        self.user_lift_status = self.user_all_status[0]
+    #        self.user_lift_value = 0
+
+    #def update_user_lift_down_half(self, val):
+    #    if val > 0:
+    #        self.user_lift_value = -0.5 * self.lift_direction
+    #        self.user_lift_status = self.user_all_status[1]
+    #    else:
+    #        self.user_lift_status = self.user_all_status[0]
+    #        self.user_lift_value = 0
+
+    #def update_user_lift_move_half(self, val):
+    #    if val == 0:
+    #        self.user_lift_status = self.user_all_status[0]
+    #        self.user_lift_value = 0
+    #    elif val > 0:
+    #        self.user_lift_value = 0.5 * self.lift_direction
+    #        self.user_lift_status = self.user_all_status[1]
+    #    else:
+    #        self.user_lift_value = -0.5 * self.lift_direction
+    #        self.user_lift_status = self.user_all_status[1]
+
+    def toggle_user_mode(self, val):
+        if val > 0:
+            self.user_mode = next(self.user_mode_toggle)
+
+    def update_user_start(self, val):
+        if val > 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+            #self.user_lift_status = self.user_all_status[0]
+            #self.user_lift_value = 0
+            if not self.recording:
+                self.toggle_recording(1) # 記録開始
+            if self.user_mode == 'local':
+                self.user_mode = next(self.user_mode_toggle)
+
+    def update_local_start(self, val):
+        if val > 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+            #self.user_lift_status = self.user_all_status[0]
+            #self.user_lift_value = 0
+            if not self.recording:
+                self.toggle_recording(1) # 記録開始
+            if self.user_mode == 'user':
+                self.user_mode = next(self.user_mode_toggle)
+    
+    def update_init(self, val):
+        if val > 0:
+            self.user_left_status = self.user_all_status[0]
+            self.user_left_value = 0
+            self.user_right_status = self.user_all_status[0]
+            self.user_right_value = 0
+            #self.user_lift_status = self.user_all_status[0]
+            #self.user_lift_value = 0
+            if self.recording:
+                self.toggle_recording(1) # 記録停止
+            if self.user_mode == 'local':
+                self.user_mode = next(self.user_mode_toggle)
+
+    def no_operation(self, val):
+        pass

@@ -21,8 +21,8 @@ USER_MODES = ['user', 'local']
 MOTOR_STATUS = ['move', 'free', 'brake']
 # モータステータスを使用しているレコードファイルのキー群
 MOTOR_STATUS_KEYS = [
-    'user/left/status',  'user/right/status',  'user/lift/status',
-    'local/left/status', 'local/right/status', 'local/lift/status'
+    'user/left/status',  'user/right/status',  #'user/lift/status',
+    'local/left/status', 'local/right/status', #'local/lift/status'
 ]
 # デフォルトモータ値/ステータス
 DEFAULT_VALUE = 0.0

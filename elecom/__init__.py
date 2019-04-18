@@ -1,1 +1,1 @@
-from . import part
+from .part import *

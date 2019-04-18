@@ -28,12 +28,12 @@ class PowerUnit:
         self.pi = pi
         self.left_motor =   MotorDriver(self.pi, pu_gpios[0][0], pu_gpios[0][1], pu_gpios[0][2])
         self.right_motor =  MotorDriver(self.pi, pu_gpios[1][0], pu_gpios[1][1], pu_gpios[1][2])
-        self.lift_motor =   MotorDriver(self.pi, pu_gpios[2][0], pu_gpios[2][1], pu_gpios[2][2])
+        #self.lift_motor =   MotorDriver(self.pi, pu_gpios[2][0], pu_gpios[2][1], pu_gpios[2][2])
 
     def update(self):
         pass
 
-    def run(self, left_value, left_status, right_value, right_status, lift_value, lift_status):
+    def run(self, left_value, left_status, right_value, right_status): #, lift_value, lift_status):
         '''
         それぞれのモータに指示を出す。
         引数：
@@ -41,13 +41,11 @@ class PowerUnit:
             left_status     左モータステータス(move, free, brake)
             right_value     右モータ動作レベル(-1.0～1.0)
             right_status    右モータステータス(move, free, brake)
-            lift_value      リフトモータ動作レベル(-1.0～1.0)
-            lift_status     左モータステータス(move, free, brake)
         戻り値：
             なし
         '''
         # 未入力状態の場合、何もしない
-        if left_value is None or right_value is None or lift_value is None:
+        if left_value is None or right_value is None: # or lift_value is None:
             return
 
         if left_status == BRAKE:
@@ -64,14 +62,14 @@ class PowerUnit:
         else:
             self.right_motor.move(self._add_idle(right_value))
         
-        if lift_status == BRAKE:
-            self.lift_motor.brake()
-        elif lift_status == FREE:
-            self.lift_motor.free()
-        else:
-            self.lift_motor.move(self._add_idle(lift_value))
+        #if lift_status == BRAKE:
+        #    self.lift_motor.brake()
+        #elif lift_status == FREE:
+        #    self.lift_motor.free()
+        #else:
+        #    self.lift_motor.move(self._add_idle(lift_value))
     
-    def run_threaded(self, left_value, left_status, right_value, right_status, lift_value, lift_status):
+    def run_threaded(self, left_value, left_status, right_value, right_status): #, lift_value, lift_status):
         '''
         それぞれのモータに指示を出す。
         引数：
@@ -79,12 +77,10 @@ class PowerUnit:
             left_status     左モータステータス(move, free, brake)
             right_value     右モータ動作レベル(-1.0～1.0)
             right_status    右モータステータス(move, free, brake)
-            lift_value      リフトモータ動作レベル(-1.0～1.0)
-            lift_status     左モータステータス(move, free, brake)
         戻り値：
             なし
         '''
-        self.run(left_value, left_status, right_value, right_status, lift_value, lift_status)
+        self.run(left_value, left_status, right_value, right_status) #, lift_value, lift_status)
     
     def shutdown(self):
         '''
@@ -96,7 +92,7 @@ class PowerUnit:
         '''
         self.left_motor.free()
         self.right_motor.free()
-        self.lift_motor.free()
+        #self.lift_motor.free()
 
     def _add_idle(self, input_value):
         """

@@ -90,12 +90,12 @@ class KerasLinear(KerasPilot):
         # 右モータステータス：分類
         right_status = MOTOR_STATUS[np.argmax(outputs[3][0][0])]
         # リフトモータ値：回帰
-        lift_value = outputs[4][0][0]
+        #lift_value = outputs[4][0][0]
         # リフトモータステータス：分類
-        lift_status =  MOTOR_STATUS[np.argmax(outputs[5][0][0])]
+        #lift_status =  MOTOR_STATUS[np.argmax(outputs[5][0][0])]
 
         # Agent Jones用操作データを返却
-        return left_value, left_status, right_value, right_status, lift_value, lift_status
+        return left_value, left_status, right_value, right_status #, lift_value, lift_status
 
 
 def default_linear():
@@ -130,24 +130,28 @@ def default_linear():
     right_status_out = Dense(units=len(MOTOR_STATUS), activation='softmax', name='right_status_out')(x)
 
     # リフトモータ
-    lift_value_out  = Dense(units=1, activation='linear', name='lift_value_out')(x)
-    lift_status_out = Dense(units=len(MOTOR_STATUS), activation='softmax', name='lift_status_out')(x)
+    #lift_value_out  = Dense(units=1, activation='linear', name='lift_value_out')(x)
+    #lift_status_out = Dense(units=len(MOTOR_STATUS), activation='softmax', name='lift_status_out')(x)
 
-    model = Model(inputs=[img_in], outputs=[left_value_out, left_status_out, right_value_out, right_status_out, lift_value_out, lift_status_out])
+    model = Model(inputs=[img_in], outputs=[left_value_out, left_status_out, right_value_out, right_status_out]) #, lift_value_out, lift_status_out])
 
     # 回帰、分類別に最適化関数を使い分け
     model.compile(optimizer='adam',
-                  loss={'left_value_out': 'mean_squared_error',
-                        'left_status_out':  'categorical_crossentropy',
-                        'right_value_out': 'mean_squared_error',
-                        'right_status_out':  'categorical_crossentropy',
-                        'lift_value_out': 'mean_squared_error',
-                        'lift_status_out':  'categorical_crossentropy',},
-                  loss_weights={'left_value_out': 0.5,
-                        'left_status_out': 0.5,
-                        'right_value_out': 0.5,
-                        'right_status_out': 0.5,
-                        'lift_value_out': 0.5,
-                        'lift_status_out': 0.5})
+        loss={
+            'left_value_out': 'mean_squared_error',
+            'left_status_out':  'categorical_crossentropy',
+            'right_value_out': 'mean_squared_error',
+            'right_status_out':  'categorical_crossentropy',
+            #'lift_value_out': 'mean_squared_error',
+            #'lift_status_out':  'categorical_crossentropy',
+        },
+        loss_weights={
+            'left_value_out': 0.5,
+            'left_status_out': 0.5,
+            'right_value_out': 0.5,
+            'right_status_out': 0.5,
+            #'lift_value_out': 0.5,
+            #'lift_status_out': 0.5
+        })
 
     return model
