@@ -1,4 +1,4 @@
-# Automotive forklift jones for donkeycar
+# Automotive forklift smith for donkeycar
 
 ## 操作方法
 
@@ -68,7 +68,7 @@
 
 ### リポジトリ
 
-- https://github.com/coolerking/jones3.git
+- https://github.com/coolerking/agent_smith.git
 
 >  [MITライセンス](./LICENSE)準拠
 
