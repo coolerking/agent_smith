@@ -1,0 +1,995 @@
+# donkey createjs ウィザード操作
+
+- Donkeycar(3.1.0以降)インストール済みRaspberry Piを用意（手順略）
+- ジョイスティックドングルをRaspberry PiのUSBポートに刺す
+- Raspberry Piを起動
+- Raspberry Piへログイン
+- `donkey createjs` を実行
+
+```bash
+(env) kong@jones_310 $ donkey createjs
+using donkey v3.1.0 ...
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+## Welcome to Joystick Creator Wizard. ##
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+This will generate code to use your joystick with a Donkey car.
+
+Overview:
+
+First we name each button, then each axis control.
+Next we map names to actions.
+Finally we output a python file you can use in your project.
+
+Hit Enter to continue
+```
+
+- Enterキーを押す
+
+```bash
+Please plug-in your controller via USB or bluetooth. Make sure status lights are on and device is mapped.
+Enter to continue
+```
+
+- Enterキーを押す
+
+```bash
+Where can we find the device file for your joystick?
+Hit Enter for default: /dev/input/js0 or type alternate path: 
+```
+
+- Enterキーを押す
+  複数ジョイスティックを接続している場合は変更する（Raspberry Piに複数接続することはまずないはず）。
+
+```bash
+Attempting to open device at that file...
+Opening /dev/input/js0...
+Device name: Logitech Gamepad F710
+Found and accessed input device.
+Hit Enter to continue
+```
+
+- Enterキーを押す
+
+```bash
+Next we are going to look for gyroscope data.
+For 5 seconds, move controller and rotate on each axis. Hit Enter then start moving: 
+```
+
+- なにもしない
+  傾きセンサ搭載のジョイスティックの場合は、傾けるとその値を読み取り名前をつけるウィザードに入る
+
+```bash
+Ok, we found 5 axes that stream gyroscope data. We will ignore those during labelling and mapping.
+Hit Enter to continue 
+```
+
+- Enterキーを押す
+
+```
+We will display the current progress in this set of tables:
+
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+
+As you name buttons and map them to controls this table will be updated.
+Hit enter to continue
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Next we will give every button a name. Not analog yet. We will do that next.
+Tap a button to name it.
+What name to give to this button:cross
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x133    |    cross    |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x133    |    cross    |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:Y
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x133    |    cross    |
+|    0x134    |      Y      |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x133    |    cross    |
+|    0x134    |      Y      |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:B
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:A
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:L3
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x13d    |      L3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x13d    |      L3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:R3
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:L1
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:L2
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:back
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:start
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+What name to give to this button:logo
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+Tap a button to name it.
+No button was pressed in last 10 seconds. It's possible that your buttons all generate axis commands.
+Keep mapping buttons? [Y, n]n
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+
+Next we are going to name all the axis you would like to use.
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Most movement on axis code: 0x02
+What name to give to this axis: (D when done) L2
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
+|    0x2    |     L2    |
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Didn't detect any movement.
+Try again? [Y/n]: Y
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Didn't detect any movement.
+Try again? [Y/n]: Y
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Most movement on axis code: 0x11
+What name to give to this axis: (D when done) dpad_upo 
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
+|    0x11   |  dpad_up  |
+|    0x2    |     L2    |
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Most movement on axis code: 0x11
+What name to give to this axis: (D when done) dpad_up
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+-----------+
+| axis code | axis name |
++-----------+-----------+
+|    0x11   |  dpad_up  |
+|    0x2    |     L2    |
++-----------+-----------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Most movement on axis code: 0x10
+What name to give to this axis: (D when done) dpad_leftright
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+----------------+
+| axis code |   axis name    |
++-----------+----------------+
+|    0x10   | dpad_leftright |
+|    0x11   |    dpad_up     |
+|    0x2    |       L2       |
++-----------+----------------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Didn't detect any movement.
+Try again? [Y/n]: Y
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Didn't detect any movement.
+Try again? [Y/n]: Y
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Didn't detect any movement.
+Try again? [Y/n]: Y
+Prepare to move one axis on the controller for 2 sec.
+Hit Enter to begin. D when done. 
+Didn't detect any movement.
+Try again? [Y/n]: b n
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+----------------+
+| axis code |   axis name    |
++-----------+----------------+
+|    0x10   | dpad_leftright |
+|    0x11   |    dpad_up     |
+|    0x2    |       L2       |
++-----------+----------------+
+Control Map:
++---------+--------+
+| control | action |
++---------+--------+
++---------+--------+
+
+Now we will create a mapping of controls to actions.
+
+First steering.
+Move the controller axis you wish to use for steering. Continue moving for 2 seconds.
+Hit Enter to begin. D when done. 
+Didn't detect any movement.
+Try again? [Y/n]: Y
+Move the controller axis you wish to use for steering. Continue moving for 2 seconds.
+Hit Enter to begin. D when done. 
+Didn't detect any movement.
+Try again? [Y/n]: Y
+Move the controller axis you wish to use for steering. Continue moving for 2 seconds.
+Hit Enter to begin. D when done. 
+Mapping dpad_leftright to steering.
+
+Is this mapping ok? (y, N) y
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+----------------+
+| axis code |   axis name    |
++-----------+----------------+
+|    0x10   | dpad_leftright |
+|    0x11   |    dpad_up     |
+|    0x2    |       L2       |
++-----------+----------------+
+Control Map:
++----------------+--------------+
+|    control     |    action    |
++----------------+--------------+
+| dpad_leftright | set_steering |
++----------------+--------------+
+
+Next throttle.
+Move the controller axis you wish to use for throttle. Continue moving for 2 seconds.
+Hit Enter to begin. D when done. 
+Mapping dpad_up to throttle.
+
+Is this mapping ok? (y, N) y
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+----------------+
+| axis code |   axis name    |
++-----------+----------------+
+|    0x10   | dpad_leftright |
+|    0x11   |    dpad_up     |
+|    0x2    |       L2       |
++-----------+----------------+
+Control Map:
++----------------+--------------+
+|    control     |    action    |
++----------------+--------------+
+| dpad_leftright | set_steering |
+|    dpad_up     | set_throttle |
++----------------+--------------+
+
+Next we are going to assign button presses to controls.
+
+Unmapped Controls:
++-----+--------------------------+-----------------------------------------------------------------+
+| Num |         Control          |                               Help                              |
++-----+--------------------------+-----------------------------------------------------------------+
+|  1  |       toggle_mode        |   changes the drive mode between user, local, and local_angle   |
+|  2  |   erase_last_N_records   |            erases the last 100 records while driving            |
+|  3  |      emergency_stop      |    executes a full back throttle to bring car to a quick stop   |
+|  4  |  increase_max_throttle   | increases the max throttle, also used for constant throttle val |
+|  5  |  decrease_max_throttle   | decreases the max throttle, also used for constant throttle val |
+|  6  | toggle_constant_throttle |          toggle the mode of supplying constant throttle         |
+|  7  | toggle_manual_recording  |               toggles recording records on and off              |
++-----+--------------------------+-----------------------------------------------------------------+
+
+Press the number of control to map (1-7). D when done. D
+done mapping controls
+
+[2J
+[2J
+Button Map:
++-------------+-------------+
+| button code | button name |
++-------------+-------------+
+|    0x130    |      A      |
+|    0x131    |      B      |
+|    0x133    |    cross    |
+|    0x134    |      Y      |
+|    0x136    |      L1     |
+|    0x137    |      L2     |
+|    0x13a    |     back    |
+|    0x13b    |    start    |
+|    0x13c    |     logo    |
+|    0x13d    |      L3     |
+|    0x13e    |      R3     |
++-------------+-------------+
+Axis Map:
++-----------+----------------+
+| axis code |   axis name    |
++-----------+----------------+
+|    0x10   | dpad_leftright |
+|    0x11   |    dpad_up     |
+|    0x2    |       L2       |
++-----------+----------------+
+Control Map:
++----------------+--------------+
+|    control     |    action    |
++----------------+--------------+
+| dpad_leftright | set_steering |
+|    dpad_up     | set_throttle |
++----------------+--------------+
+Now we are nearly done! Are you happy with this config or would you like to revisit a topic?
+H)appy, please continue to write out python file.
+B)uttons need renaming.
+A)xes need renaming.
+T)hrottle and steering need remap.
+R)emap buttons to controls.
+Select option H
+[2J
+Now we will write these values to a new python file.
+What is the name of python file to create joystick code? [default: my_joystick.py]forklift     klift_controller          joystick.py
+using filename: forklift_joystick.py
+
+
+What is the name of joystick class? [default: MyJoystick] F710ForkliftC Joystick
+forklift_joystick.py written.
+Check your new python file to see the controller implementation. Import this in manage.py and use for control.
+(env) ]0;pi@jones_310: ~[01;32mpi@jones_310[00m:[01;34m~ $[00m ls
+[0m[01;34menv[0m  forklift_joystick.py  [01;36mjones3[0m  js.txt  [01;34mprojects[0m
+(env) ]0;pi@jones_310: ~[01;32mpi@jones_310[00m:[01;34m~ $[00m exit
+exit
+
+Script done on Wed 21 Aug 2019 01:27:12 BST
