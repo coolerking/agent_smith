@@ -50,9 +50,7 @@ class mpu6050:
     def __init__(self, pgio=None, address=0x68, bus=1):
         import pigpio
         self.pi = pgio or pigpio.pi() 
-        self.address = address
-        self.bus = bus
-        self.handler = self.pi.i2c_open(self.bus, self.address)
+        self.handler = self.pi.i2c_open(bus, address)
         # Wake up the MPU-6050 since it starts in sleep mode
         #self.bus.write_byte_data(self.address, self.PWR_MGMT_1, 0x00)
         self.pi.i2c_write_byte_data(self.handler, self.PWR_MGMT_1, 0x00)
