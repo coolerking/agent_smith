@@ -137,7 +137,9 @@ MODEL_CATEGORICAL_MAX_THROTTLE_RANGE = 0.5
 SEQUENCE_LENGTH = 3             #some models use a number of images over time. This controls how many.
 
 #IMU
-HAVE_IMU = False                #when true, this add a Mpu6050 part and records the data. Can be used with a 
+HAVE_IMU = True                #when true, this add a Mpu6050 part and records the data. Can be used with a 
+MPC6050_I2C_ADDRESS = 0x68
+MPC6050_I2C_BUS = 1
 
 #SOMBRERO
 HAVE_SOMBRERO = False           #set to true when using the sombrero hat from the Donkeycar store. This will enable pwm on the hat.

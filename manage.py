@@ -361,8 +361,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
     #IMU
     if cfg.HAVE_IMU:
-        from donkeycar.parts.imu import Mpu6050
-        imu = Mpu6050()
+        #from donkeycar.parts.imu import Mpu6050
+        #imu = Mpu6050()
+        from parts.imu import Mpu6050
+        imu = Mpu6050(pgio=pgio, 
+            bus=cfg.MPC6050_I2C_BUS, address=cfg.MPC6050_I2C_ADDRESS, debug=False)
         V.add(imu, outputs=['imu/acl_x', 'imu/acl_y', 'imu/acl_z',
             'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z'], threaded=True)
 

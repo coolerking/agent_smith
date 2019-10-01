@@ -1,7 +1,80 @@
-#import smbus
+"""
+MPU6050モジュールを操作するパーツクラスを提供する。
+要pigpioパッケージ。
+"""
 
+class Mpu6050:
+    def __init__(self, pgio=None, bus=1, address=0x68, debug=False):
+        """
+        MPU6050ドライバを生成しインスタンス変数へ格納する。
+        引数：
+            pgip    pgio.pi()インスタンス
+            address アドレス値
+            bus     バス値
+            debug   デバッグフラグ
+        戻り値：
+            なし
+        """
+        self.mpu = _mpu6050(pgio, address, bus)
+        self.debug = debug
+    
+    def run(self):
+        """
+        MPU6050を読み込みIMU情報を返却する。
+        引数：
+            なし
+        戻り値：
+            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
+        """
+        accel_data = self.mpu.get_accel_data()
+        gyro_data = self.mpu.get_gyro_data()
+        if self.debug:
+            print('temp:[{}], acc:[{}, {}, {}], gyro:[{}, {}, {}]'.format(
+                self.mpu.get_temp(),
+                accel_data['x'], accel_data['y'], accel_data['z'],
+                gyro_data['x'], gyro_data['y'], gyro_data['z']))
+        return accel_data['x'], accel_data['y'], accel_data['z'], \
+            gyro_data['x'], gyro_data['y'], gyro_data['z']
+    
+    def run_threaded(self):
+        """
+        run()を呼び出す。
+        引数：
+            なし
+        戻り値：
+            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
+        """
+        return self.run()
 
-class mpu6050:
+    def shutdown(self):
+        """
+        処理なし
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        if self.debug:
+            print('Mpu6050 shutdown')
+
+    def __del__(self):
+        """
+        I2Cチャネルを閉じる。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        self.mpu.close()
+        if self.debug:
+            print('i2c channel closed')
+        self.mpu = None
+
+class _mpu6050:
+    """
+    MPU6050 ドライバクラス。
+    pigpioパッケージを使ってI2C通信を実行する。
+    """
 
     # Global Variables
     GRAVITIY_MS2 = 9.80665
@@ -48,24 +121,33 @@ class mpu6050:
     GYRO_CONFIG = 0x1B
 
     def __init__(self, pgio=None, address=0x68, bus=1):
+        """
+        I2C通信を開き、MPU6050を起動する。
+        引数：
+            pgip    pgio.pi()インスタンス
+            address アドレス値
+            bus     バス値
+        戻り値：
+            なし
+        """
         import pigpio
         self.pi = pgio or pigpio.pi() 
         self.handler = self.pi.i2c_open(bus, address)
-        # Wake up the MPU-6050 since it starts in sleep mode
-        #self.bus.write_byte_data(self.address, self.PWR_MGMT_1, 0x00)
+        # MPU6050を起動
         self.pi.i2c_write_byte_data(self.handler, self.PWR_MGMT_1, 0x00)
 
-    # I2C communication methods
+    # I2C 通信関連メソッド
 
     def read_i2c_word(self, register):
-        """Read two i2c registers and combine them.
-        register -- the first register to read from.
-        Returns the combined read results.
         """
-        # Read the data from the registers
-        #high = self.bus.read_byte_data(self.address, register)
+        ２つのI2Cレジスタを読み込み統合する。
+        引数：
+            register    最初に読み込むレジスタ
+        戻り値：
+            統合された結果
+        """
+        # レジスタからデータを読み込み
         high = self.pi.i2c_read_byte_data(self.handler, register)
-        #low = self.bus.read_byte_data(self.address, register + 1)
         low = self.pi.i2c_read_byte_data(self.handler, register + 1)
 
         value = (high << 8) + low
@@ -75,41 +157,42 @@ class mpu6050:
         else:
             return value
 
-    # MPU-6050 Methods
+    # MPU-6050 関連メソッド
 
     def get_temp(self):
-        """Reads the temperature from the onboard temperature sensor of the MPU-6050.
-        Returns the temperature in degrees Celcius.
+        """
+        MPU6050上に搭載された温度センサより温度を読み込む。
+        引数：
+            なし
+        戻り値：
+            実測温度値（セルシウス）
         """
         raw_temp = self.read_i2c_word(self.TEMP_OUT0)
-
-        # Get the actual temperature using the formule given in the
-        # MPU-6050 Register Map and Descriptions revision 4.2, page 30
         actual_temp = (raw_temp / 340.0) + 36.53
-
         return actual_temp
 
     def set_accel_range(self, accel_range):
-        """Sets the range of the accelerometer to range.
-        accel_range -- the range to set the accelerometer to. Using a
-        pre-defined range is advised.
         """
-        # First change it to 0x00 to make sure we write the correct value later
-        #self.bus.write_byte_data(self.address, self.ACCEL_CONFIG, 0x00)
+        加速度計の範囲を指定する。
+        引数：
+            accel_range     加速度計に設定する範囲
+        戻り値：
+            なし
+        """
+        # ACCEL_CONFIG レジスタに 0x00 を書き込む
         self.pi.i2c_write_byte_data(self.handler, self.ACCEL_CONFIG, 0x00)
 
-        # Write the new range to the ACCEL_CONFIG register
-        #self.bus.write_byte_data(self.address, self.ACCEL_CONFIG, accel_range)
+        # ACCEL_CONFIG レジスタに範囲を書き込む
         self.pi.i2c_write_byte_data(self.handler, self.ACCEL_CONFIG, accel_range)
 
     def read_accel_range(self, raw = False):
-        """Reads the range the accelerometer is set to.
-        If raw is True, it will return the raw value from the ACCEL_CONFIG
-        register
-        If raw is False, it will return an integer: -1, 2, 4, 8 or 16. When it
-        returns -1 something went wrong.
         """
-        #raw_data = self.bus.read_byte_data(self.address, self.ACCEL_CONFIG)
+        加速度計から設定された範囲を読み取る。
+        引数：
+            raw     真値：ACCEL_CONFIGから読み取る、偽値：整数を返却
+        戻り値：
+            -1, 2, 4, 8, 16の整数もしくは範囲
+        """
         raw_data = self.pi.i2c_read_byte_data(self.handler, self.ACCEL_CONFIG)
 
         if raw is True:
@@ -127,10 +210,12 @@ class mpu6050:
                 return -1
 
     def get_accel_data(self, g = False):
-        """Gets and returns the X, Y and Z values from the accelerometer.
-        If g is True, it will return the data in g
-        If g is False, it will return the data in m/s^2
-        Returns a dictionary with the measurement results.
+        """
+        加速度計から座標値を取得する。
+        引数：
+            g       真値：重力加速度を返却、偽値：m.s^2 を返却
+        戻り値：
+            加速度（座標値）辞書
         """
         x = self.read_i2c_word(self.ACCEL_XOUT0)
         y = self.read_i2c_word(self.ACCEL_YOUT0)
@@ -164,16 +249,17 @@ class mpu6050:
             return {'x': x, 'y': y, 'z': z}
 
     def set_gyro_range(self, gyro_range):
-        """Sets the range of the gyroscope to range.
-        gyro_range -- the range to set the gyroscope to. Using a pre-defined
-        range is advised.
         """
-        # First change it to 0x00 to make sure we write the correct value later
-        #self.bus.write_byte_data(self.address, self.GYRO_CONFIG, 0x00)
+        ジャイロスコープの範囲を書き込む。
+        引数：
+            gyro_range      ジャイロスコープ範囲
+        戻り値：
+            なし
+        """
+        # GYRO_CONFIG レジスタに0x00を書き込む
         self.pi.i2c_write_byte_data(self.handler, self.GYRO_CONFIG, 0x00)
 
-        # Write the new range to the ACCEL_CONFIG register
-        #self.bus.write_byte_data(self.address, self.GYRO_CONFIG, gyro_range)
+        # GYRO_CONFIG レジスタに範囲を書き込む
         self.pi.i2c_write_byte_data(self.handler, self.GYRO_CONFIG, gyro_range)
 
     def read_gyro_range(self, raw = False):
@@ -182,8 +268,12 @@ class mpu6050:
         register.
         If raw is False, it will return 250, 500, 1000, 2000 or -1. If the
         returned value is equal to -1 something went wrong.
+        ジャイロスコープに設定されている範囲を読み取る。
+        引数：
+            raw 真値：GYRO_CONFIGレジスタから読み取る、偽値：250,500,1000, 2000を返却
+        戻り値：
+            範囲（エラーの場合-1を返却）
         """
-        #raw_data = self.bus.read_byte_data(self.address, self.GYRO_CONFIG)
         raw_data = self.pi.i2c_read_byte_data(self.handler, self.GYRO_CONFIG)
 
         if raw is True:
@@ -201,8 +291,12 @@ class mpu6050:
                 return -1
 
     def get_gyro_data(self):
-        """Gets and returns the X, Y and Z values from the gyroscope.
-        Returns the read values in a dictionary.
+        """
+        ジャイロスコープから座標値を読み取る。
+        引数：
+            なし
+        戻り値：
+            ジャイロスコープ座標（辞書）
         """
         x = self.read_i2c_word(self.GYRO_XOUT0)
         y = self.read_i2c_word(self.GYRO_YOUT0)
@@ -230,15 +324,45 @@ class mpu6050:
         return {'x': x, 'y': y, 'z': z}
 
     def get_all_data(self):
-        """Reads and returns all the available data."""
+        """
+        すべての値を標準出力へ表示する。
+        引数：
+            なし
+        戻り値：
+            加速度座標辞書、じゃ虚スコープ座標辞書、温度のリスト
+        """
         temp = self.get_temp()
         accel = self.get_accel_data()
         gyro = self.get_gyro_data()
 
         return [accel, gyro, temp]
+    
+    def close(self):
+        """
+        I2C通信をクローズする。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        self.pi.i2c_close(self.handler)
+    
+    def __del__(self):
+        """
+        インスタンス変数をクリア。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        self.handler = None
+        self.pi = None
 
 if __name__ == "__main__":
-    mpu = mpu6050()
+    '''
+    動作確認
+    '''
+    mpu = _mpu6050()
     print(mpu.get_temp())
     accel_data = mpu.get_accel_data()
     print(accel_data['x'])
