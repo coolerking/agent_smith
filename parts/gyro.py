@@ -1,5 +1,5 @@
 #import smbus
-import pigpio
+
 
 class mpu6050:
 
@@ -48,6 +48,7 @@ class mpu6050:
     GYRO_CONFIG = 0x1B
 
     def __init__(self, pgio=None, address=0x68, bus=1):
+        import pigpio
         self.pi = pgio or pigpio.pi() 
         self.address = address
         #self.bus = bus
