@@ -66,7 +66,7 @@ class mpu6050:
         #high = self.bus.read_byte_data(self.address, register)
         high = self.pi.i2c_read_byte_data(self.handler, register)
         #low = self.bus.read_byte_data(self.address, register + 1)
-        low = self.pi.i2c_read_byte_data(self.address, register + 1)
+        low = self.pi.i2c_read_byte_data(self.handler, register + 1)
 
         value = (high << 8) + low
 
@@ -110,7 +110,7 @@ class mpu6050:
         returns -1 something went wrong.
         """
         #raw_data = self.bus.read_byte_data(self.address, self.ACCEL_CONFIG)
-        raw_data = self.pi.i2c_read_byte_data(self.handler, self.address, self.ACCEL_CONFIG)
+        raw_data = self.pi.i2c_read_byte_data(self.handler, self.ACCEL_CONFIG)
 
         if raw is True:
             return raw_data
