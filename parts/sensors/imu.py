@@ -17,7 +17,34 @@ class Mpu6050:
         """
         self.mpu = _mpu6050(pgio, address, bus)
         self.debug = debug
-    
+        self.init_imu_data()
+
+    def init_imu_data(self):
+        """
+        IMU情報を初期化する。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        self.accel_data = {
+            'x':    0,
+            'y':    0,
+            'z':    0,
+        }
+        self.gyro_data = self.accel_data
+
+    def update(self):
+        """
+        IMU情報をセンサから読み取りインスタンス変数へ格納する。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        self.accel_data = self.mpu.get_accel_data()
+        self.gyro_data = self.mpu.get_gyro_data()
+
     def run(self):
         """
         MPU6050を読み込みIMU情報を返却する。
@@ -26,25 +53,26 @@ class Mpu6050:
         戻り値：
             加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
         """
-        accel_data = self.mpu.get_accel_data()
-        gyro_data = self.mpu.get_gyro_data()
-        if self.debug:
-            print('temp:[{}], acc:[{}, {}, {}], gyro:[{}, {}, {}]'.format(
-                self.mpu.get_temp(),
-                accel_data['x'], accel_data['y'], accel_data['z'],
-                gyro_data['x'], gyro_data['y'], gyro_data['z']))
-        return accel_data['x'], accel_data['y'], accel_data['z'], \
-            gyro_data['x'], gyro_data['y'], gyro_data['z']
+        self.accel_data = self.mpu.get_accel_data()
+        self.gyro_data = self.mpu.get_gyro_data()
+        self.update()
+        return self.run_threaded()
     
     def run_threaded(self):
         """
-        run()を呼び出す。
+        インスタンス変数上のIMU情報を返却する。
         引数：
             なし
         戻り値：
             加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
         """
-        return self.run()
+        if self.debug:
+            print('temp:[{}], acc:[{}, {}, {}], gyro:[{}, {}, {}]'.format(
+                self.mpu.get_temp(),
+                self.accel_data['x'], self.accel_data['y'], self.accel_data['z'],
+                self.gyro_data['x'], self.gyro_data['y'], self.gyro_data['z']))
+        return self.accel_data['x'], self.accel_data['y'], self.accel_data['z'], \
+            self.gyro_data['x'], self.gyro_data['y'], self.gyro_data['z']
 
     def shutdown(self):
         """
@@ -54,18 +82,10 @@ class Mpu6050:
         戻り値：
             なし
         """
+        self.init_imu_data()
+        self.mpu = None
         if self.debug:
             print('Mpu6050 shutdown')
-
-    def __del__(self):
-        """
-        I2Cチャネルを閉じる。
-        引数：
-            なし
-        戻り値：
-            なし
-        """
-        self.mpu = None
 
 class _mpu6050:
     """
