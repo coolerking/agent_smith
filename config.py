@@ -148,7 +148,7 @@ HAVE_SOMBRERO = False           #set to true when using the sombrero hat from th
 RECORD_DURING_AI = False        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
 
 #LED
-HAVE_RGB_LED = False            #do you have an RGB LED like https://www.amazon.com/dp/B07BNRZWNF
+HAVE_RGB_LED = True            #do you have an RGB LED like https://www.amazon.com/dp/B07BNRZWNF
 LED_INVERT = False              #COMMON ANODE? Some RGB LED use common anode. like https://www.amazon.com/Xia-Fly-Tri-Color-Emitting-Diffused/dp/B07MYJQP8B
 
 #LED board pin number for pwm outputs

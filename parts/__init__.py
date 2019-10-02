@@ -6,3 +6,4 @@ from .pigpio_wrapper import PIGPIO_IN, PIGPIO_OUT, PIGPIO_PWM, PIGPIO_SPI_ADC
 from .sensors.range import get_range_part
 from .sensors.hedgehog import HedgeHogController
 from .clock import Timestamp
+from .led_status import LED, RGB_LED
