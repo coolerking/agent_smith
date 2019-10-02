@@ -65,9 +65,6 @@ class Mpu6050:
         戻り値：
             なし
         """
-        self.mpu.close()
-        if self.debug:
-            print('i2c channel closed')
         self.mpu = None
 
 class _mpu6050:
@@ -336,16 +333,6 @@ class _mpu6050:
         gyro = self.get_gyro_data()
 
         return [accel, gyro, temp]
-    
-    def close(self):
-        """
-        I2C通信をクローズする。
-        引数：
-            なし
-        戻り値：
-            なし
-        """
-        self.pi.i2c_close(self.handler)
     
     def __del__(self):
         """
