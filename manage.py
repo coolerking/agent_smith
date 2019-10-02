@@ -293,7 +293,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     if cfg.HAVE_RGB_LED and not cfg.DONKEY_GYM:
         #from donkeycar.parts.led_status import RGB_LED
         #led = RGB_LED(cfg.LED_PIN_R, cfg.LED_PIN_G, cfg.LED_PIN_B, cfg.LED_INVERT)
-        from .parts import RGB_LED
+        from parts import RGB_LED
         led = RGB_LED(pgio, cfg.LED_PIN_R, cfg.LED_PIN_G, cfg.LED_PIN_B, cfg.LED_INVERT)
         led.set_rgb(cfg.LED_R, cfg.LED_G, cfg.LED_B)        
         
