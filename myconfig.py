@@ -128,8 +128,8 @@ TARGET_D = 3
 # PI_PASSWD = "raspberry"             # password is optional. Only used from Windows machine. Ubuntu and mac users should copy their public keys to the pi. `ssh-copy-id username@hostname`
 # PI_HOSTNAME = "raspberrypi.local"   # the network hostname or ip address
 # PI_DONKEY_ROOT = "/home/pi/mycar"   # the location of the mycar dir on the pi. this will be used to help locate the final model destination.
-PI_HOSTNAME = "192.168.8.107"   # the network hostname or ip address
-PI_DONKEY_ROOT = "/home/pi/projects/jones3"   # the location of the mycar dir on the pi. this will be used to help locate the final model destination.
+PI_HOSTNAME = "192.168.8.134"   # the network hostname or ip address
+PI_DONKEY_ROOT = "/home/pi/projects/agent_smith"   # the location of the mycar dir on the pi. this will be used to help locate the final model destination.
 # 
 # # Region of interst cropping
 # # only supported in Categorical and Linear models.
@@ -193,8 +193,8 @@ ADC_BEND_CH = 1
 
 HAVE_AWS = False
 USE_AWS_AS_DEFAULT = False
-AWS_CONFIG_PATH = 'conf/ratf_aws.yml'
-AWS_THING_NAME = 'jones3'
+AWS_CONFIG_PATH = 'conf/smith.yml'
+AWS_THING_NAME = 'smith'
 
 # #For the categorical model, this limits the upper bound of the learned throttle
 # #it's very IMPORTANT that this value is matched from the training PC config.py and the robot.py
@@ -206,6 +206,9 @@ AWS_THING_NAME = 'jones3'
 # 
 # #IMU
 # HAVE_IMU = False                #when true, this add a Mpu6050 part and records the data. Can be used with a 
+HAVE_IMU = True
+MPC6050_I2C_ADDRESS = 0x68
+MPC6050_I2C_BUS = 1
 # 
 # #SOMBRERO
 # HAVE_SOMBRERO = False           #set to true when using the sombrero hat from the Donkeycar store. This will enable pwm on the hat.
@@ -215,7 +218,7 @@ AWS_THING_NAME = 'jones3'
 # 
 # #LED
 # HAVE_RGB_LED = False            #do you have an RGB LED like https://www.amazon.com/dp/B07BNRZWNF
-HAVE_RGB_LED = False
+HAVE_RGB_LED = True
 # LED_INVERT = False              #COMMON ANODE? Some RGB LED use common anode. like https://www.amazon.com/Xia-Fly-Tri-Color-Emitting-Diffused/dp/B07MYJQP8B
 # 
 # #LED board pin number for pwm outputs

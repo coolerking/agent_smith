@@ -101,8 +101,8 @@ PRUNE_EVAL_PERCENT_OF_DATASET = .05  # percent of dataset used to perform evalua
 #be used to copy the final model to your vehicle. If not using this option, no need to set these.
 PI_USERNAME = "pi"                  # username on pi
 PI_PASSWD = "raspberry"             # password is optional. Only used from Windows machine. Ubuntu and mac users should copy their public keys to the pi. `ssh-copy-id username@hostname`
-PI_HOSTNAME = "raspberrypi.local"   # the network hostname or ip address
-PI_DONKEY_ROOT = "/home/pi/mycar"   # the location of the mycar dir on the pi. this will be used to help locate the final model destination.
+PI_HOSTNAME = "smith"   # the network hostname or ip address
+PI_DONKEY_ROOT = "/home/pi/agent_smith"   # the location of the mycar dir on the pi. this will be used to help locate the final model destination.
 
 # Region of interst cropping
 # only supported in Categorical and Linear models.
@@ -137,7 +137,9 @@ MODEL_CATEGORICAL_MAX_THROTTLE_RANGE = 0.5
 SEQUENCE_LENGTH = 3             #some models use a number of images over time. This controls how many.
 
 #IMU
-HAVE_IMU = False                #when true, this add a Mpu6050 part and records the data. Can be used with a 
+HAVE_IMU = True                #when true, this add a Mpu6050 part and records the data. Can be used with a 
+MPC6050_I2C_ADDRESS = 0x68
+MPC6050_I2C_BUS = 1
 
 #SOMBRERO
 HAVE_SOMBRERO = False           #set to true when using the sombrero hat from the Donkeycar store. This will enable pwm on the hat.
@@ -146,7 +148,7 @@ HAVE_SOMBRERO = False           #set to true when using the sombrero hat from th
 RECORD_DURING_AI = False        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
 
 #LED
-HAVE_RGB_LED = False            #do you have an RGB LED like https://www.amazon.com/dp/B07BNRZWNF
+HAVE_RGB_LED = True            #do you have an RGB LED like https://www.amazon.com/dp/B07BNRZWNF
 LED_INVERT = False              #COMMON ANODE? Some RGB LED use common anode. like https://www.amazon.com/Xia-Fly-Tri-Color-Emitting-Diffused/dp/B07MYJQP8B
 
 #LED board pin number for pwm outputs
