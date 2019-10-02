@@ -24,6 +24,10 @@
 - Logitech F710 ワイヤレスゲームパッド(USBドングル経由)
 - 単3×4 電池ボックス２個（＋電池）
 
+### Raspberry Pi HAT 基板
+
+![HAT基板 設計図](./assets/board.png)
+
 ### TB6612B モータ側配線
 
 |TB6612B|コネクタ|DCモータ|備考|
