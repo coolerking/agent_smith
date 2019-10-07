@@ -240,7 +240,7 @@ class HedgeHogController:
         self.dist_b3d = self.hedge.distances()[7]
         self.dist_b4 = self.hedge.distances()[8]
         self.dist_b4d = self.hedge.distances()[9]
-        self.dist_timestamp = self.hedge.distances()[10]
+        self.dist_timestamp = self.hedge.distances()[0]
         #print(self.hedge.distances()[0])
         return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
             self.usnav_angle, self.usnav_timestamp, \
