@@ -231,16 +231,16 @@ class HedgeHogController:
         #print('raw imu')
         #print(list(self.hedge.valuesImuRawData)[-1])
         print(self.hedge.distances())
-        self.dist_id = self.hedge.distances()[0]
-        self.dist_b1 = self.hedge.distances()[1]
-        self.dist_b1d = self.hedge.distances()[2]
-        self.dist_b2 = self.hedge.distances()[3]
-        self.dist_b2d = self.hedge.distances()[4]
-        self.dist_b3 = self.hedge.distances()[5]
-        self.dist_b3d = self.hedge.distances()[6]
-        self.dist_b4 = self.hedge.distances()[7]
-        self.dist_b4d = self.hedge.distances()[8]
-        self.dist_timestamp = self.hedge.distances()[9]
+        self.dist_id = self.hedge.distances()[1]
+        self.dist_b1 = self.hedge.distances()[2]
+        self.dist_b1d = self.hedge.distances()[3]
+        self.dist_b2 = self.hedge.distances()[4]
+        self.dist_b2d = self.hedge.distances()[5]
+        self.dist_b3 = self.hedge.distances()[6]
+        self.dist_b3d = self.hedge.distances()[7]
+        self.dist_b4 = self.hedge.distances()[8]
+        self.dist_b4d = self.hedge.distances()[9]
+        self.dist_timestamp = self.hedge.distances()[10]
         #print(self.hedge.distances()[0])
         return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
             self.usnav_angle, self.usnav_timestamp, \
