@@ -174,18 +174,18 @@ class HedgeHogController:
             self.imu_timestamp = raw_imu[9]
         if self.debug:
             self.hedge.print_distances()
-        dist = self.hedge.distances()
-        if dist is not None and len(dist) == 10:
-            self.dist_id = dist[0]
-            self.dist_b1 = dist[1]
-            self.dist_b1d = dist[2]
-            self.dist_b2 = dist[3]
-            self.dist_b2d = dist[4]
-            self.dist_b3 = dist[5]
-            self.dist_b3d = dist[6]
-            self.dist_b4 = dist[7]
-            self.dist_b4d = dist[8]
-            self.dist_timestamp = dist[9]
+        print(self.hedge.distances())
+        if self.hedge.distances() is not None and len(self.hedge.distances()) == 10:
+            self.dist_id = self.hedge.distances()[0]
+            self.dist_b1 = self.hedge.distances()[1]
+            self.dist_b1d = self.hedge.distances()[2]
+            self.dist_b2 = self.hedge.distances()[3]
+            self.dist_b2d = self.hedge.distances()[4]
+            self.dist_b3 = self.hedge.distances()[5]
+            self.dist_b3d = self.hedge.distances()[6]
+            self.dist_b4 = self.hedge.distances()[7]
+            self.dist_b4d = self.hedge.distances()[8]
+            self.dist_timestamp = self.hedge.distances()[9]
 
 
     def run_threaded(self):
@@ -230,8 +230,8 @@ class HedgeHogController:
         """
         #print('raw imu')
         #print(list(self.hedge.valuesImuRawData)[-1])
-        print(self.hedge.distances())
-        print(self.hedge.distances()[0])
+        #print(self.hedge.distances())
+        #print(self.hedge.distances()[0])
         return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
             self.usnav_angle, self.usnav_timestamp, \
             self.imu_x, self.imu_y, self.imu_z, \
