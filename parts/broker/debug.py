@@ -46,7 +46,7 @@ class PrintRecording:
         pass
 
 class PrintDist:
-    def run(self, dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d, dist_b3, dist_b4, dist_b4d, dist_timestamp):
+    def run(self, dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d, dist_b3, dist_b3d, dist_b4, dist_b4d, dist_timestamp):
         print('[DIST] id={}, timespamp={}'.format(str(dist_id), str(dist_timestamp)))
         print('       b1={},b1d={}, b2={},b2d={}, b3={},b3d={}, b4={},b4d={}'.format(
             str(dist_b1), str(dist_b1d), str(dist_b2), str(dist_b2d),
