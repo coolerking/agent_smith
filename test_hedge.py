@@ -5,8 +5,8 @@ def test_hedge():
     import donkeycar as dk
     V = dk.vehicle.Vehicle()
 
-    from parts.broker import AWSShadowClientFactory
-    factory = AWSShadowClientFactory('conf/aws/smith.yml', 'smith')
+    #from parts.broker import AWSShadowClientFactory
+    #factory = AWSShadowClientFactory('conf/aws/smith.yml', 'smith')
 
     from parts import HedgeHogController
     hedge = HedgeHogController(debug=True)
@@ -42,6 +42,7 @@ def test_hedge():
         'imu/ax', 'imu/ay', 'imu/az',
     ])
 
+    '''
     from parts.broker import HedgePublisher
     hedge_pub = HedgePublisher(factory, debug=True)
     V.add(hedge_pub, inputs=[
@@ -59,7 +60,7 @@ def test_hedge():
         'dist_b4', 'dist_b4d',
         'dist_timestamp', 'timestamp'
     ])
-
+    '''
     try:
         V.start(rate_hz=20, max_loop_count=1000)
     finally:
