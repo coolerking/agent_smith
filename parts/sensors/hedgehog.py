@@ -176,8 +176,8 @@ class HedgeHogController:
             self.hedge.print_distances()
         
         if self.hedge.distances() is not None and len(self.hedge.distances()) == 10:
-            self.dist_id = self.id
-            self.dist_b1 = self.hedge.distances()[2]
+            self.dist_id = self.hedge.distances()[2]
+            self.dist_b1 = self.hedge.distances()[1]
             self.dist_b1d = self.hedge.distances()[3]
             self.dist_b2 = self.hedge.distances()[4]
             self.dist_b2d = self.hedge.distances()[5]
