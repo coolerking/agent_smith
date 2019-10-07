@@ -159,7 +159,7 @@ class HedgeHogController:
             self.imu_timestamp = imu[13]
         if self.debug:
             print('raw imu')
-            print(self.hedge.valuesRawImuData)
+            print(self.hedge.valuesImuRawData)
         raw_imu = list(self.hedge.valuesImuRawData)[-1]
         if isinstance(raw_imu, list) and len(raw_imu) == 10:
             self.imu_ax = raw_imu[0]
