@@ -165,12 +165,12 @@ class HedgeHogController:
             self.imu_ax = raw_imu[0]
             self.imu_ay = raw_imu[1]
             self.imu_az = raw_imu[2]
-            self.imu_ax = raw_imu[3]
-            self.imu_ay = raw_imu[4]
-            self.imu_az = raw_imu[5]
-            self.imu_ax = raw_imu[6]
-            self.imu_ay = raw_imu[7]
-            self.imu_az = raw_imu[8]
+            self.imu_gx = raw_imu[3]
+            self.imu_gy = raw_imu[4]
+            self.imu_gz = raw_imu[5]
+            self.imu_mx = raw_imu[6]
+            self.imu_my = raw_imu[7]
+            self.imu_mz = raw_imu[8]
             self.imu_timestamp = raw_imu[9]
         if self.debug:
             self.hedge.print_distances()
@@ -230,6 +230,7 @@ class HedgeHogController:
         """
         #print('raw imu')
         #print(list(self.hedge.valuesImuRawData)[-1])
+        self.hedge.print_distances()
         return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
             self.usnav_angle, self.usnav_timestamp, \
             self.imu_x, self.imu_y, self.imu_z, \
