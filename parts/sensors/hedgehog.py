@@ -230,8 +230,9 @@ class HedgeHogController:
         """
         #print('raw imu')
         #print(list(self.hedge.valuesImuRawData)[-1])
-        '''
+        
         print(self.hedge.distances())
+        '''
         self.dist_id = self.hedge.distances()[1]
         self.dist_b1 = self.hedge.distances()[2]
         self.dist_b1d = self.hedge.distances()[3]
