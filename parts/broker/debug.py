@@ -45,13 +45,23 @@ class PrintRecording:
     def shutdown(self):
         pass
 
+class PrintDist:
+    def run(self, dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d, dist_b3, dist_b4, dist_b4d, dist_timestamp):
+        print('[DIST] id={}, timespamp={}'.format(str(dist_id), str(dist_timestamp)))
+        print('       b1={},b1d={}, b2={},b2d={}, b3={},b3d={}, b4={},b4d={}'.format(
+            str(dist_b1), str(dist_b1d), str(dist_b2), str(dist_b2d),
+            str(dist_b3), str(dist_b3d), str(dist_b4), str(dist_b4d),
+        ))
 
 class PrintIMU:
-    def run(self, x, y, z, qw, qx, qy, qz, vx, vy, vz, ax, ay, az):
-        print('[IMU]  x={},   y={},  z={}'.format(str(x), str(y), str(z)))
-        print('[IMU] qx={},  qy={}, qz={}, qw={}'.format(str(qx), str(qy), str(qz), str(qw)))
-        print('[IMU] vx={},  vy={}, vz={}'.format(str(vx), str(vy), str(vz)))
-        print('[IMU] ax={},  ay={}, az={}'.format(str(vx), str(vy), str(vz)))
+    def run(self, x, y, z, qw, qx, qy, qz, vx, vy, vz, ax, ay, az, gx, gy, gz, mx, my, mz, timestamp):
+        print('[IMU] timespamp={}'.format(str(timestamp)))
+        print('        x={},   y={},  z={}'.format(str(x), str(y), str(z)))
+        print('       qx={},  qy={}, qz={}, qw={}'.format(str(qx), str(qy), str(qz), str(qw)))
+        print('       vx={},  vy={}, vz={}'.format(str(vx), str(vy), str(vz)))
+        print('       ax={},  ay={}, az={}'.format(str(ax), str(ay), str(az)))
+        print('       gx={},  gy={}, gz={}'.format(str(gx), str(gy), str(gz)))
+        print('       mx={},  my={}, mz={}'.format(str(mx), str(my), str(mz)))
 
     def shutdown(self):
         pass

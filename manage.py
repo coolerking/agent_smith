@@ -176,14 +176,16 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     if use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
         from parts import HedgeHogController
 
-        hedge = HedgeHogController(tty=cfg.HEDGE_SERIAL_TTY)
+        hedge = HedgeHogController(tty=cfg.HEDGE_SERIAL_TTY, adr=cfg.HEDGE_ID)
         V.add(hedge, outputs=[
             'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
             'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
             'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
+            'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz',
+            'imu_timestamp',
             'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
             'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp'
-        ])
+        ], threaded=True)
 
         if use_aws or cfg.USE_AWS_AS_DEFAULT:
             from parts.broker import HedgePublisher
@@ -712,12 +714,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         inputs += ['usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
             'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
             'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
+            'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp'
             'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
             'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp']
 
         types += ['int', 'float',  'float',  'float',  'float', 'float',
             'float', 'float', 'float', 'float', 'float', 'float', 'float',
             'float', 'float', 'float', 'float', 'float', 'float',
+            'float', 'float', 'float', 'float', 'float', 'float', 'float',
             'int', 'int', 'float', 'int', 'float',
             'int', 'float', 'int', 'float', 'float']
 

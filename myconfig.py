@@ -174,6 +174,7 @@ JOYSTICK_DEBUG = False
 HAVE_HEDGE = False
 USE_HEDGE_AS_DEFAULT = False
 HEDGE_SERIAL_TTY = '/dev/ttyACM0'
+HEDGE_ID = 79
 
 HAVE_RANGE = False
 USE_RANGE_AS_DEFAULT = False
@@ -193,7 +194,7 @@ ADC_BEND_CH = 1
 
 HAVE_AWS = False
 USE_AWS_AS_DEFAULT = False
-AWS_CONFIG_PATH = 'conf/smith.yml'
+AWS_CONFIG_PATH = 'conf/aws/smith.yml'
 AWS_THING_NAME = 'smith'
 
 # #For the categorical model, this limits the upper bound of the learned throttle

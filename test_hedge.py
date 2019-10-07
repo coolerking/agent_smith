@@ -5,8 +5,6 @@ def test_hedge():
     import donkeycar as dk
     V = dk.vehicle.Vehicle()
 
-    #from parts.broker import AWSShadowClientFactory
-    #factory = AWSShadowClientFactory('conf/aws/smith.yml', 'smith')
 
     from parts import HedgeHogController
     hedge = HedgeHogController(debug=True)
@@ -18,19 +16,21 @@ def test_hedge():
         'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
         'imu/vx', 'imu/vy', 'imu/vz',
         'imu/ax', 'imu/ay', 'imu/az',
-        'dist_id',
-        'dist_b1', 'dist_b1d',
-        'dist_b2', 'dist_b2d',
-        'dist_b3', 'dist_b3d',
-        'dist_b4', 'dist_b4d',
-        'dist_timestamp'
+        'imu/gx', 'imu/gy', 'imu/gz',
+        'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp'
+        'dist/id',
+        'dist/b1', 'dist/b1d',
+        'dist/b2', 'dist/b2d',
+        'dist/b3', 'dist/b3d',
+        'dist/b4', 'dist/b4d',
+        'dist/timestamp',
     ])
     from parts.broker.debug import PrintUSNav
     usnav = PrintUSNav()
     V.add(usnav, inputs=[
         'usnav/id',
         'usnav/x', 'usnav/y', 'usnav/z',
-        'usnav/angle', 'usnav/timestamp'
+        'usnav/angle', 'usnav/timestamp',
     ])
 
     from parts.broker.debug import PrintIMU
@@ -40,29 +40,23 @@ def test_hedge():
         'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
         'imu/vx', 'imu/vy', 'imu/vz',
         'imu/ax', 'imu/ay', 'imu/az',
+        'imu/gx', 'imu/gy', 'imu/gz',
+        'imu/mx', 'imu/my', 'imu/mz',
+        'imu/timestamp',
     ])
 
-    '''
-    from parts.broker import HedgePublisher
-    hedge_pub = HedgePublisher(factory, debug=True)
-    V.add(hedge_pub, inputs=[
-                'usnav/id',
-        'usnav/x', 'usnav/y', 'usnav/z',
-        'usnav/angle', 'usnav/timestamp',
-        'imu/x', 'imu/y', 'imu/z',
-        'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
-        'imu/vx', 'imu/vy', 'imu/vz',
-        'imu/ax', 'imu/ay', 'imu/az',
-        'dist_id',
-        'dist_b1', 'dist_b1d',
-        'dist_b2', 'dist_b2d',
-        'dist_b3', 'dist_b3d',
-        'dist_b4', 'dist_b4d',
-        'dist_timestamp', 'timestamp'
+    from parts.broker.debug import PrintDist
+    dist = PrintDist()
+    V.add(dist, inputs=[
+        'dist/id',
+        'dist/b1', 'dist/b1d',
+        'dist/b2', 'dist/b2d',
+        'dist/b3', 'dist/b3d',
+        'dist/b4', 'dist/b4d',
+        'dist/timestamp',
     ])
-    '''
     try:
-        V.start(rate_hz=20, max_loop_count=1000)
+        V.start(rate_hz=20, max_loop_count=10000)
     finally:
         print('stop')
         
