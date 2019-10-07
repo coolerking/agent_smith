@@ -231,6 +231,7 @@ class HedgeHogController:
         #print('raw imu')
         #print(list(self.hedge.valuesImuRawData)[-1])
         print(self.hedge.distances())
+        print(self.hedge.distances()[0])
         return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
             self.usnav_angle, self.usnav_timestamp, \
             self.imu_x, self.imu_y, self.imu_z, \
