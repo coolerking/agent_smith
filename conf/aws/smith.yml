@@ -3,10 +3,10 @@
   thing_type: 'agent'
   thing_group: 'loader'
   thing_name: 'smith'
-  endpoint: 'awpukm9e6k7mn-ats.iot.us-east-1.amazonaws.com'
+  endpoint: 'ag190y2vfd9hs-ats.iot.us-east-1.amazonaws.com'
   port: 8883
   auth:
     root_ca:  'conf/aws/AmazonRootCA1.pem'
-    certificate: 'conf/aws/436b3dba96-certificate.pem.crt'
-    private_key: 'conf/aws/436b3dba96-private.pem.key'
+    certificate: 'conf/aws/1f634fcd93-certificate.pem.crt'
+    private_key: 'conf/aws/1f634fcd93-private.pem.key'
 
