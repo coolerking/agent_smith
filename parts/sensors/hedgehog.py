@@ -30,7 +30,7 @@ class HedgeHogController:
         self.id = adr
         self.debug = debug
         self.init()
-        self.hedge = MarvelmindHedge(tty, adr, debug)
+        self.hedge = MarvelmindHedge(adr=adr, tty=tty, debug=debug)
         self.hedge.start()
 
     def init(self):
