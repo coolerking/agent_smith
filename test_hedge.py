@@ -6,7 +6,7 @@ def test_hedge():
     V = dk.vehicle.Vehicle()
 
     from parts.broker import AWSShadowClientFactory
-    factory = AWSShadowClientFactory('conf/ratf_aws.yml', 'jones3')
+    factory = AWSShadowClientFactory('conf/smith.yml', 'smith')
 
     from parts import HedgeHogController
     hedge = HedgeHogController(debug=True)
