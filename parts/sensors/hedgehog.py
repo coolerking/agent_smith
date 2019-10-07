@@ -138,7 +138,7 @@ class HedgeHogController:
             self.usnav_y = usnav[2]
             self.usnav_z = usnav[3]
             self.usnav_angle = usnav[4],
-            self.usnav_timestamp = usnav[5]
+            self.usnav_timestamp = usnav[5]/1000.0
         if self.debug and self.hedge.valuesImuData is not None:
             print(self.hedge.valuesImuData)
         imu = list(self.hedge.valuesImuData)[-1]
@@ -230,7 +230,7 @@ class HedgeHogController:
         """
         #print('raw imu')
         #print(list(self.hedge.valuesImuRawData)[-1])
-        self.hedge.print_distances()
+        print(self.hedge.distances())
         return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
             self.usnav_angle, self.usnav_timestamp, \
             self.imu_x, self.imu_y, self.imu_z, \
