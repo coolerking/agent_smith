@@ -24,7 +24,7 @@ def test_hedge():
         'dist/b3', 'dist/b3d',
         'dist/b4', 'dist/b4d',
         'dist/timestamp',
-    ])
+    ], threaded=True)
     from parts.broker.debug import PrintUSNav
     usnav = PrintUSNav()
     V.add(usnav, inputs=[

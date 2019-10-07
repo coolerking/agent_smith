@@ -139,7 +139,7 @@ class HedgeHogController:
             self.usnav_z = usnav[3]
             self.usnav_angle = usnav[4],
             self.usnav_timestamp = usnav[5]
-        if self.debug:
+        if self.debug and self.hedge.valuesImuData is not None:
             print(self.hedge.valuesImuData)
         imu = list(self.hedge.valuesImuData)[-1]
         if isinstance(imu, list) and len(imu) == 14:
