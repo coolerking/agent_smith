@@ -219,7 +219,7 @@ MPC6050_I2C_BUS = 1
 # 
 # #LED
 # HAVE_RGB_LED = False            #do you have an RGB LED like https://www.amazon.com/dp/B07BNRZWNF
-HAVE_RGB_LED = False
+HAVE_RGB_LED = True
 # LED_INVERT = False              #COMMON ANODE? Some RGB LED use common anode. like https://www.amazon.com/Xia-Fly-Tri-Color-Emitting-Diffused/dp/B07MYJQP8B
 # 
 # #LED board pin number for pwm outputs
