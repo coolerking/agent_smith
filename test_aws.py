@@ -4,7 +4,7 @@ from time import sleep
 
 def test_aws():
     from parts.broker import AWSShadowClientFactory
-    factory = AWSShadowClientFactory('conf/ratf_aws.yml', 'jones3')
+    factory = AWSShadowClientFactory('conf/aws/smith.yml', 'smith')
 
     from parts.broker import PowerReporter
     power = PowerReporter(factory, debug=True)
@@ -26,7 +26,7 @@ def test_aws3():
     V = dk.vehicle.Vehicle()
 
     from parts.broker import AWSShadowClientFactory
-    factory = AWSShadowClientFactory('conf/ratf_aws.yml', 'jones3')
+    factory = AWSShadowClientFactory('conf/aws/smith.yml', 'smith')
 
     from parts.broker import PowerReporter
     power = PowerReporter(factory, debug=True)
@@ -70,9 +70,9 @@ def test_aws2():
     from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
     myAWSIoTMQTTClient = None
 
-    myAWSIoTMQTTClient = AWSIoTMQTTClient('jones3', useWebsocket=True)
+    myAWSIoTMQTTClient = AWSIoTMQTTClient('smith', useWebsocket=True)
     myAWSIoTMQTTClient.configureEndpoint('ag190y2vfd9hs-ats.iot.ap-northeast-1.amazonaws.com', 8883)
-    myAWSIoTMQTTClient.configureCredentials('conf/AmazonRootCA1.pem', 'conf/125230d433-private.pem.key', 'conf/125230d433-certificate.pem.crt')
+    myAWSIoTMQTTClient.configureCredentials('conf/aws/AmazonRootCA1.pem', 'conf/aws/436b3dba96-private.pem.key', 'conf/436b3dba96-certificate.pem.crt')
 
 
     # AWSIoTMQTTClient connection configuration
