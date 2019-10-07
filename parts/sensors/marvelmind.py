@@ -262,6 +262,7 @@ def test_main():
             print(hedge.valuesUltrasoundPosition)
             print('*** imu')
             print(hedge.valuesImuData)
+            print(hedge.valuesImuRawData)
             print('******')
             if (hedge.distancesUpdated):
                 hedge.print_distances()
