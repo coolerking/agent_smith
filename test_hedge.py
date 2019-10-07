@@ -7,7 +7,7 @@ def test_hedge():
 
 
     from parts import HedgeHogController
-    hedge = HedgeHogController(debug=True)
+    hedge = HedgeHogController(debug=False)
     V.add(hedge, outputs=[
         'usnav/id',
         'usnav/x', 'usnav/y', 'usnav/z',
