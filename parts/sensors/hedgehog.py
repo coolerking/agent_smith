@@ -157,9 +157,9 @@ class HedgeHogController:
             self.imu_ay = imu[11]
             self.imu_az = imu[12]
             self.imu_timestamp = imu[13]
-        #if self.debug:
-        print('raw imu')
-        print(self.hedge.valuesRawImuData)
+        if self.debug:
+            print('raw imu')
+            print(self.hedge.valuesRawImuData)
         raw_imu = list(self.hedge.valuesImuRawData)[-1]
         if isinstance(raw_imu, list) and len(raw_imu) == 10:
             self.imu_ax = raw_imu[0]
@@ -228,6 +228,8 @@ class HedgeHogController:
             dist_b4d        ステーショナリビーコン4までの距離
             dist_timestamp  Distance取得タイムスタンプ
         """
+        print('raw imu')
+        print(self.hedge.valuesRawImuData)
         return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
             self.usnav_angle, self.usnav_timestamp, \
             self.imu_x, self.imu_y, self.imu_z, \
