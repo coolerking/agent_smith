@@ -229,7 +229,7 @@ class HedgeHogController:
             dist_timestamp  Distance取得タイムスタンプ
         """
         print('raw imu')
-        print(self.hedge.valuesRawImuData)
+        print(self.hedge.valuesImuRawData)
         return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
             self.usnav_angle, self.usnav_timestamp, \
             self.imu_x, self.imu_y, self.imu_z, \
