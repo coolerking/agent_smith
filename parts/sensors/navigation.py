@@ -124,11 +124,21 @@ class HedgehogController:
 
     def imu_raw_callback(self):
         # [ax, ay, az, gx, gy, gz, mx, my, mz, timestamp]
-        raw_imu = list(self.hedge.valuesImuRawData)[-1]
         if self.debug:
             print('[HedgehogController] imu raw data recieved')
+        values_raw_imu = getattr(self.hedge, 'valuesImuRawData', None)
+        if values_raw_imu is None:
+            if self.debug:
+                print('[HedgehogController] imu raw data has no valuesImuRawData')
+            return
+        raw_imu = list(values_raw_imu)[-1]
+        if raw_imu is None:
+            if self.debug:
+                print('[HedgehogController] imu raw data is None')
+            return
+        if self.debug:
             print(raw_imu)
-        if raw_imu is not None and len(raw_imu) == 10:
+        if len(raw_imu) == 10:
             self.imu_ax = raw_imu[0]
             self.imu_ay = raw_imu[1]
             self.imu_az = raw_imu[2]
@@ -156,6 +166,9 @@ class HedgehogController:
                     str(self.imu_my),
                     str(self.imu_mz)
                 ))
+            return
+        if self.debug:
+            print('[HedgehogController] no match format')
 
     def imu_callback(self):
         """
