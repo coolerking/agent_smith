@@ -93,15 +93,19 @@ class HedgehogController:
     def usnav_callback(self):
         # [usnAdr, usnX, usnY, usnZ, usnAngle, usnTimestamp]
         usnav = self.hedge.position()
+        '''
         if self.debug:
             print('[HedgehogController] usnav data recieved')
             print(usnav)
+        '''
         if usnav[0] != self.id:
+            '''
             if self.debug:
                 print('[HedgehogController] usnav data ignored id:{} is not {}'.format(
                     str(usnav[0]),
                     str(self.id)
                 ))
+            '''
         if isinstance(usnav, list) and len(usnav) == 6:
             self.usnav_id = usnav[0]
             self.usnav_x = usnav[1]
@@ -109,6 +113,7 @@ class HedgehogController:
             self.usnav_z = usnav[3]
             self.usnav_angle = usnav[4]
             self.usnav_timestamp = usnav[5]/1000.0
+            '''
             if self.debug:
                 print('[HedgehogController] (x, y, z)=({}, {}, {}), angle={}, timestamp={}'.format(
                     str(self.usnav_x),
@@ -117,6 +122,7 @@ class HedgehogController:
                     str(self.usnav_angle),
                     str(self.usnav_timestamp)
                 ))
+            '''
         else:
             if self.debug:
                 print('[HedgehogController] usnav data ignored no match format')
@@ -124,20 +130,20 @@ class HedgehogController:
 
     def imu_raw_callback(self):
         # [ax, ay, az, gx, gy, gz, mx, my, mz, timestamp]
-        if self.debug:
-            print('[HedgehogController] imu raw data recieved')
+        #if self.debug:
+        #    print('[HedgehogController] imu raw data recieved')
         values_raw_imu = getattr(self.hedge, 'valuesImuRawData', None)
         if values_raw_imu is None:
-            if self.debug:
-                print('[HedgehogController] imu raw data has no valuesImuRawData')
+            #if self.debug:
+            #    print('[HedgehogController] imu raw data has no valuesImuRawData')
             return
         raw_imu = list(values_raw_imu)[-1]
         if raw_imu is None:
-            if self.debug:
-                print('[HedgehogController] imu raw data is None')
+            #if self.debug:
+            #    print('[HedgehogController] imu raw data is None')
             return
-        if self.debug:
-            print(raw_imu)
+        #if self.debug:
+        #    print(raw_imu)
         if len(raw_imu) == 10:
             self.imu_ax = raw_imu[0]
             self.imu_ay = raw_imu[1]
@@ -149,6 +155,7 @@ class HedgehogController:
             self.imu_my = raw_imu[7]
             self.imu_mz = raw_imu[8]
             self.imu_timestamp = raw_imu[9]
+            '''
             if self.debug:
                 print('[HedgehogController] (ax, ay, az) = ({}, {}, {}), timestamp={}'.format(
                     str(self.imu_ax),
@@ -166,9 +173,10 @@ class HedgehogController:
                     str(self.imu_my),
                     str(self.imu_mz)
                 ))
+            '''
             return
-        if self.debug:
-            print('[HedgehogController] no match format')
+        #if self.debug:
+        #    print('[HedgehogController] no match format')
 
     def imu_callback(self):
         """
@@ -183,9 +191,9 @@ class HedgehogController:
         #   vx/1000.0, vy/1000.0, vz/1000.0,
         #   ax/1000.0,ay/1000.0,az/1000.0, timestamp]
         imu = list(self.hedge.valuesImuData)[-1]
-        if self.debug:
-            print('[HedgehogController] imu data recieved')
-            print(imu)
+        #if self.debug:
+        #    print('[HedgehogController] imu data recieved')
+        #    print(imu)
         if isinstance(imu, list) and len(imu) == 14:
             self.imu_x = imu[0]
             self.imu_y = imu[1]
@@ -201,6 +209,7 @@ class HedgehogController:
             self.imu_ay = imu[11]
             self.imu_az = imu[12]
             self.imu_timestamp = imu[13]
+            '''
             if self.debug:
                 print('[HedgehogController] (x, y, z) = ({}, {}, {})'.format(
                     str(self.imu_x),
@@ -224,6 +233,7 @@ class HedgehogController:
                     str(self.imu_az),
                     str(self.imu_timestamp)
                 ))
+            '''
 
     def usnav_raw_callback(self):
         """
@@ -368,6 +378,11 @@ class HedgehogController:
         """
         if self.debug:
             print('[HedgehogController] run_threaded called')
+            print('dist_id={}, b1:{}, b1d:{}'.format(
+                str(self.dist_id),
+                str(self.dist_b1),
+                str(self.dist_b1d)
+            ))
         return  self.usnav_id, \
                 self.usnav_x, \
                 self.usnav_y, \
