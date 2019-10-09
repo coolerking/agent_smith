@@ -27,8 +27,8 @@ class HedgehogController:
         if debug:
             print('[HedgehogController] __init__ called adr={}'.format(str(adr)))
         self.id = adr
-        self.init()
         self.debug = debug
+        self.init()
         self.hedge = MarvelmindHedge(
             adr=adr,
             tty=tty,
