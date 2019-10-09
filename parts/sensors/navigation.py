@@ -245,6 +245,13 @@ class HedgehogController:
         """
         # [HedgeAdr, b1, b1d/1000.0, b2, b2d/1000.0,
         #  b3, b3d/1000.0, b4, b4d/1000.0, timestamp]
+        if self.hedge is None:
+            print('self.hedge is None')
+            return
+        values_dist = getattr(self.hedge, 'valuesUltrasoundRawData', None)
+        if values_dist is None:
+            print('self.hedge has no valuesUltrasoundRawData')
+            return
         dist = self.hedge.distances()
         if self.debug:
             print('[HedgehogController] usnav raw data(distances) recieved')
