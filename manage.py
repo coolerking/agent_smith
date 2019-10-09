@@ -187,7 +187,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         hedge = HedgehogController(tty=cfg.HEDGE_SERIAL_TTY, adr=cfg.HEDGE_ID)
         V.add(hedge, outputs=hedge_items)
 
-        hedge += ['timestamp']
+        hedge_items += ['timestamp']
         if use_aws or cfg.USE_AWS_AS_DEFAULT:
             from parts.broker import HedgePublisher
             hedge_pub = HedgePublisher(factory, debug=use_debug)
