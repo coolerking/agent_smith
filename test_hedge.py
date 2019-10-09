@@ -5,6 +5,9 @@ def test_hedge():
     import donkeycar as dk
     V = dk.vehicle.Vehicle()
 
+    #V.mem['timestamp'] = str(time.time())
+    from parts import Timestamp
+    V.add(Timestamp(), outputs=['timestamp'])
 
     from parts import HedgehogController
     hedge = HedgehogController(debug=True)
@@ -71,6 +74,29 @@ def test_hedge():
         'dist/b4', 'dist/b4d',
         'dist/timestamp',
     ])
+
+    from parts.broker import AWSShadowClientFactory
+    factory = AWSShadowClientFactory('conf/aws/smith.yml', 'smith')
+    from parts.broker import HedgePublisher
+    pub = HedgePublisher(factory)
+    V.add(pub, inputs=[
+        'usnav/id',
+        'usnav/x', 'usnav/y', 'usnav/z',
+        'usnav/angle', 'usnav/timestamp',
+        'imu/x', 'imu/y', 'imu/z',
+        'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+        'imu/vx', 'imu/vy', 'imu/vz',
+        'imu/ax', 'imu/ay', 'imu/az',
+        'imu/gx', 'imu/gy', 'imu/gz',
+        'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
+        'dist/id',
+        'dist/b1', 'dist/b1d',
+        'dist/b2', 'dist/b2d',
+        'dist/b3', 'dist/b3d',
+        'dist/b4', 'dist/b4d',
+        'dist/timestamp', 'timestamp',
+    ])
+
     try:
         V.start(rate_hz=20, max_loop_count=10000)
     finally:
