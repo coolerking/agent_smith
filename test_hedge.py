@@ -17,7 +17,7 @@ def test_hedge():
         'imu/vx', 'imu/vy', 'imu/vz',
         'imu/ax', 'imu/ay', 'imu/az',
         'imu/gx', 'imu/gy', 'imu/gz',
-        'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp'
+        'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
         'dist/id',
         'dist/b1', 'dist/b1d',
         'dist/b2', 'dist/b2d',
