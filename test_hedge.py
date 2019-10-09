@@ -6,8 +6,8 @@ def test_hedge():
     V = dk.vehicle.Vehicle()
 
 
-    from parts import HedgeHogController
-    hedge = HedgeHogController(debug=False)
+    from parts import HedgehogController
+    hedge = HedgehogController(debug=True)
     V.add(hedge, outputs=[
         'usnav/id',
         'usnav/x', 'usnav/y', 'usnav/z',
@@ -24,7 +24,7 @@ def test_hedge():
         'dist/b3', 'dist/b3d',
         'dist/b4', 'dist/b4d',
         'dist/timestamp',
-    ], threaded=True)
+    ], threaded=False)
 
     '''
             return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
