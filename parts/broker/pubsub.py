@@ -123,11 +123,23 @@ class HedgePublisher(PublisherBase):
     Marvelmind モバイルルータ(IMU)データ(JSONデータ)をMQTTプロトコルで送信する
     パブリッシャパーツクラス。
     """
-    
+    '''
+        hedge_items = [
+            'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
+            'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+            'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
+            'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz',
+            'imu_timestamp',
+            'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
+            'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp'
+        ]
+    '''
     def run(self,
     usnav_id, usnav_x, usnav_y, usnav_z, usnav_angle, usnav_timestamp,
     imu_x, imu_y, imu_z, imu_qw, imu_qx, imu_qy, imu_qz,
     imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az,
+    imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz,
+    imu_timestamp,
     dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d,
     dist_b3, dist_b3d, dist_b4, dist_b4d, dist_timestamp,
     timestamp):
@@ -153,6 +165,13 @@ class HedgePublisher(PublisherBase):
             imu_ax              IMU：加速度(X)
             imu_ay              IMU：加速度(Y)
             imu_az              IMU：加速度(Z)
+            imu_gx              IMU：重力加速度(X)
+            imu_gy              IMU：重力加速度(Y)
+            imu_gz              IMU：重力加速度(Z)
+            imu_mx              IMU：磁気速度(X)
+            imu_my              IMU：磁気速度(Y)
+            imu_mz              IMU：磁気速度(Z)
+            imu_timestamp       IMU情報を計測したタイムスタンプ
             dist_id             距離：デバイスID
             dist_b1             距離：対象となるステーショナリビーコン1のデバイスID
             dist_b1d            距離：対象となるステーショナリビーコン1との距離
@@ -163,7 +182,7 @@ class HedgePublisher(PublisherBase):
             dist_b4             距離：対象となるステーショナリビーコン4のデバイスID
             dist_b4d            距離：対象となるステーショナリビーコン4との距離
             dist_timestamp      距離：タイムスタンプ
-            timestamp           タイムスタンプ
+            timestamp           Donkeycarタイムスタンプ
         戻り値：
             なし
         """
@@ -173,6 +192,8 @@ class HedgePublisher(PublisherBase):
             usnav_angle, usnav_timestamp,
             imu_x, imu_y, imu_z, imu_qw, imu_qx, imu_qy, imu_qz,
             imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az,
+            imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz,
+            imu_timestamp,
             dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d,
             dist_b3, dist_b3d, dist_b4, dist_b4d, dist_timestamp,
             timestamp)
@@ -185,6 +206,8 @@ class HedgePublisher(PublisherBase):
     usnav_id, usnav_x, usnav_y, usnav_z, usnav_angle, usnav_timestamp,
     imu_x, imu_y, imu_z, imu_qw, imu_qx, imu_qy, imu_qz,
     imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az,
+    imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz,
+    imu_timestamp,
     dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d,
     dist_b3, dist_b3d, dist_b4, dist_b4d, dist_timestamp,
     timestamp):
@@ -210,6 +233,13 @@ class HedgePublisher(PublisherBase):
             imu_ax              IMU：加速度(X)
             imu_ay              IMU：加速度(Y)
             imu_az              IMU：加速度(Z)
+            imu_gx              IMU：重力加速度(X)
+            imu_gy              IMU：重力加速度(Y)
+            imu_gz              IMU：重力加速度(Z)
+            imu_mx              IMU：磁気速度(X)
+            imu_my              IMU：磁気速度(Y)
+            imu_mz              IMU：磁気速度(Z)
+            imu_timestamp       IMUデータを計測したタイムスタンプ
             dist_id             距離：デバイスID
             dist_b1             距離：対象となるステーショナリビーコン1のデバイスID
             dist_b1d            距離：対象となるステーショナリビーコン1との距離
@@ -245,6 +275,13 @@ class HedgePublisher(PublisherBase):
             'imu_ax':               v2f(imu_ax),
             'imu_ay':               v2f(imu_ay),
             'imu_az':               v2f(imu_az),
+            'imu_gx':               v2f(imu_gx),
+            'imu_gy':               v2f(imu_gy),
+            'imu_gz':               v2f(imu_gz),
+            'imu_mx':               v2f(imu_mx),
+            'imu_my':               v2f(imu_my),
+            'imu_mz':               v2f(imu_mz),
+            'imu_timestamp':        imu_timestamp,
             'dist_id':              dist_id,
             'dist_b1':              dist_b1,
             'dist_b1d':             v2f(dist_b1d),
