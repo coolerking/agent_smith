@@ -179,7 +179,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
             'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
             'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz',
-            'imu_timestamp',
+            'imu/timestamp',
             'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
             'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp'
         ]
@@ -192,7 +192,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
             'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
             'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz',
-            'imu_timestamp',
+            'imu/timestamp',
             'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
             'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
             'timestamp',
