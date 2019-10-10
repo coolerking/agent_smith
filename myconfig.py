@@ -207,7 +207,7 @@ AWS_THING_NAME = 'smith'
 # 
 # #IMU
 # HAVE_IMU = False                #when true, this add a Mpu6050 part and records the data. Can be used with a 
-HAVE_IMU = False
+HAVE_IMU = True
 MPC6050_I2C_ADDRESS = 0x68
 MPC6050_I2C_BUS = 1
 # 
