@@ -213,11 +213,13 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             hedge_pub = HedgePublisher(factory, debug=use_debug)
             V.add(hedge_pub, inputs=hedge_aws_items)
 
-    '''
-    ジョイスティック
-    '''
+
 
     if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
+        '''
+        ジョイスティック
+        '''
+
         #modify max_throttle closer to 1.0 to have more power
         #modify steering_scale lower than 1.0 to have less responsive steering
         #from donkeycar.parts.controller import get_js_controller
@@ -237,11 +239,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             outputs=['user/angle', 'user/throttle', 'user/lift_throttle', 'user/mode', 'recording'],
             threaded=True)
 
-    '''
-    Webコントローラ
-    '''
+    else:
+        
+        '''
+        Webコントローラ
+        '''
 
-    else:        
         #This web controller will create a web server that is capable
         #of managing steering, throttle, and modes, and more.
         
