@@ -444,12 +444,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             outputs=[inf_input],
             run_condition='run_pilot')
 
-    '''
-    振る舞い状態
-    '''
+
 
     #Behavioral state
     if cfg.TRAIN_BEHAVIORS:
+        
+        '''
+        振る舞い状態
+        '''
+
         bh = BehaviorPart(cfg.BEHAVIOR_LIST)
         V.add(bh, outputs=['behavior/state', 'behavior/label', "behavior/one_hot_state_array"])
         try:
@@ -459,12 +462,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
         inputs = [inf_input, "behavior/one_hot_state_array"]
 
-    '''
-    IMU（MPU6050）モデル
-    '''
 
     #IMU
     elif model_type == "imu":
+        
+        '''
+        IMU（MPU6050）モデル
+        '''
+
         #assert(cfg.HAVE_IMU)
         #Run the pilot if the mode is not user.
         if cfg.HAVE_IMU:
@@ -549,7 +554,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             return
 
         '''
-        モデルファイル後進監視
+        モデルファイル更新監視
         '''
 
         #this part will signal visual LED, if connected
@@ -702,12 +707,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         V.mem['lift_motor_throttle'] = 0
 
 
-    '''
-    フォークリフト３モータ駆動
-    '''
+
 
     # Forklift 駆動モータ操作
     elif cfg.DRIVE_TRAIN_TYPE == "THREE_MOTORS_PIGPIO":
+        '''
+        フォークリフト３モータ駆動
+        '''
+
         from parts import PIGPIO_OUT, PIGPIO_PWM, ForkliftMotorDriver
 
         motor_driver = ForkliftMotorDriver(
