@@ -81,6 +81,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         power = PowerReporter(factory, debug=use_debug)
         power.on()
 
+    '''
+    カメラ
+    '''
+
     if camera_type == "stereo":
 
         if cfg.CAMERA_TYPE == "WEBCAM":
@@ -141,7 +145,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             
         V.add(cam, inputs=inputs, outputs=['cam/image_array'], threaded=threaded)
 
-    # Range Sensor
+    '''
+    距離センサ
+    '''
     if use_range or cfg.USE_RANGE_AS_DEFAULT:
         from parts import get_range_part
 
@@ -153,7 +159,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             range_pub = RangePublisher(factory, debug=use_debug)
             V.add(range_pub, inputs=['range/cms', 'timestamp'])
 
-    # Force/Bend Sensors via SPI ADC
+    '''
+    圧力センサほか(SPI)
+    '''
     if use_spi or cfg.USE_SPI_AS_DEFAULT:
         from parts import PIGPIO_SPI_ADC
 
@@ -172,7 +180,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             adc_pub = ADCPublisher(factory, debug=use_debug)
             V.add(adc_pub, inputs=['force/volts', 'bend/volts', 'timestamp'])
     
-    # Marvelmind Mobile Beacon via USB
+    '''
+    Marvelmind 位置情報システム
+    '''
     if use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
         hedge_items = [
             'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
@@ -202,7 +212,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             from parts.broker import HedgePublisher
             hedge_pub = HedgePublisher(factory, debug=use_debug)
             V.add(hedge_pub, inputs=hedge_aws_items)
-        
+
+    '''
+    ジョイスティック
+    '''
+
     if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
         #modify max_throttle closer to 1.0 to have more power
         #modify steering_scale lower than 1.0 to have less responsive steering
@@ -223,6 +237,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             outputs=['user/angle', 'user/throttle', 'user/lift_throttle', 'user/mode', 'recording'],
             threaded=True)
 
+    '''
+    Webコントローラ
+    '''
+
     else:        
         #This web controller will create a web server that is capable
         #of managing steering, throttle, and modes, and more.
@@ -236,18 +254,19 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             outputs=['user/angle', 'user/throttle', 'user/lift_throttle', 'user/mode', 'recording'],
             threaded=True)
 
-    #class PrintControll:
-    #    def run(self, angle, throttle, lift_throttle):
-    #        print('angle={}, throttle={}, lift_throttle={}'.format(str(angle), str(throttle), str(lift_throttle)))
-    #    def shutdown(self):
-    #        pass
-    
-    #V.add(PrintControll(), inputs=['user/angle', 'user/throttle', 'user/lift_throttle'])
+    '''
+    スロットルフィルタ(ワンタップESC後進)
+    '''
 
     #this throttle filter will allow one tap back for esc reverse
     th_filter = ThrottleFilter()
     V.add(th_filter, inputs=['user/throttle'], outputs=['user/throttle'])
-    
+
+
+    '''
+    手動運転・自動運転判定フラグ設定
+    '''
+
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
     class PilotCondition:
@@ -258,7 +277,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 return True       
 
     V.add(PilotCondition(), inputs=['user/mode'], outputs=['run_pilot'])
-    
+
+    '''
+    3色LED表示
+    '''
+
     class LedConditionLogic:
         def __init__(self, cfg):
             self.cfg = cfg
@@ -317,6 +340,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 col = color
         return col    
 
+    '''
+    レコードトラッカ
+    '''
+
     class RecordTracker:
         def __init__(self):
             self.last_num_rec_print = 0
@@ -348,6 +375,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     rec_tracker_part = RecordTracker()
     V.add(rec_tracker_part, inputs=["tub/num_records"], outputs=['records/alert'])
 
+    '''
+    自動記録
+    '''
+
     if cfg.AUTO_RECORD_ON_THROTTLE and isinstance(ctr, JoystickController):
         #then we are not using the circle button. hijack that to force a record count indication
         def show_record_acount_status():
@@ -363,10 +394,18 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         else:
             ctr.set_button_down_trigger('circle', show_record_acount_status)
 
+    '''
+    Sombero HAT
+    '''
+
     #Sombrero
     if cfg.HAVE_SOMBRERO:
         from donkeycar.parts.sombrero import Sombrero
         s = Sombrero()
+
+    '''
+    MPU6050
+    '''
 
     #IMU
     if cfg.HAVE_IMU:
@@ -377,6 +416,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             bus=cfg.MPC6050_I2C_BUS, address=cfg.MPC6050_I2C_ADDRESS, debug=False)
         V.add(imu, outputs=['imu/acl_x', 'imu/acl_y', 'imu/acl_z',
             'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z'], threaded=True)
+
+    '''
+    画像前処理
+    '''
 
     class ImgPreProcess():
         '''
@@ -398,6 +441,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             outputs=[inf_input],
             run_condition='run_pilot')
 
+    '''
+    振る舞い状態
+    '''
+
     #Behavioral state
     if cfg.TRAIN_BEHAVIORS:
         bh = BehaviorPart(cfg.BEHAVIOR_LIST)
@@ -407,7 +454,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         except:
             pass
 
-        inputs = [inf_input, "behavior/one_hot_state_array"]  
+        inputs = [inf_input, "behavior/one_hot_state_array"]
+
+    '''
+    IMU（MPU6050）モデル
+    '''
+
     #IMU
     elif model_type == "imu":
         #assert(cfg.HAVE_IMU)
@@ -425,6 +477,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             ]
     else:
         inputs=[inf_input]
+
+    '''
+    モデル
+    '''
 
     def load_model(kl, model_path):
         start = time.time()
@@ -489,6 +545,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             print("ERR>> Unknown extension type on model file!!")
             return
 
+        '''
+        モデルファイル後進監視
+        '''
+
         #this part will signal visual LED, if connected
         V.add(FileWatcher(model_path, verbose=True), outputs=['modelfile/modified'])
 
@@ -499,8 +559,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
         outputs=['pilot/angle', 'pilot/throttle']
 
-
-        
+        '''
+        ローカライザモデルの場合の出力編集
+        '''
 
         if cfg.TRAIN_LOCALIZER:
             outputs.append("pilot/loc")
@@ -509,7 +570,17 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             outputs=outputs,
             run_condition='run_pilot')            
 
+    '''
+    モデルがない場合の自動運転結果初期値設定
+    '''
+
+    V.mem['pilot/throttle'] = 0.0
+    V.mem['pilot/angle'] = 0.0
     V.mem['pilot/lift_throttle'] = 0.0
+
+    '''
+    運転モードから、モータ入力値決定
+    '''
 
     #Choose what inputs should change the car.
     class DriveMode:
@@ -530,7 +601,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                   'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle'], 
           outputs=['angle', 'throttle', 'lift_throttle'])
 
-    
+    '''
+    AIランチャ
+    '''
+
     #to give the car a boost when starting ai mode in a race.
     aiLauncher = AiLaunch(cfg.AI_LAUNCH_DURATION, cfg.AI_LAUNCH_THROTTLE, cfg.AI_LAUNCH_KEEP_ENABLED)
     
@@ -541,6 +615,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     if isinstance(ctr, JoystickController):
         ctr.set_button_down_trigger(cfg.AI_LAUNCH_ENABLE_BUTTON, aiLauncher.enable_ai_launch)
 
+    '''
+    AIによる自動運転かどうかの判定
+    '''
 
     class AiRunCondition:
         '''
@@ -552,6 +629,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             return True
 
     V.add(AiRunCondition(), inputs=['user/mode'], outputs=['ai_running'])
+
+    '''
+    AI運転時の記録モード
+    '''
 
     #Ai Recording
     class AiRecordingCondition:
@@ -565,7 +646,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
     if cfg.RECORD_DURING_AI:
         V.add(AiRecordingCondition(), inputs=['user/mode', 'recording'], outputs=['recording'])
-    
+
+    '''
+    モータ駆動
+    '''
+
     #Drive train setup
     if cfg.DONKEY_GYM:
         pass
@@ -612,6 +697,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         V.add(left_motor, inputs=['left_motor_speed'])
         V.add(right_motor, inputs=['right_motor_speed'])
         V.mem['lift_motor_throttle'] = 0
+
+
+    '''
+    フォークリフト３モータ駆動
+    '''
 
     # Forklift 駆動モータ操作
     elif cfg.DRIVE_TRAIN_TYPE == "THREE_MOTORS_PIGPIO":
@@ -687,6 +777,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         V.mem['lift_throttle'] = 0
 
     
+    '''
+    Tubデータ
+    '''
+
     #add tub to save data
 
     inputs=['cam/image_array',
@@ -697,16 +791,28 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
            'float', 'float', 'float',
            'str']
 
+    '''
+    timestamp追加
+    '''
+
     # timestamp
     inputs += ['timestamp']
     # float
     #types += ['float']
     types += ['str']
 
+    '''
+    behaviorモデルの場合
+    '''
+
     if cfg.TRAIN_BEHAVIORS:
         inputs += ['behavior/state', 'behavior/label', "behavior/one_hot_state_array"]
         types += ['int', 'str', 'vector']
-    
+
+    '''
+    IMU(MPU6050)データ追加
+    '''
+
     if cfg.HAVE_IMU:
         inputs += ['imu/acl_x', 'imu/acl_y', 'imu/acl_z',
             'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z']
@@ -714,8 +820,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         types +=['float', 'float', 'float',
            'float', 'float', 'float']
 
+    '''
+    Marvelmind位置情報システムデータ追加
+    '''
+
     # Marvelmind Mobile Beacon 使用時
-    elif use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
+    if use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
         inputs += ['usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
             'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
             'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
@@ -730,11 +840,19 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             'int', 'int', 'float', 'int', 'float',
             'int', 'float', 'int', 'float', 'float']
 
+    '''
+    距離センサ追加
+    '''
+
     # Range Sensor 使用時
     if use_range or cfg.USE_RANGE_AS_DEFAULT:
         inputs +=['range/cms']
 
         types += ['float']
+
+    '''
+    圧力センサ他(SPI)追加
+    '''
 
     # Force/Bend Sensors via SPI ADC 使用時
     if use_spi or cfg.USE_SPI_AS_DEFAULT:
@@ -742,13 +860,25 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
         types += ['float', 'float']
 
+    '''
+    AI推論結果追加
+    '''
+
     if cfg.RECORD_DURING_AI:
         inputs += ['pilot/angle', 'pilot/throttle', 'pilot/lift_throttle']
         types += ['float', 'float', 'float']
-    
+
+    '''
+    Tubデータ書き込み
+    '''
+
     th = TubHandler(path=cfg.DATA_PATH)
     tub = th.new_tub_writer(inputs=inputs, types=types, user_meta=meta)
     V.add(tub, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
+
+    '''
+    カメライメージを通信して貰う場合
+    '''
 
     if cfg.PUB_CAMERA_IMAGES:
         from donkeycar.parts.network import TCPServeValue
@@ -756,6 +886,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         pub = TCPServeValue("camera")
         V.add(ImgArrToJpg(), inputs=['cam/image_array'], outputs=['jpg/bin'])
         V.add(pub, inputs=['jpg/bin'])
+
+    '''
+    操縦系統別
+    '''
 
     if type(ctr) is LocalWebController:
         print("You can now go to <your pi ip address>:8887 to drive your car.")
@@ -783,6 +917,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 ctr.set_button_down_trigger('cross', new_tub_dir)
 
         ctr.print_controls()
+
+    '''
+    運転ループ
+    '''
 
     try:
         print('Start running')
