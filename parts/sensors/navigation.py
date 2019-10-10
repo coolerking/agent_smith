@@ -99,9 +99,19 @@ class HedgehogController:
             なし
         """
         # [usnAdr, usnX, usnY, usnZ, usnAngle, usnTimestamp]
-        usnav = self.hedge.position()
         if self.debug:
             print('[HedgehogController] usnav data recieved')
+        if self.hedge is None:
+            if self.debug:
+                print('[HedgehogController] hedge is None')
+            return
+        values_usnav = getattr(self.hedge, 'valuesUltrasoundPosition', None)
+        if values_usnav is None:
+            if self.debug:
+                print('[HedgehogController] self.hedge has no valuesUltrasoundPosition')
+            return
+        usnav = self.hedge.position()
+        if self.debug:
             print(usnav)
         if usnav[0] != self.id:
             if self.debug:
@@ -196,9 +206,20 @@ class HedgehogController:
         #   qw/10000.0, qx/10000.0, qy/10000.0, qz/10000.0,
         #   vx/1000.0, vy/1000.0, vz/1000.0,
         #   ax/1000.0,ay/1000.0,az/1000.0, timestamp]
-        imu = list(self.hedge.valuesImuData)[-1]
+        
         if self.debug:
             print('[HedgehogController] imu data recieved')
+        if self.hedge is None:
+            if self.debug:
+                print('[HedgehogController] self.hedge is None')
+            return
+        values_dist = getattr(self.hedge, 'valuesImuData', None)
+        if values_dist is None:
+            if self.debug:
+                print('[HedgehogController] self.hedge has no valuesImuData')
+            return
+        imu = list(self.hedge.valuesImuData)[-1]
+        if self.debug:
             print(imu)
         if isinstance(imu, list) and len(imu) == 14:
             self.imu_x = imu[0]
@@ -249,16 +270,19 @@ class HedgehogController:
         """
         # [HedgeAdr, b1, b1d/1000.0, b2, b2d/1000.0,
         #  b3, b3d/1000.0, b4, b4d/1000.0, timestamp]
+        if self.debug:
+            print('[HedgehogController] usnav raw data(distances) recieved')
         if self.hedge is None:
-            print('self.hedge is None')
+            if self.debug:
+                print('self.hedge is None')
             return
         values_dist = getattr(self.hedge, 'valuesUltrasoundRawData', None)
         if values_dist is None:
-            print('self.hedge has no valuesUltrasoundRawData')
+            if self.debug:
+                print('self.hedge has no valuesUltrasoundRawData')
             return
         dist = self.hedge.distances()
         if self.debug:
-            print('[HedgehogController] usnav raw data(distances) recieved')
             print(dist)
         if len(dist) == 10 and dist[0] == self.id:
             self.dist_id = dist[0]
