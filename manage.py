@@ -145,6 +145,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             
         V.add(cam, inputs=inputs, outputs=['cam/image_array'], threaded=threaded)
 
+    if use_aws or cfg.USE_AWS_AS_DEFAULT:
+        from parts.broker import ImagePublisher
+        image_pub = ImagePublisher(factory, debug=use_debug)
+        V.add(image_pub, inputs=['cam/image_array'])
+
     '''
     距離センサ
     '''

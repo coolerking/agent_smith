@@ -48,7 +48,7 @@ class PublisherBase:
         """
         self._client = None
         if self.debug:
-            print('[TubPublisher] shutdown')
+            print('[Publisher] shutdown')
 
 class TubPublisher(PublisherBase):
     def run(self, image_array,
@@ -116,6 +116,23 @@ class TubPublisher(PublisherBase):
             'pilot/lift_throttle':  v2f(pilot_lift_throttle),
             'timestamp':            timestamp
         })
+
+class ImagePublisher(PublisherBase):
+    def run(self, image_array):
+        """
+        Tubデータ(イメージ)をpublish送信する。
+        引数：
+            image_array         イメージデータ
+        戻り値：
+            なし
+        """
+        image_topic = create_image_topic(self.system, self.thing_type,
+        self.thing_group, self.thing_name, 'image')
+        image_message = self.create_image_message(image_array)
+        if self._client is not None:
+            is_sent = self._client.publish(image_topic, image_message, 0)
+            if self.debug:
+                print('[ImagePublisher] published image status: {}'.format(str(is_sent)))
 
 
 class HedgePublisher(PublisherBase):
