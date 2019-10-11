@@ -127,7 +127,8 @@ class ImagePublisher(PublisherBase):
             なし
         """
         if image_array is None:
-            print('[ImagePublisher] image_array is None')
+            if self.debug:
+                print('[ImagePublisher] image_array is None(ignore publishing)')
             return
         image_topic = create_image_topic(self.system, self.thing_type,
         self.thing_group, self.thing_name, 'image')
