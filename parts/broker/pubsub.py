@@ -51,6 +51,10 @@ class PublisherBase:
             print('[Publisher] shutdown')
 
 class TubPublisher(PublisherBase):
+    """
+    通常フォーマットのTubデータを送信するパーツクラス。
+    IMUやHedgeなどのデータは送信されない。
+    """
     def run(self, image_array,
     user_angle, user_throttle, user_lift_throttle,
     pilot_angle, pilot_throttle, pilot_lift_throttle,
@@ -118,6 +122,9 @@ class TubPublisher(PublisherBase):
         })
 
 class ImagePublisher(PublisherBase):
+    """
+    cam/image_array のみpublishするパーツクラス。
+    """
     def run(self, image_array):
         """
         Tubデータ(イメージ)をpublish送信する。
