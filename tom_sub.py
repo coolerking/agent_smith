@@ -6,13 +6,14 @@ def test_sub(use_debug=False):
     import donkeycar as dk
     V = dk.vehicle.Vehicle()
 
-    from parts.broker import AWSShadowClientFactory, PowerReporter
+    from parts.broker.aws import AWSShadowClientFactory
+    from parts.broker.shadow import PowerReporter
     factory = AWSShadowClientFactory('conf/aws/tom.yml', 'tom')
     # Power ON 情報の送信
     power = PowerReporter(factory, debug=use_debug)
     power.on()
 
-    from parts.broker import HedgeSubscriber
+    from parts.broker.pubsub import HedgeSubscriber
     sub = HedgeSubscriber(factory, debug=use_debug)
     V.add(sub, outputs=['hedge'])
 
