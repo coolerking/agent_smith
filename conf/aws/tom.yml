@@ -1,0 +1,12 @@
+'tom':
+  system: 'real'
+  thing_type: 'agent'
+  thing_group: 'monitor'
+  thing_name: 'tom'
+  endpoint: 'ag190y2vfd9hs-ats.iot.us-east-1.amazonaws.com'
+  port: 8883
+  auth:
+    root_ca:  'conf/aws/AmazonRootCA1.pem'
+    certificate: 'conf/aws/32af9570ba-certificate.pem.crt'
+    private_key: 'conf/aws/32af9570ba-private.pem.key'
+

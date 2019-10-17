@@ -78,5 +78,17 @@ def create_bin_topic(system='real', thing_type='agent', thing_group='loader',
 thing_name='john_doe', message_type='tub'):
     return _create_base_topic(system, thing_type, thing_group, thing_name, message_type) + '/bin'
 
+def create_hedge_topic(system='real', thing_type='agent', thing_group='loader', 
+thing_name='+', message_type='hedge'):
+    return _create_base_topic(system, thing_type, thing_group, thing_name, message_type) + '/json'
+
+def get_thing_name_from_hedge_topic(system='real', thing_type='agent', 
+thing_group='loader', message_type='hedge', topic=None):
+    if topic is None:
+        return None
+    prefix = '/' + system + '/' + thing_type + '/' + thing_group + '/'
+    suffix = '/' + message_type + '/json'
+    return topic[len(prefix):(-1 * len(suffix))]
+
 def _create_base_topic(system, thing_type, thing_group, thing_name, message_type):
     return '/' + system + '/' + thing_type + '/' + thing_group + '/' + thing_name + '/' + message_type
