@@ -220,6 +220,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             from parts.broker import HedgePublisher
             hedge_pub = HedgePublisher(factory, debug=use_debug)
             V.add(hedge_pub, inputs=hedge_aws_items)
+            from parts.broker import HedgeSubscriber
+            hedge_sub = HedgeSubscriber(factory, debug=use_debug)
+            V.add(hedge_sub, outputs=['hedge'])
+            V.mem['hedge'] = '{}'
 
 
 
