@@ -140,6 +140,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         elif cfg.CAMERA_TYPE == "MOCK":
             from donkeycar.parts.camera import MockCamera
             cam = MockCamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH)
+        elif cfg.CAMERA_TYPE == "MAP":
+            from parts import MapImageCreator
+            cam = MapImageCreator(cfg.MAP_BASE_IMAGE_PATH, cfg.MAP_AGENT_IMAGE_PATH)
         else:
             raise(Exception("Unkown camera type: %s" % cfg.CAMERA_TYPE))
             
@@ -342,6 +345,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         
 
     def get_record_alert_color(num_records):
+        """
+        Tubデータ件数を色PWMタプル(r,　g, b)：各0-100に変換する。
+        件数範囲、PWMタプルはconfig.py上のRECORD_ALERT_COLOR_ARR
+        を参照している。
+        引数：
+            num_records     Tubデータ件数
+        戻り値
+            色PWMタプル     (r, g, b)形式(0-100)
+        """
         col = (0, 0, 0)
         for count, color in cfg.RECORD_ALERT_COLOR_ARR:
             if num_records >= count:
