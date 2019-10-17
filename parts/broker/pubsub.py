@@ -516,9 +516,16 @@ class HedgeSubscriber:
         elif thing_name == self.thing_name:
             if self.debug:
                 print('[HedgeSubscriber] ignore my data({})'.format(thing_name))
+        elif message.payload is None:
+            if self.debug:
+                print('[HedgeSubscriber] no messsage.payload')
+        elif isinstance(self.hedge, dict):
+            import ast
+            self.hedge[thing_name] = ast.literal_eval(message.payload.decode('utf-8'))
+            #self.hedge[thing_name] = json.loads(message.payload)
         else:
-            self.hedge[thing_name] = json.loads(str(message.payload))
-
+            if self.debug:
+                print('[HedgeSubscriber] unknown type self.hedge')
 
     def run(self):
         """
