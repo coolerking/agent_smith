@@ -517,7 +517,7 @@ class HedgeSubscriber:
             if self.debug:
                 print('[HedgeSubscriber] ignore my data({})'.format(thing_name))
         else:
-            self.hedge[thing_name] = json.loads(message.payload)
+            self.hedge[thing_name] = json.loads(str(message.payload))
 
 
     def run(self):
