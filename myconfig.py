@@ -22,8 +22,9 @@
 # #CAMERA
 # CAMERA_TYPE = "PICAM"   # (PICAM|WEBCAM|CVCAM|CSIC|MOCK)
 # CAMERA_TYPE = "MAP"
-# MAP_BASE_IMAGE_PATH = assets/base.jpg
-# MAP_AGENT_IMAGE_PATH = assets/agent.jpg
+MAP_BASE_IMAGE_PATH = assets/base.jpg
+MAP_AGENT_IMAGE_PATH = assets/agent.jpg
+MAP_ANOTHER_AGENT_IMAGE_PATH = assets/another_agent.jpg
 # IMAGE_W = 160
 # IMAGE_H = 120
 # IMAGE_DEPTH = 3         # default RGB=3, make 1 for mono

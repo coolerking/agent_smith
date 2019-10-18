@@ -109,6 +109,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         V.add(StereoPair(), inputs=['cam/image_array_a', 'cam/image_array_b'], 
             outputs=['cam/image_array'])
 
+    elif cfg.CAMERA_TYPE == "MAP":
+        from parts import MapImageCreator
+        cam = MapImageCreator(cfg.MAP_BASE_IMAGE_PATH, cfg.MAP_AGENT_IMAGE_PATH, cfg.MAP_ANOTHER_AGENT_IMAGE_PATH, debug=use_debug)
+        V.add(cam, inputs=['imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz', 'hedge'], outputs=['cam/image_array'])
+
     else:
         print("cfg.CAMERA_TYPE", cfg.CAMERA_TYPE)
         if cfg.DONKEY_GYM:
@@ -140,9 +145,6 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         elif cfg.CAMERA_TYPE == "MOCK":
             from donkeycar.parts.camera import MockCamera
             cam = MockCamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH)
-        elif cfg.CAMERA_TYPE == "MAP":
-            from parts import MapImageCreator
-            cam = MapImageCreator(cfg.MAP_BASE_IMAGE_PATH, cfg.MAP_AGENT_IMAGE_PATH)
         else:
             raise(Exception("Unkown camera type: %s" % cfg.CAMERA_TYPE))
             
