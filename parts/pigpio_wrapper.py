@@ -2,7 +2,7 @@
 """
 pigpioパッケージを使用したGPIO操作を行うためのパーツクラス群。
 """
-import pigpio
+
 
 DEFAULT_FREQ=75
 DEFAULT_RANGE=255
@@ -20,6 +20,7 @@ class PIGPIO:
             debug   boolean デバッグフラグ、デフォルトはFalse
         """
         self.debug = debug
+        import pigpio
         #pigpio.exceptions = self.debug
         self.pgio = pgio or pigpio.pi()
         self.pin = pin
@@ -189,6 +190,7 @@ class PIGPIO_SPI_ADC:
             なし
         """
         #pigpio.exceptions = debug
+        import pigpio
         self.pgio = pgio or pigpio.pi()
         self.vref_volts = vref_volts
         self.debug = debug
