@@ -132,7 +132,7 @@ TARGET_D = 3
 # PI_PASSWD = "raspberry"             # password is optional. Only used from Windows machine. Ubuntu and mac users should copy their public keys to the pi. `ssh-copy-id username@hostname`
 # PI_HOSTNAME = "raspberrypi.local"   # the network hostname or ip address
 # PI_DONKEY_ROOT = "/home/pi/mycar"   # the location of the mycar dir on the pi. this will be used to help locate the final model destination.
-PI_HOSTNAME = "192.168.8.134"   # the network hostname or ip address
+PI_HOSTNAME = "192.168.8.107"   # the network hostname or ip address
 PI_DONKEY_ROOT = "/home/pi/projects/agent_smith"   # the location of the mycar dir on the pi. this will be used to help locate the final model destination.
 # 
 # # Region of interst cropping
