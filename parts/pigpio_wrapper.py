@@ -94,6 +94,7 @@ class PIGPIO_PWM(PIGPIO):
             range   int     PWMサイクル値の範囲(25から40,000までの整数)
             threshold   float   入力値を0として認識するしきい値(-threshold < value< threshold => 0)
         """
+        import pigpio
         super().__init__(pin, mode=pigpio.OUTPUT, pgio=pgio, debug=debug)
         self.freq = freq or DEFAULT_FREQ
         self.range = range or DEFAULT_RANGE
@@ -160,6 +161,7 @@ class PIGPIO_IN(PIGPIO):
         戻り値：
             なし
         """
+        import pigpio
         super().__init__(pin, mode=pigpio.INPUT, pgio=pgio, debug=debug)
     
     def run(self):
