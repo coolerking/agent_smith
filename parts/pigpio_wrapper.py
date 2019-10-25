@@ -53,6 +53,7 @@ class PIGPIO_OUT(PIGPIO):
             pgio            piインスタンス、Noneの場合生成する
             debug   boolean デバッグフラグ、デフォルトはFalse
         """
+        import pigpio
         super().__init__(pin, mode=pigpio.OUTPUT, pgio=pgio, debug=debug)
         self.pgio.write(self.pin, 0)
         if self.debug:
