@@ -7,4 +7,4 @@ from .sensors.range import get_range_part
 from .sensors.navigation import HedgehogController
 from .clock import Timestamp
 from .led_status import LED, RGB_LED
-from .image import MapImageCreator
+from .image import MapImageCreator, FormerHedgehogPusher

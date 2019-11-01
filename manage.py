@@ -4,7 +4,7 @@
 Scripts to drive a donkey 2 car
 
 Usage:
-    manage.py (drive) [--model=<model>] [--js] [--range] [--spi] [--hedge] [--aws] [--debug] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|latent|tflite_linear)] [--camera=(single|stereo)] [--meta=<key:value> ...]
+    manage.py (drive) [--model=<model>] [--js] [--range] [--spi] [--hedge] [--aws] [--map] [--debug] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|latent|tflite_linear)] [--camera=(single|stereo)] [--meta=<key:value> ...]
     manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--transfer=<model>] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|tflite_linear)] [--continuous] [--aug]
 
 
@@ -15,6 +15,7 @@ Options:
     --spi              Use sensors via SPI
     --hedge            Use Marvelmind Mobile Beacon via USB
     --aws              Use AWS IoT Core
+    --map              Use 2d map image instead of camera
     --debug            Show debug message
     -f --file=<file>   A text file containing paths to tub files, one per line. Option may be used more than once.
     --meta=<key:value> Key/Value strings describing describing a piece of meta data about this drive. Option may be used more than once.
@@ -37,7 +38,7 @@ from donkeycar.parts.file_watcher import FileWatcher
 from donkeycar.parts.launch import AiLaunch
 from donkeycar.utils import *
 
-def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=False, use_hedge=False, use_aws=False, use_debug=False, model_type=None, camera_type='single', meta=[] ):
+def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=False, use_hedge=False, use_aws=False, use_map=False, use_debug=False, model_type=None, camera_type='single', meta=[] ):
     '''
     Construct a working robotic vehicle from many parts.
     Each part runs as a job in the Vehicle loop, calling either
@@ -109,12 +110,8 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         V.add(StereoPair(), inputs=['cam/image_array_a', 'cam/image_array_b'], 
             outputs=['cam/image_array'])
 
-    elif cfg.CAMERA_TYPE == "MAP":
-        from parts import MapImageCreator
-        cam = MapImageCreator(cfg.MAP_BASE_IMAGE_PATH, cfg.MAP_AGENT_IMAGE_PATH, cfg.MAP_ANOTHER_AGENT_IMAGE_PATH, debug=use_debug)
-        V.add(cam, inputs=['imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz', 'hedge'], outputs=['cam/image_array'])
+    elif cfg.CAMERA_TYPE != "MAP" and use_map == False:
 
-    else:
         print("cfg.CAMERA_TYPE", cfg.CAMERA_TYPE)
         if cfg.DONKEY_GYM:
             from donkeycar.parts.dgym import DonkeyGymEnv 
@@ -194,6 +191,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     Marvelmind 位置情報システム
     '''
     if use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
+        former_hedge_items = [
+            'usnav/id_f', 'usnav/x_f', 'usnav/y_f', 'usnav/z_f', 'usnav/angle_f', 'usnav/timestamp_f',
+            'imu/x_f', 'imu/y_f', 'imu/z_f', 'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f',
+            'imu/vx_f', 'imu/vy_f', 'imu/vz_f', 'imu/ax_f', 'imu/ay_f', 'imu/az_f',
+            'imu/gx_f', 'imu/gy_f', 'imu/gz_f', 'imu/mx_f', 'imu/my_f', 'imu/mz_f',
+            'imu/timestamp_f',
+            'dist/id_f', 'dist/b1_f', 'dist/b1d_f', 'dist/b2_f', 'dist/b2d_f', 
+            'dist/b3_f', 'dist/b3d_f', 'dist/b4_f', 'dist/b4d_f', 'dist/timestamp_f'
+        ]
         hedge_items = [
             'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
             'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
@@ -203,7 +209,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
             'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp'
         ]
-        from parts import HedgehogController
+        for item in hedge_items:
+            V.mem[item] = 0
+        from parts import HedgehogController, FormerHedgehogPusher
+        pusher = FormerHedgehogPusher(debug=use_debug)
+        V.add(former, inputs=hedge_items, outputs=former_hedge_items)
         hedge = HedgehogController(tty=cfg.HEDGE_SERIAL_TTY, adr=cfg.HEDGE_ID)
         V.add(hedge, outputs=hedge_items)
 
@@ -226,6 +236,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             hedge_sub = HedgeSubscriber(factory, debug=use_debug)
             V.add(hedge_sub, outputs=['hedge'])
             V.mem['hedge'] = '{}'
+
+        if use_map or cfg.CAMERA_TYPE == "MAP":
+            from parts import MapImageCreator
+            creator = MapImageCreator(base_image_path=cfg.MAP_BASE_IMAGE_PATH, debug=use_debug)
+            V.add(creator,
+                inputs=['imu/x', 'imu/y',
+                    'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz', 'imu/timestamp',
+                    'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f', 'imu/timestamp_f' ],
+                outputs=['cam/image_array'])
 
 
 
@@ -997,6 +1016,7 @@ if __name__ == '__main__':
             use_spi = args['--spi'],
             use_hedge = args['--hedge'],
             use_aws = args['--aws'],
+            use_map = args['--map']
             use_debug = args['--debug'],
             model_type = model_type,
             camera_type = camera_type,

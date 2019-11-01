@@ -172,7 +172,7 @@ class HedgehogController:
             self.imu_mx = raw_imu[6]
             self.imu_my = raw_imu[7]
             self.imu_mz = raw_imu[8]
-            self.imu_timestamp = raw_imu[9]
+            #self.imu_timestamp = raw_imu[9]
             if self.debug:
                 print('[HedgehogController] (ax, ay, az) = ({}, {}, {}), timestamp={}'.format(
                     str(self.imu_ax),
@@ -468,3 +468,114 @@ class HedgehogController:
         self.hedge.stop()
         self.hedge = None
         self.init()
+
+class FormerHedgehogPusher:
+    """
+    過去に記録したモバイルビーコンから取得した全てのデータを
+    別のVeichle変数へ格納するためのパーツクラス。
+    """
+    def __init__(self, debug=False):
+        """
+        デバッグフラグをインスタンス変数に格納する。
+        引数：
+            debug       デバッグフラグ
+        戻り値：
+            なし
+        """
+        self.debug = debug
+        if self.debug:
+            print('[FormerHedgehogPusher] init called')
+    
+    def run(self, usnav_id, 
+    usnav_x, usnav_y, usnav_z, usnav_angle, usnav_timestamp,
+    imu_x, imu_y, imu_z,
+    imu_qw, imu_qx, imu_qy, imu_qz,
+    imu_vx, imu_vy, imu_vz,
+    imu_ax, imu_ay, imu_az,
+    imu_gx, imu_gy, imu_gz, 
+    imu_mx, imu_my, imu_mz,
+    imu_timestamp,
+    dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d, 
+    dist_b3, dist_b3d, dist_b4, dist_b4d, dist_timestamp):
+        """
+        インスタンス変数から最新データを取得する。
+        引数：
+            なし
+        戻り値：
+            usnav_id        ステーショナリビーコンのアドレス
+            usnav_x         USNavより取得したX座標
+            usnav_y         USNavより取得したY座標
+            usnav_z         USNavより取得したZ座標
+            usnav_angle     USNavより取得したアングル値
+            usnav_timestamp USNav取得タイムスタンプ
+            imu_x           IMUより取得したX座標
+            imu_y           IMUより取得したX座標
+            imu_z           IMUより取得したX座標
+            imu_qw          IMUより取得した四元数qw
+            imu_qx          IMUより取得した四元数qx
+            imu_qy          IMUより取得した四元数qy
+            imu_qz          IMUより取得した四元数qz
+            imu_vx          IMUより取得した速度(X座標)
+            imu_vy          IMUより取得した速度(Y座標)
+            imu_vz          IMUより取得した速度(Z座標)
+            imu_ax          IMUより取得した加速度(X座標)
+            imu_ay          IMUより取得した加速度(Y座標)
+            imu_az          IMUより取得した加速度(X座標)
+            imu_mx          IMUより取得した磁力(X座標)
+            imu_my          IMUより取得した磁力(Y座標)
+            imu_mz          IMUより取得した磁力(Z座標)
+            imu_timestamp   IMUより取得タイムスタンプ
+            dist_id         モバイルビーコンのアドレス
+            dist_b1         ステーショナリビーコン1のアドレス
+            dist_b1d        ステーショナリビーコン1までの距離
+            dist_b2         ステーショナリビーコン2のアドレス
+            dist_b2d        ステーショナリビーコン2までの距離
+            dist_b3         ステーショナリビーコン3のアドレス
+            dist_b3d        ステーショナリビーコン3までの距離
+            dist_b4         ステーショナリビーコン4のアドレス
+            dist_b4d        ステーショナリビーコン4までの距離
+            dist_timestamp  Distance取得タイムスタンプ
+        """
+        if self.debug:
+            print('[FormerHedgehogPusher] usnav:{}, imu:{}, dist:{}'.format(
+                str(usnav_timestamp), str(imu_timestamp), str(dist_timestamp)))
+        return  usnav_id, \
+                usnav_x, \
+                usnav_y, \
+                usnav_z, \
+                usnav_angle, \
+                usnav_timestamp, \
+                imu_x, \
+                imu_y, \
+                imu_z, \
+                imu_qw, \
+                imu_qx, \
+                imu_qy, \
+                imu_qz, \
+                imu_vx, \
+                imu_vy, \
+                imu_vz, \
+                imu_ax, \
+                imu_ay, \
+                imu_az, \
+                imu_gx, \
+                imu_gy, \
+                imu_gz, \
+                imu_mx, \
+                imu_my, \
+                imu_mz, \
+                imu_timestamp, \
+                dist_id, \
+                dist_b1, \
+                dist_b1d, \
+                dist_b2, \
+                dist_b2d, \
+                dist_b3, \
+                dist_b3d, \
+                dist_b4, \
+                dist_b4d, \
+                dist_timestamp
+
+    def shutdown(self):
+        if self.debug:
+            print('[FormerHedgehogPusher] shutdown called')
