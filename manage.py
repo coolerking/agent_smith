@@ -214,6 +214,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         from parts import HedgehogController, FormerHedgehogPusher
         pusher = FormerHedgehogPusher(debug=use_debug)
         V.add(pusher, inputs=hedge_items, outputs=former_hedge_items)
+
+        class PrtHedge:
+            def run(self, x, y, qw, qx, qy, qz, timestamp, qw_f, qx_f, qy_f, qz_f, timestamp_f):
+                print('(x, y) = ({}, {})'.format(str(x), str(y)))
+                print('[NEW] (qw, qx, qy, qz) = ({}, {}, {}, {}) ts={}'.format(str(qw), str(qx), str(qy), str(qz), str(timestamp)))
+                print('[OLD] (qw, qx, qy, qz) = ({}, {}, {}, {}) ts={}'.format(str(qw_f), str(qx_f), str(qy_f), str(qz_f), str(timestamp_f)))
         hedge = HedgehogController(tty=cfg.HEDGE_SERIAL_TTY, adr=cfg.HEDGE_ID)
         V.add(hedge, outputs=hedge_items)
 
@@ -238,6 +244,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             V.mem['hedge'] = '{}'
 
         if use_map or cfg.CAMERA_TYPE == "MAP":
+            prt = PrtHedge()
+            V.add(prt,
+                inputs=['imu/x', 'imu/y',
+                    'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz', 'imu/timestamp',
+                    'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f', 'imu/timestamp_f' ])
             from parts import MapImageCreator
             creator = MapImageCreator(base_image_path=cfg.MAP_BASE_IMAGE_PATH, debug=use_debug)
             V.add(creator,
