@@ -4,7 +4,7 @@
 要pillowパッケージ。
 `pip install pillow`
 """
-from .VisionGenerator import SpoolMobileVision
+from .VisionGenerator.SpoolMobile import SpoolMobileVision
 import donkeycar as dk
 from PIL import Image
 import numpy as np
