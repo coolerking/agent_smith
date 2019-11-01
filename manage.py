@@ -213,7 +213,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             V.mem[item] = 0
         from parts import HedgehogController, FormerHedgehogPusher
         pusher = FormerHedgehogPusher(debug=use_debug)
-        V.add(former, inputs=hedge_items, outputs=former_hedge_items)
+        V.add(pusher, inputs=hedge_items, outputs=former_hedge_items)
         hedge = HedgehogController(tty=cfg.HEDGE_SERIAL_TTY, adr=cfg.HEDGE_ID)
         V.add(hedge, outputs=hedge_items)
 
