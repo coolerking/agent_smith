@@ -113,9 +113,14 @@ class MapImageCreator:
             else:
                 if abs(delta_yaw) > self.dead_zone:
                     angle = angle + delta_yaw
-        #if self.debug:
-        #    print('[MapImageCreator] x:%f y:%f delta-yaw:%f angle:%f in %f msec sampled at %f msec' % (rotated_position[0, 0], rotated_position[1, 0], delta_yaw, angle % 360, elapsed_time, timestamp))
-        
+
+        if angle is None:
+            if self.debug:
+                print('[MapImageCreator] return base image because angle is None')
+            return self.base_to_array()
+
+        if self.debug:
+            print('[MapImageCreator] x:%f y:%f delta-yaw:%f angle:%f in %f msec sampled at %f msec' % (rotated_position[0, 0], rotated_position[1, 0], delta_yaw, angle % 360, elapsed_time, timestamp))
         im = self.dt_vision.get_vision(rotated_position[0, 0] / self.stud, rotated_position[1, 0] / self.stud, angle)
 
         return dk.utils.img_to_arr(im)
