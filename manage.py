@@ -1016,7 +1016,7 @@ if __name__ == '__main__':
             use_spi = args['--spi'],
             use_hedge = args['--hedge'],
             use_aws = args['--aws'],
-            use_map = args['--map']
+            use_map = args['--map'],
             use_debug = args['--debug'],
             model_type = model_type,
             camera_type = camera_type,
