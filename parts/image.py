@@ -109,19 +109,15 @@ class MapImageCreator:
             if elapsed_time != 0:
                 number_of_timeslice = elapsed_time / self.imu_processing_rate
                 if abs(delta_yaw / number_of_timeslice) > self.dead_zone:
-                    angle = angle + delta_yaw
+                    self.angle = self.angle + delta_yaw
             else:
                 if abs(delta_yaw) > self.dead_zone:
-                    angle = angle + delta_yaw
-
-            if self.debug:
-                print('[MapImageCreator] x:%f y:%f delta-yaw:%f angle:%f in %f msec sampled at %f msec' % (rotated_position[0, 0], rotated_position[1, 0], delta_yaw, angle % 360, elapsed_time, timestamp))
-            im = self.dt_vision.get_vision(rotated_position[0, 0] / self.stud, rotated_position[1, 0] / self.stud, angle)
-            return dk.utils.img_to_arr(im)
+                    self.angle = self.angle + delta_yaw
 
         if self.debug:
-            print('[MapImageCreator] return base image because angle is not defined')
-        return self.base_to_array()
+            print('[MapImageCreator] x:%f y:%f delta-yaw:%f angle:%f in %f msec sampled at %f msec' % (rotated_position[0, 0], rotated_position[1, 0], delta_yaw, self.angle % 360, elapsed_time, timestamp))
+        im = self.dt_vision.get_vision(rotated_position[0, 0] / self.stud, rotated_position[1, 0] / self.stud, self.angle)
+        return dk.utils.img_to_arr(im)
 
         
 
