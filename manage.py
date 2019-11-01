@@ -244,11 +244,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             V.mem['hedge'] = '{}'
 
         if use_map or cfg.CAMERA_TYPE == "MAP":
-            prt = PrtHedge()
-            V.add(prt,
-                inputs=['imu/x', 'imu/y',
-                    'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz', 'imu/timestamp',
-                    'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f', 'imu/timestamp_f' ])
+            if use_debug:
+                prt = PrtHedge()
+                V.add(prt,
+                    inputs=['imu/x', 'imu/y',
+                        'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz', 'imu/timestamp',
+                        'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f', 'imu/timestamp_f' ])
             from parts import MapImageCreator
             creator = MapImageCreator(base_image_path=cfg.MAP_BASE_IMAGE_PATH, debug=use_debug)
             V.add(creator,

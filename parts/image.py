@@ -70,10 +70,6 @@ class MapImageCreator:
             if self.debug:
                 print('[MapImageCreator] return base image because None exists')
             return self.base_to_array()
-        #elif timestamp == timestamp_f:
-        #    if self.debug:
-        #        print('[MapImageCreator] return base image because timestamp == timestamp_f')
-        #    return self.base_to_array()
 
         # Miniature-Warehouse reference frame only concerns x, y position and yaw angle(around z-axis)
         # transform the Stationary-Beacon reference frame to the Miniature-Warehouse reference frame
