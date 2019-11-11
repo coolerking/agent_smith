@@ -53,10 +53,11 @@ class ForkliftMotorDriver(object):
         """
         if self.debug:
             print('ForkliftMD throttle:{}, steering:{}, lift:{}'.format(str(throttle), str(steering), str(lift_throttle)))
-        left_motor_speed, right_motor_speed = self.twowheel.run(
-            self.to_range_value(throttle), self.to_range_value(steering))
-        left_motor_speed, right_motor_speed = self.to_range_value(left_motor_speed), self.to_range_value(right_motor_speed)
-        lift_motor_speed = self.to_range_value(lift_throttle)
+        left_motor_speed, right_motor_speed = self.twowheel.run(throttle, steering)
+        if lift_throttle > 1 or lift_throttle < -1:
+            raise ValueError( "lift throttle must be between 1(forward) and -1(reverse)")
+        else:
+            lift_motor_speed = float(lift_throttle)
         if self.debug:
             print('ForkliftMD left motor speed:{}, right motor speed:{}'.format(str(left_motor_speed), str(right_motor_speed)))
 
@@ -64,8 +65,8 @@ class ForkliftMotorDriver(object):
         right_pwm, right_in1, right_in2 = self.convert_pin_values(right_motor_speed)
         lift_pwm, lift_in1, lift_in2 = self.convert_pin_values(lift_motor_speed)
 
-        left_pwm = self.to_range_value(left_pwm * self.left_balance)
-        right_pwm = self.to_range_value(right_pwm * self.right_balance)
+        left_pwm = float(left_pwm * self.left_balance)
+        right_pwm = float(right_pwm * self.right_balance)
 
         if self.debug:
             print('ForkliftMD left   pwm:{}, in1:{}, in2:{}'.format(str(left_pwm), str(left_in1), str(left_in2)))
@@ -96,22 +97,6 @@ class ForkliftMotorDriver(object):
             in2 = 1
         return pwm, in1, in2
 
-    def to_range_value(self, value):
-        """
-        ステアリング値、スロットル値を適正値範囲内に修正する。
-        引数：
-            value       ステアリング・スロットル値
-        戻り値：
-            適正範囲内修正値(-1.0～1.0)
-        """
-        if value is None:
-            return 0.0
-        elif value < -1.0:
-            return -1.0
-        elif value > 1.0:
-            return 1.0
-        else:
-            return float(value)
 
     def shutdown(self):
         """
