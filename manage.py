@@ -63,7 +63,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             model_type = cfg.DEFAULT_MODEL_TYPE
 
     # pigpio 初期化
-    import pigpio
+    try:
+        import pigpio
+    except:
+        raise
     pgio = pigpio.pi()
 
     #Initialize car
@@ -461,19 +464,35 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         s = Sombrero()
 
     '''
-    MPU6050
+    MPU6050/MPU9250
     '''
 
     #IMU
     if cfg.HAVE_IMU:
         #from donkeycar.parts.imu import Mpu6050
         #imu = Mpu6050()
+        '''MPU6050
         from parts.sensors.imu import Mpu6050
         imu = Mpu6050(pgio=pgio, 
-            bus=cfg.MPC6050_I2C_BUS, address=cfg.MPC6050_I2C_ADDRESS, debug=False)
+            bus=cfg.MPU6050_I2C_BUS, address=cfg.MPU6050_I2C_ADDRESS, debug=use_debug)
         V.add(imu, outputs=['imu/acl_x', 'imu/acl_y', 'imu/acl_z',
             'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z'], threaded=True)
-
+        '''
+        '''MPU9250III'''
+        from parts.sensors.imu import Mpu9250
+        imu = Mpu9250(
+            pgio=pgio,
+            bus=cfg.MPC9250_I2C_BUS, 
+            mpu9250_address=cfg.M9250_I2C_ADDRESS, 
+            ak8963_address=cfg.AK8963_I2C_ADDRESS, 
+            debug=use_debug)
+        V.add(imu,
+            outputs=[
+                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+                'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
+                'imu/mpu_timestamp'],
+            threaded=True)
     '''
     画像前処理
     '''
@@ -563,7 +582,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     def load_model_json(kl, json_fnm):
         start = time.time()
         print('loading model json', json_fnm)
-        from tensorflow.python import keras
+        try:
+            from tensorflow.python import keras
+        except:
+            raise
         try:
             with open(json_fnm, 'r') as handle:
                 contents = handle.read()

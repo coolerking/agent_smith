@@ -10,6 +10,296 @@ Marvelmind社の提供するサンプルコード marvelmind.py が同じディ�
 """
 from .marvelmind import MarvelmindHedge
 
+import datetime
+
+class USNavController:
+    """
+    Marvelmind側のコールバック機能を使用したモバイルビーコンデータ取得パーツクラス。
+    ただし、超音波計測情報のみ取得する。
+    """
+    def __init__(self, tty='/dev/ttyACM0', adr=79, debug=False):
+        """
+        インスタンス変数を初期化し、Marvelmindスレッドを開始する。
+        引数：
+            tty             シリアルポートを表すキャラクタデバイスパス
+            adr             ビーコン側アドレス(ID)
+            debug           marvelmind.pyにてデバッグ出力するか
+        戻り値：
+            なし
+        """
+        if debug:
+            print('[HedgehogController] __init__ called adr={}'.format(str(adr)))
+        self.id = adr
+        self.debug = debug
+        self.init()
+        self.hedge = MarvelmindHedge(
+            adr=adr,
+            tty=tty,
+            recieveUltrasoundPositionCallback=self.usnav_callback,
+            recieveUltrasoundRawDataCallback=self.usnav_raw_callback,
+            debug=debug) # Marvelmind側ログも出す場合
+            #debug=False) # ログがうざい場合
+        self.hedge.start()
+        if self.debug:
+            print('[HedgehogController] start marbelmind thread')
+
+    def init(self):
+        """
+        位置情報を格納するインスタンス変数を初期化する。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        self.usnav_id = self.id
+        self.usnav_x = 0
+        self.usnav_y = 0
+        self.usnav_z = 0
+        self.usnav_angle = 0
+        self.usnav_timestamp = 0
+        self.imu_x = 0
+        self.imu_y = 0
+        self.imu_z = 0
+        self.imu_timestamp = 0
+        self.dist_id = self.id
+        self.dist_b1 = 0
+        self.dist_b1d = 0
+        self.dist_b2 = 0
+        self.dist_b2d = 0
+        self.dist_b3 = 0
+        self.dist_b3d = 0
+        self.dist_b4 = 0
+        self.dist_b4d = 0
+        self.dist_timestamp = 0
+        if self.debug:
+            print('[USNavController] init instance values')
+
+
+    def usnav_callback(self):
+        """
+        位置情報をインスタンス変数へ格納する。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        # [usnAdr, usnX, usnY, usnZ, usnAngle, usnTimestamp]
+        if self.debug:
+            print('[HedgehogController] usnav data recieved')
+        if self.hedge is None:
+            if self.debug:
+                print('[HedgehogController] hedge is None')
+            return
+        values_usnav = getattr(self.hedge, 'valuesUltrasoundPosition', None)
+        if values_usnav is None:
+            if self.debug:
+                print('[HedgehogController] self.hedge has no valuesUltrasoundPosition')
+            return
+        usnav = self.hedge.position()
+        if self.debug:
+            print(usnav)
+        if usnav[0] != self.id:
+            if self.debug:
+                print('[HedgehogController] usnav data ignored id:{} is not {}'.format(
+                    str(usnav[0]),
+                    str(self.id)
+                ))
+        if isinstance(usnav, list) and len(usnav) == 6:
+            self.usnav_id = usnav[0]
+            self.usnav_x = usnav[1]
+            self.usnav_y = usnav[2]
+            self.usnav_z = usnav[3]
+            self.usnav_angle = usnav[4]
+            self.usnav_timestamp = usnav[5]/1000.0
+            self.imu_x = self.usnav_x
+            self.imu_y = self.usnav_y
+            self.imu_z = self.usnav_z
+            self.imu_timestamp = self.usnav_timestamp
+            if self.debug:
+                print('[USNavController] (x, y, z)=({}, {}, {}), angle={}, timestamp={}'.format(
+                    str(self.usnav_x),
+                    str(self.usnav_y),
+                    str(self.usnav_z),
+                    str(self.usnav_angle),
+                    str(self.usnav_timestamp)
+                ))
+        else:
+            if self.debug:
+                print('[USNavController] usnav data ignored no match format')
+
+    def usnav_raw_callback(self):
+        """
+        ビーコン間距離データをインスタンス変数へ格納する。
+        引数： 
+            なし
+        戻り値：
+            なし
+        """
+        # [HedgeAdr, b1, b1d/1000.0, b2, b2d/1000.0,
+        #  b3, b3d/1000.0, b4, b4d/1000.0, timestamp]
+        if self.debug:
+            print('[HedgehogController] usnav raw data(distances) recieved')
+        if self.hedge is None:
+            if self.debug:
+                print('self.hedge is None')
+            return
+        values_dist = getattr(self.hedge, 'valuesUltrasoundRawData', None)
+        if values_dist is None:
+            if self.debug:
+                print('self.hedge has no valuesUltrasoundRawData')
+            return
+        dist = self.hedge.distances()
+        if self.debug:
+            print(dist)
+        if len(dist) == 10 and dist[0] == self.id:
+            self.dist_id = dist[0]
+            self.dist_b1 = dist[1]
+            self.dist_b1d = dist[2]
+            self.dist_b2 = dist[3]
+            self.dist_b2d = dist[4]
+            self.dist_b3 = dist[5]
+            self.dist_b3d = dist[6]
+            self.dist_b4 = dist[7]
+            self.dist_b4d = dist[8]
+            self.dist_timestamp = dist[9]/1000.0
+            if self.debug:
+                print('[USNavController] Adr:{} B1:{}:{}, B2:{}:{}, B3:{},{}, B4:{},{}, t={}'.format(
+                    str(self.dist_id),
+                    str(self.dist_b1),
+                    str(self.dist_b1d),
+                    str(self.dist_b2),
+                    str(self.dist_b2d),
+                    str(self.dist_b3),
+                    str(self.dist_b3d),
+                    str(self.dist_b4),
+                    str(self.dist_b4d),
+                    str(self.dist_timestamp)
+                ))
+        else:
+            if self.debug:
+                print('[USNavController] usnav raw data ignored id:{} is not {} or len={}'.format(
+                    str(dist[0]),
+                    str(self.id),
+                    str(len(dist))
+                ))
+
+    def update(self):
+        """
+        marvelmind側のスレッドを使用するため、処理なし。
+        引数： 
+            なし
+        戻り値：
+            なし
+        """
+        if self.debug:
+            print('[HedgehogController] update called')
+
+    def run(self):
+        """
+        インスタンス変数から最新データを取得する。
+        ただし、実装はrun_threadedを呼び出しているだけ。
+        引数：
+            なし
+        戻り値：
+            usnav_id        ステーショナリビーコンのアドレス
+            usnav_x         USNavより取得したX座標
+            usnav_y         USNavより取得したY座標
+            usnav_z         USNavより取得したZ座標
+            usnav_angle     USNavより取得したアングル値
+            usnav_timestamp USNav取得タイムスタンプ
+            imu_x           IMUより取得したX座標
+            imu_y           IMUより取得したX座標
+            imu_z           IMUより取得したX座標
+            imu_timestamp   IMUより取得タイムスタンプ
+            dist_id         モバイルビーコンのアドレス
+            dist_b1         ステーショナリビーコン1のアドレス
+            dist_b1d        ステーショナリビーコン1までの距離
+            dist_b2         ステーショナリビーコン2のアドレス
+            dist_b2d        ステーショナリビーコン2までの距離
+            dist_b3         ステーショナリビーコン3のアドレス
+            dist_b3d        ステーショナリビーコン3までの距離
+            dist_b4         ステーショナリビーコン4のアドレス
+            dist_b4d        ステーショナリビーコン4までの距離
+            dist_timestamp  Distance取得タイムスタンプ
+        """
+        self.update()
+        return self.run_threaded()
+
+    def run_threaded(self):
+        """
+        インスタンス変数から最新データを取得する。
+        引数：
+            なし
+        戻り値：
+            usnav_id        ステーショナリビーコンのアドレス
+            usnav_x         USNavより取得したX座標
+            usnav_y         USNavより取得したY座標
+            usnav_z         USNavより取得したZ座標
+            usnav_angle     USNavより取得したアングル値
+            usnav_timestamp USNav取得タイムスタンプ
+            imu_x           IMUより取得したX座標
+            imu_y           IMUより取得したX座標
+            imu_z           IMUより取得したX座標
+            imu_timestamp   IMUより取得タイムスタンプ
+            dist_id         モバイルビーコンのアドレス
+            dist_b1         ステーショナリビーコン1のアドレス
+            dist_b1d        ステーショナリビーコン1までの距離
+            dist_b2         ステーショナリビーコン2のアドレス
+            dist_b2d        ステーショナリビーコン2までの距離
+            dist_b3         ステーショナリビーコン3のアドレス
+            dist_b3d        ステーショナリビーコン3までの距離
+            dist_b4         ステーショナリビーコン4のアドレス
+            dist_b4d        ステーショナリビーコン4までの距離
+            dist_timestamp  Distance取得タイムスタンプ
+        """
+        if self.debug:
+            print('[USNavController] run_threaded called')
+            print('dist_id={}, b1:{}, b1d:{}'.format(
+                str(self.dist_id),
+                str(self.dist_b1),
+                str(self.dist_b1d)
+            ))
+        return  self.usnav_id, \
+                self.usnav_x, \
+                self.usnav_y, \
+                self.usnav_z, \
+                self.usnav_angle, \
+                self.usnav_timestamp, \
+                self.imu_x, \
+                self.imu_y, \
+                self.imu_z, \
+                self.imu_timestamp, \
+                self.dist_id, \
+                self.dist_b1, \
+                self.dist_b1d, \
+                self.dist_b2, \
+                self.dist_b2d, \
+                self.dist_b3, \
+                self.dist_b3d, \
+                self.dist_b4, \
+                self.dist_b4d, \
+                self.dist_timestamp
+
+    def shutdown(self):
+        """
+        Marvelmind側のスレッドを停止し、インスタンス変数を初期化する。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        if self.debug:
+            print('[USNavController] shutdown called')
+        self.hedge.stop()
+        self.hedge = None
+        self.init()
+
+class IMUCopier:
+    def run(self, accel_x, accel_y, accel_z, gyro_x):
+        return accel_x, accel_y, accel_z, gyro_x
+    def shutdown(self):
+        pass
+
 class HedgehogController:
     """
     Marvelmind側のコールバック機能を使用したモバイルビーコンデータ取得パーツクラス。
