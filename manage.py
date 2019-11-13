@@ -295,8 +295,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
         #This web controller will create a web server that is capable
         #of managing steering, throttle, and modes, and more.
-        
-        from .parts import LocalWebForkliftController
+        try:
+            from .parts import LocalWebForkliftController
+        except:
+            raise
         ctr = LocalWebForkliftController()
         #ctr = LocalWebController()
 
@@ -473,10 +475,16 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         #imu = Mpu6050()
         '''MPU6050
         from parts.sensors.imu import Mpu6050
-        imu = Mpu6050(pgio=pgio, 
-            bus=cfg.MPU6050_I2C_BUS, address=cfg.MPU6050_I2C_ADDRESS, debug=use_debug)
-        V.add(imu, outputs=['imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z'], threaded=True)
+        imu = Mpu6050(
+            pgio=pgio, 
+            bus=cfg.MPU6050_I2C_BUS, 
+            address=cfg.MPU6050_I2C_ADDRESS, 
+            debug=use_debug)
+        V.add(imu, outputs=[
+                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+                'imu/temp', 'imu/recent', 'imu/timestamp',
+            ], threaded=True)
         '''
         '''MPU9250III'''
         from parts.sensors.imu import Mpu9250
@@ -491,8 +499,25 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
                 'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
                 'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-                'imu/mpu_timestamp'],
+                'imu/recent', 'imu/mpu_timestamp'],
             threaded=True)
+        if use_debug:
+            class PrintIMU:
+                def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, ts):
+                    print('ts:{} temp:{}, a:({},{},{}) g:({},{},{}) m:({},{},{})'.format(
+                        str(ts), str(temp),
+                        str(ax), str(ay), str(az), str(gx), str(gy), str(gz),
+                        str(mx), str(my), str(mz)
+                    ))
+                def shutdown(self):
+                    pass
+            V.add(PrintIMU(), inputs=[
+                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+                'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
+                'imu/mpu_timestamp'
+            ])
+
     '''
     画像前処理
     '''
