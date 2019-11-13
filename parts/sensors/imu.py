@@ -1,25 +1,30 @@
 # -*- coding: utf-8 -*-
 """
-BNO055/MPU6050モジュールを操作するパーツクラスを提供する。
-要pigpioパッケージ。
+MPU6050/MPU9250モジュールを操作するパーツクラスを提供する。
+要pigpioパッケージ、I2C接続前提。
 """
 
 import time
+import json
 
 class Mpu6050:
-    def __init__(self, pgio=None, bus=1, address=0x68, debug=False):
+    def __init__(self, pgio=None, bus=1, address=0x68, depth=3, debug=False):
         """
         MPU6050ドライバを生成しインスタンス変数へ格納する。
         引数：
             pgip    pgio.pi()インスタンス
             address アドレス値
             bus     バス値
+            depth   残しておく最新データ件数
             debug   デバッグフラグ
         戻り値：
             なし
         """
         self.mpu = _mpu6050(pgio, address, bus)
         self.debug = debug
+        self.depth = depth
+        if self.debug:
+            print('[Mpu6050] depth={}'.format(str(self.depth)))
         self.init_imu_data()
 
     def init_imu_data(self):
@@ -30,12 +35,14 @@ class Mpu6050:
         戻り値：
             なし
         """
-        self.accel_data = {
-            'x':    0,
-            'y':    0,
-            'z':    0,
-        }
-        self.gyro_data = self.accel_data
+        self.temp = 0
+        self.accel_data = {'x': 0, 'y': 0, 'z': 0}
+        self.gyro_data =  {'x': 0, 'y': 0, 'z': 0}
+        self.timestamp = time.time()
+        self.recent_data = []
+        packed_data = pack(self.timestamp, self.temp, self.accel_data, self.gyro_data)
+        for _ in range(self.depth):
+            self.recent_data.append(packed_data)
 
     def update(self):
         """
@@ -45,8 +52,13 @@ class Mpu6050:
         戻り値：
             なし
         """
-        self.accel_data = self.mpu.get_accel_data()
-        self.gyro_data = self.mpu.get_gyro_data()
+        temp = self.mpu.get_temp()
+        if temp is not None:
+            self.temp = temp
+        self.accel_data = omit_none(self.accel_data, self.mpu.get_accel_data())
+        self.gyro_data = omit_none(self.gyro_data, self.mpu.get_gyro_data())
+        self.timestamp = time.time()
+        push_recent_data(self.recent_data, pack(self.timestamp, self.temp, self.accel_data, self.gyro_data))
 
     def run(self):
         """
@@ -65,15 +77,19 @@ class Mpu6050:
         引数：
             なし
         戻り値：
-            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
+            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)、気温、
+            過去最新データ（文字列）、タイムスタンプ
         """
+        accel_x, accel_y, accel_z = \
+            self.accel_data['x'], self.accel_data['y'] ,self.accel_data['z']
+        gyro_x, gyro_y, gyro_z = \
+            self.gyro_data['x'], self.gyro_data['y'] ,self.gyro_data['z']
         if self.debug:
-            print('temp:[{}], acc:[{}, {}, {}], gyro:[{}, {}, {}]'.format(
-                self.mpu.get_temp(),
-                self.accel_data['x'], self.accel_data['y'], self.accel_data['z'],
-                self.gyro_data['x'], self.gyro_data['y'], self.gyro_data['z']))
-        return self.accel_data['x'], self.accel_data['y'], self.accel_data['z'], \
-            self.gyro_data['x'], self.gyro_data['y'], self.gyro_data['z']
+            print('temp:[{}], acc:[{}, {}, {}], gyro:[{}, {}, {}] ts:{}'.format(
+                str(self.temp), str(accel_x), str(accel_y), str(accel_z), 
+                str(gyro_x), str(gyro_y), str(gyro_z), str(self.timestamp)))
+        return accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, \
+            self.temp, str_recent_data(self.recent_data), self.timestamp
 
     def shutdown(self):
         """
@@ -287,11 +303,7 @@ class _mpu6050:
         self.pi.i2c_write_byte_data(self.handler, self.GYRO_CONFIG, gyro_range)
 
     def read_gyro_range(self, raw = False):
-        """Reads the range the gyroscope is set to.
-        If raw is True, it will return the raw value from the GYRO_CONFIG
-        register.
-        If raw is False, it will return 250, 500, 1000, 2000 or -1. If the
-        returned value is equal to -1 something went wrong.
+        """
         ジャイロスコープに設定されている範囲を読み取る。
         引数：
             raw 真値：GYRO_CONFIGレジスタから読み取る、偽値：250,500,1000, 2000を返却
@@ -353,7 +365,7 @@ class _mpu6050:
         引数：
             なし
         戻り値：
-            加速度座標辞書、じゃ虚スコープ座標辞書、温度のリスト
+            加速度座標辞書、ジャイロスコープ座標辞書、温度のリスト
         """
         temp = self.get_temp()
         accel = self.get_accel_data()
@@ -373,15 +385,17 @@ class _mpu6050:
         self.pi = None
 
 class Mpu9250:
-    def __init__(self, pgio=None, bus=1, mpu9250_address=None, ak8963_address=None, debug=False):
+    def __init__(self, pgio=None, bus=1, 
+    mpu9250_address=None, ak8963_address=None, depth=3, debug=False):
         """
         MPU9250ドライバを生成しインスタンス変数へ格納する。
         引数：
             pgip                pgio.pi() インスタンス
+            bus                 I2Cバス値
             mpu9250_address     MPU9250 I2Cスレーブアドレス
             ak8963_address      AK8963 I2Cスレーブアドレス
-            bus                 I2Cバス値
-            debug               デバッグフラグ
+            depth               最新データを残す件数(デフォルト:3)
+            debug               デバッグフラグ(デフォルト:False)
         戻り値：
             なし
         """
@@ -391,6 +405,9 @@ class Mpu9250:
             ak8963_address=ak8963_address, 
             debug=debug)
         self.debug = debug
+        self.depth = depth
+        if self.debug:
+            print('[Mpu9250] depth={}'.format(str(self.depth)))
         self.init_imu_data()
 
     def init_imu_data(self):
@@ -401,15 +418,16 @@ class Mpu9250:
         戻り値：
             なし
         """
-        self.accel_data = {
-            'x':    0,
-            'y':    0,
-            'z':    0,
-        }
-        self.gyro_data = self.accel_data
-        self.magnet_data = self.accel_data
         self.temp = 0
-        self.timestamp = 0.0
+        self.accel_data = {'x': 0, 'y': 0, 'z': 0}
+        self.gyro_data =  {'x': 0, 'y': 0, 'z': 0}
+        self.magnet_data = {'x': 0, 'y': 0, 'z': 0}
+        self.timestamp = time.time()
+        self.recent_data = []
+        packed_data = pack(self.timestamp, self.temp, 
+            self.accel_data, self.gyro_data, self.magnet_data)
+        for _ in range(self.depth):
+            self.recent_data.append(packed_data)
 
     def update(self):
         """
@@ -419,11 +437,17 @@ class Mpu9250:
         戻り値：
             なし
         """
-        self.accel_data = self.mpu.readAccel()
-        self.gyro_data = self.mpu.readGyro
-        self.magnet_data = self.mpu.readMagnet()
-        self.temp = self.mpu.readTemperature()
+        temp = self.mpu.readTemperature()
+        if temp is not None:
+            self.temp = temp
+        self.accel_data = omit_none(self.accel_data,self.mpu.readAccel())
+        self.gyro_data = omit_none(self.gyro_data, self.mpu.readGyro())
+        self.magnet_data = omit_none(self.magnet_data, self.mpu.readMagnet())
         self.timestamp = time.time()
+        push_recent_data(
+            self.recent_data, 
+            pack(self.timestamp, self.temp, 
+                self.accel_data, self.gyro_data, self.magnet_data))
 
     def run(self):
         """
@@ -442,25 +466,23 @@ class Mpu9250:
         引数：
             なし
         戻り値：
-            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)、磁束密度値(x, y, z)、気温、現在時刻
+            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)、磁束密度値(x, y, z)、
+            気温、最新過去データ文字列、現在時刻
         """
+        accel_x, accel_y, accel_z = \
+            self.accel_data['x'], self.accel_data['y'] ,self.accel_data['z']
+        gyro_x, gyro_y, gyro_z = \
+            self.gyro_data['x'], self.gyro_data['y'] ,self.gyro_data['z']
+        magnet_x, magnet_y, magnet_z = \
+            self.magnet_data['x'], self.magnet_data['y'] ,self.magnet_data['z']
         if self.debug:
-            print('temp:[{}], acc:[{}, {}, {}], gyro:[{}, {}, {}] magnet[{}, {}, {}]'.format(
-                str(self.temp),
-                str(self.accel_data['x']), str(self.accel_data['y']), str(self.accel_data['z']),
-                str(self.gyro_data['x']), str(self.gyro_data['y']), str(self.gyro_data['z']),
-                str(self.magnet_data['x']), str(self.magnet_data['y']), str(self.magnet_data['z'])))
-        acc_x = to_float(self.accel_data['x'])
-        acc_y = to_float(self.accel_data['y'])
-        acc_z = to_float(self.accel_data['z'])
-        gyr_x = to_float(self.gyro_data['x'])
-        gyr_y = to_float(self.gyro_data['y'])
-        gyr_z = to_float(self.gyro_data['z'])
-        mgt_x = to_float(self.magnet_data['x'])
-        mgt_y = to_float(self.magnet_data['y'])
-        mgt_z = to_float(self.magnet_data['z'])
-        temp = to_float(self.temp)
-        return acc_x, acc_y, acc_z, gyr_x, gyr_y, gyr_z, mgt_x, mgt_y, mgt_z, temp, self.timestamp
+            print('temp:[{}], acc:[{}, {}, {}], gyro:[{}, {}, {}] magnet:[{}, {}, {}] ts:{}'.format(
+                str(self.temp), str(accel_x), str(accel_y), str(accel_z), 
+                str(gyro_x), str(gyro_y), str(gyro_z), 
+                str(magnet_x), str(magnet_y), str(magnet_z), str(self.timestamp)))
+        return accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, \
+            magnet_x, magnet_y, magnet_z, \
+            self.temp, str_recent_data(self.recent_data), self.timestamp
 
     def shutdown(self):
         """
@@ -473,18 +495,25 @@ class Mpu9250:
         self.mpu.close()
         self.init_imu_data()
         self.mpu = None
-
-
+        if self.debug:
+            print('[Mpu9250] shutdown')
 
 class _mpu9250:
-    ## MPU9250 Default I2C slave address
+    """
+    MPU9260ドライバクラス。
+    以下のライブラリをsmbusからpigpioに変更したもの。
+    https://github.com/FaBoPlatform/FaBo9AXIS-MPU9250-Python
+    なおベースのコード(V1.0.0)はApache-2.0ライセンス準拠である。
+    """
+
+    ## MPU9250 デフォルト I2C スレーブアドレス
     SLAVE_ADDRESS        = 0x68
-    ## AK8963 I2C slave address
+    ## AK8963 I2C スレーブアドレス
     AK8963_SLAVE_ADDRESS = 0x0C
-    ## Device id
+    ## デバイス ID
     DEVICE_ID            = 0x71
 
-    ''' MPU-9250 Register Addresses '''
+    ''' MPU-9250 レジスタアドレス '''
     ## sample rate driver
     SMPLRT_DIV     = 0x19
     CONFIG         = 0x1A
@@ -529,17 +558,17 @@ class _mpu9250:
     ## Accel Full Scale Select 16G
     AFS_16G  = 0x03
 
-    # AK8963 Register Addresses
+    # AK8963 レジスタアドレス
     AK8963_ST1        = 0x02
     AK8963_MAGNET_OUT = 0x03
     AK8963_CNTL1      = 0x0A
     AK8963_CNTL2      = 0x0B
     AK8963_ASAX       = 0x10
 
-    # CNTL1 Mode select
-    ## Power down mode
+    # CNTL1 モードセレクト
+    ## パワーダウンモード
     AK8963_MODE_DOWN   = 0x00
-    ## One shot data output
+    ## One shot データ出力
     AK8963_MODE_ONE    = 0x01
 
     ## Continous data output 8Hz
@@ -547,15 +576,26 @@ class _mpu9250:
     ## Continous data output 100Hz
     AK8963_MODE_C100HZ = 0x06
 
-    # Magneto Scale Select
-    ## 14bit output
+    # 磁束密度スケール選択
+    ## 14 ビット出力
     AK8963_BIT_14 = 0x00
-    ## 16bit output
+    ## 16 ビット出力
     AK8963_BIT_16 = 0x01
 
-    def __init__(self, pgio=None, bus=1, mpu9250_address=SLAVE_ADDRESS, ak8963_address=AK8963_SLAVE_ADDRESS, debug=False):
-        ## smbus
-        #bus = smbus.SMBus(1)
+    def __init__(self, pgio=None, bus=1, 
+    mpu9250_address=SLAVE_ADDRESS, ak8963_address=AK8963_SLAVE_ADDRESS, debug=False):
+        """
+        初期化処理。pigpioオブジェクトが与えられなかった場合は
+        内部で生成される。
+        引数：
+            pgio                pigpioオブジェクト
+            bus                 I2C バス
+            mpu9250_address     MPU9250スレーブアドレス
+            ak8963_address      AK8963スレーブアドレス
+            debug               デバッグフラグ
+        戻り値：
+            なし
+        """
         self.bus = bus
         self.debug = debug
         if pgio is None:
@@ -573,20 +613,24 @@ class _mpu9250:
         self.mpu9250_address = mpu9250_address
         self.mpu9250_handler = self.pi.i2c_open(bus, mpu9250_address)
         if self.debug:
-            print('[_mpu9250] open mpu9250 i2c bus:{} addr:{}'.format(str(self.bus), str(self.mpu9250_address)))
+            print('[_mpu9250] open mpu9250 i2c bus:{} addr:{}'.format(
+                str(self.bus), str(self.mpu9250_address)))
         self.configMPU9250(self.GFS_250, self.AFS_2G)
         self.ak8963_address = ak8963_address
         self.ak8963_handler = self.pi.i2c_open(bus, ak8963_address)
         self.configAK8963(self.AK8963_MODE_C8HZ, self.AK8963_BIT_16)
         if self.debug:
-            print('[_mpu9250] open ak8963  i2c bus:{} addr:{}'.format(str(self.bus), str(self.ak8963_address)))
+            print('[_mpu9250] open ak8963  i2c bus:{} addr:{}'.format(
+                str(self.bus), str(self.ak8963_address)))
 
-    ## Search Device
-    #  @param [in] self The object pointer.
-    #  @retval true device connected
-    #  @retval false device error
     def searchDevice(self):
-        #who_am_i = bus.read_byte_data(self.address, WHO_AM_I)
+        """
+        デバイスが存在するかを検索する。
+        引数：
+            なし
+        戻り値：
+            boolean(有無)
+        """
         who_am_i = self.pi.i2c_read_byte_data(self.mpu9250_handler, self.WHO_AM_I)
         if(who_am_i == self.DEVICE_ID):
             return True
@@ -598,6 +642,14 @@ class _mpu9250:
     #  @param [in] gfs Gyro Full Scale Select(default:GFS_250[+250dps])
     #  @param [in] afs Accel Full Scale Select(default:AFS_2G[2g])
     def configMPU9250(self, gfs, afs):
+        """
+        MPU9250の初期設定をおこなう。
+        引数：
+            gfs     ジャイロフルスケール指定（デフォルト：GFS_250[+250dps]）
+            afs     加速度フルスケール指定（デフォルト：AFS_2G[2g]）
+        戻り値：
+            なし
+        """
         if gfs == self.GFS_250:
             self.gres = 250.0/32768.0
         elif gfs == self.GFS_500:
@@ -616,55 +668,46 @@ class _mpu9250:
         else: # afs == AFS_16G:
             self.ares = 16.0/32768.0
 
-        # sleep off
-        #bus.write_byte_data(self.address, PWR_MGMT_1, 0x00)
+        # スリープOFF
         self.pi.i2c_write_byte_data(self.mpu9250_handler, self.PWR_MGMT_1, 0x00)
         time.sleep(0.1)
         # auto select clock source
-        #bus.write_byte_data(self.address, PWR_MGMT_1, 0x01)
         self.pi.i2c_write_byte_data(self.mpu9250_handler, self.PWR_MGMT_1, 0x01)
         time.sleep(0.1)
         # DLPF_CFG
-        #bus.write_byte_data(self.address, CONFIG, 0x03)
         self.pi.i2c_write_byte_data(self.mpu9250_handler, self.CONFIG, 0x03)
         # sample rate divider
-        #bus.write_byte_data(self.address, SMPLRT_DIV, 0x04)
         self.pi.i2c_write_byte_data(self.mpu9250_handler, self.SMPLRT_DIV, 0x04)
-        # gyro full scale select
-        #bus.write_byte_data(self.address, GYRO_CONFIG, gfs << 3)
+        # ジャイロフルスケール指定
         self.pi.i2c_write_byte_data(self.mpu9250_handler, self.GYRO_CONFIG, gfs << 3)
-        # accel full scale select
-        #bus.write_byte_data(self.address, ACCEL_CONFIG, afs << 3)
+        # 加速度フルスケール指定
         self.pi.i2c_write_byte_data(self.mpu9250_handler, self.ACCEL_CONFIG, afs << 3)
         # A_DLPFCFG
-        #bus.write_byte_data(self.address, ACCEL_CONFIG_2, 0x03)
-        self.pi.i2c_write_byte_data(self.mpu9250_handler, self.ACCEL_CONFIG, afs << 3)
+        self.pi.i2c_write_byte_data(self.mpu9250_handler, self.ACCEL_CONFIG_2, 0x03)
         # BYPASS_EN
-        #bus.write_byte_data(self.address, INT_PIN_CFG, 0x02)
         self.pi.i2c_write_byte_data(self.mpu9250_handler, self.INT_PIN_CFG, 0x02)
         time.sleep(0.1)
 
-    ## Configure AK8963
-    #  @param [in] self The object pointer.
-    #  @param [in] mode Magneto Mode Select(default:AK8963_MODE_C8HZ[Continous 8Hz])
-    #  @param [in] mfs Magneto Scale Select(default:AK8963_BIT_16[16bit])
     def configAK8963(self, mode, mfs):
+        """
+        AK8963の初期設定を行う。
+        引数：
+            mode    磁束密度モード指定（デフォルト：AK8963_MODE_C8HZ[連続8Hz]）
+            mfs     磁束密度スケール指定（デフォルト：AK8963_BIT_16[16ビット]）
+        """
         if mfs == self.AK8963_BIT_14:
             self.mres = 4912.0/8190.0
         else: #  mfs == AK8963_BIT_16:
             self.mres = 4912.0/32760.0
 
-        #bus.write_byte_data(AK8963_SLAVE_ADDRESS, AK8963_CNTL1, 0x00)
         self.pi.i2c_write_byte_data(self.ak8963_handler, self.AK8963_CNTL1, 0x00)
         time.sleep(0.01)
 
         # set read FuseROM mode
-        #bus.write_byte_data(AK8963_SLAVE_ADDRESS, AK8963_CNTL1, 0x0F)
         self.pi.i2c_write_byte_data(self.ak8963_handler, self.AK8963_CNTL1, 0x0F)
         time.sleep(0.01)
 
         # read coef data
-        #data = bus.read_i2c_block_data(AK8963_SLAVE_ADDRESS, AK8963_ASAX, 3)
         data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
 
         self.magXcoef = (data[0] - 128) / 256.0 + 1.0
@@ -672,34 +715,35 @@ class _mpu9250:
         self.magZcoef = (data[2] - 128) / 256.0 + 1.0
 
         # set power down mode
-        #bus.write_byte_data(AK8963_SLAVE_ADDRESS, AK8963_CNTL1, 0x00)
         self.pi.i2c_write_byte_data(self.ak8963_handler, self.AK8963_CNTL1, 0x00)
         time.sleep(0.01)
 
         # set scale&continous mode
-        #bus.write_byte_data(AK8963_SLAVE_ADDRESS, AK8963_CNTL1, (mfs<<4|mode))
         self.pi.i2c_write_byte_data(self.ak8963_handler, self.AK8963_CNTL1, (mfs<<4|mode))
         time.sleep(0.01)
 
-    ## brief Check data ready
-    #  @param [in] self The object pointer.
-    #  @retval true data is ready
-    #  @retval false data is not ready
     def checkDataReady(self):
-        #drdy = bus.read_byte_data(self.address, INT_STATUS)
+        """
+        MPU9250がデータ読み取り準備ができているかどうか判別する。
+        引数：
+            なし
+        戻り値：
+            boolean(OK/NG)
+        """
         drdy = self.pi.i2c_read_byte_data(self.mpu9250_handler, self.INT_STATUS)
         if drdy & 0x01:
             return True
         else:
             return False
 
-    ## Read accelerometer
-    #  @param [in] self The object pointer.
-    #  @retval x : x-axis data
-    #  @retval y : y-axis data
-    #  @retval z : z-axis data
     def readAccel(self):
-        #data = bus.read_i2c_block_data(self.address, ACCEL_OUT, 6)
+        """
+        加速度データを読み取る。
+        引数：
+            なし
+        戻り値：
+            辞書(x, y, z)
+        """
         data = self.pi.i2c_read_i2c_block_data(self.mpu9250_handler, self.ACCEL_OUT, 6)
         x = self.dataConv(data[1], data[0])
         y = self.dataConv(data[3], data[2])
@@ -711,13 +755,14 @@ class _mpu9250:
 
         return {"x":x, "y":y, "z":z}
 
-    ## Read gyro
-    #  @param [in] self The object pointer.
-    #  @retval x : x-gyro data
-    #  @retval y : y-gyro data
-    #  @retval z : z-gyro data
     def readGyro(self):
-        #data = bus.read_i2c_block_data(self.address, GYRO_OUT, 6)
+        """
+        ジャイロデータを読み取る。
+        引数：
+            なし
+        戻り値：
+            辞書(x, y, z)
+        """
         data = self.pi.i2c_read_i2c_block_data(self.mpu9250_handler, self.GYRO_OUT, 6)
 
         x = self.dataConv(data[1], data[0])
@@ -730,21 +775,21 @@ class _mpu9250:
 
         return {"x":x, "y":y, "z":z}
 
-    ## Read magneto
-    #  @param [in] self The object pointer.
-    #  @retval x : X-magneto data
-    #  @retval y : y-magneto data
-    #  @retval z : Z-magneto data
     def readMagnet(self):
+        """
+        磁束密度データを読み取る。
+        引数：
+            なし
+        戻り値：
+            辞書(x, y, z)
+        """
         x=0
         y=0
         z=0
 
-        # check data ready
-        #drdy = bus.read_byte_data(AK8963_SLAVE_ADDRESS, AK8963_ST1)
+        # データ読み取り準備の確認
         drdy = self.pi.i2c_read_byte_data(self.ak8963_handler, self.AK8963_ST1)
         if drdy & 0x01 :
-            #data = bus.read_i2c_block_data(AK8963_SLAVE_ADDRESS, AK8963_MAGNET_OUT, 7)
             data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_MAGNET_OUT, 7)
 
             # check overflow
@@ -759,10 +804,14 @@ class _mpu9250:
 
         return {"x":x, "y":y, "z":z}
 
-    ## Read temperature
-    #  @param [out] temperature temperature(degrees C)
     def readTemperature(self):
-        #data = bus.read_i2c_block_data(self.address, TEMP_OUT, 2)
+        """
+        温度を読み取る。
+        引数：
+            なし
+        戻り値：
+            温度(C)
+        """
         data = self.pi.i2c_read_i2c_block_data(self.mpu9250_handler, self.TEMP_OUT, 2)
         temp = self.dataConv(data[1], data[0])
 
@@ -775,42 +824,176 @@ class _mpu9250:
     # @param [in] data2 MSB
     # @retval Value MSB+LSB(int 16bit)
     def dataConv(self, data1, data2):
+        """
+        データをコンバートする。
+        引数：
+            data1   LSB
+            data2   MSB
+        戻り値：
+            コンバート値(int 16ビット)
+        """
         value = data1 | (data2 << 8)
         if(value & (1 << 16 - 1)):
             value -= (1<<16)
         return value
 
     def close(self):
+        """
+        クローズ処理。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
         if self.mpu9250_handler >= 0:
             self.pi.i2c_close(self.mpu9250_handler)
             if self.debug:
-                print('[_mpu9250] close mpu9250 i2c bus:{} addr:{}'.format(str(self.bus), str(self.mpu9250_address)))
+                print('[_mpu9250] close mpu9250 i2c bus:{} addr:{}'.format(
+                    str(self.bus), str(self.mpu9250_address)))
         if self.ak8963_handler >= 0:
             self.pi.i2c_close(self.ak8963_handler)
             if self.debug:
-                print('[_mpu9250] close ak8963  i2c bus:{} addr:{}'.format(str(self.bus), str(self.ak8963_address)))
+                print('[_mpu9250] close ak8963  i2c bus:{} addr:{}'.format(
+                    str(self.bus), str(self.ak8963_address)))
         if self.use_close and self.pi is not None:
             self.pi.close()
             if self.debug:
                 print('[_mpu9250] close pigpio')
 
+# ユーティリティ関数群
+
+def push_recent_data(recent_data, current_dict):
+    """
+    引数recent_dataで渡された配列の最期に引数current_data値を
+    格納し、先頭データを削除した配列を返却する。
+    引数：
+        recent_data     配列、編集元
+        current_data    追加する要素
+    戻り値：
+        編集後配列
+    """
+    return_data = recent_data[1:]
+    return_data.append(current_dict)
+    return return_data
+
+def str_recent_data(recent_data):
+    """
+    引数recent_data で渡された配列の要素すべてを辞書化して
+    文字列に変換する。
+    引数：
+        recent_data     文字列化対象の配列(最新データ群)
+    戻り値：
+        文字列化化された最新データ群
+    """
+    return_dict = {}
+    depth = len(recent_data)
+    for i in range(depth):
+        return_dict[str(i)] = recent_data[i]
+    return json.dumps(return_dict)
+
+def pack(timestamp, temp, accel_data, gyro_data, magnet_data=None):
+    """
+    最新位置情報データを辞書化する。
+    引数：
+        timestamp   時刻
+        temp        気温(float)
+        accel_data  加速度データ（辞書）
+        gyro_data   角速度データ（辞書）
+        magnet_data 磁束密度データ（辞書）：オプション
+    戻り値：
+        最新位置情報データ群（辞書）
+    """
+    return_dict =  {'accel': accel_data, 'gyro': gyro_data, 'temp': temp, 'timestamp': timestamp}
+    if magnet_data is not None:
+        return_dict['magnet'] = magnet_data
+    return return_dict
+
+def omit_none(recent_dict, current_dict):
+    """
+    None値を１件前のデータに置き換える。
+    引数：
+        recent_dict     1件前のデータ（辞書）
+        current_dict    最新データ（辞書）
+    戻り値：
+        Noneを1件前のデータに置き換えられた最新データ（辞書）
+    """
+    return_dict = {}
+    for key in ['x', 'y', 'z']:
+        if current_dict[key] is None:
+            return_dict[key] = to_float(recent_dict[key])
+        else:
+            return_dict[key] = to_float(current_dict[key])
+    return return_dict
+
 def to_float(value):
+    """
+    Noneを0.0に置き換えfloat化する。
+    引数：
+        value   対象値
+    戻り値：
+        置き換え済みfloat値
+    """
     if value is None:
         return 0.0
     else:
         return float(value)
 
+## テストコード
+
+def test_mpu6050():
+    """
+    MPU6050の疎通テストを行う。
+    引数：
+        なし
+    戻り値：
+        temp        温度
+        accel_dict  加速度データ（辞書）
+        gyro_dict   ジャイロデータ（辞書）
+        magnet_dict 磁束密度データ（辞書）（ダミー）
+    """
+    mpu = _mpu6050()
+    temp = mpu.get_temp()
+    accel_dict = mpu.get_accel_data()
+    gyro_dict = mpu.get_gyro_data()
+    magnet_dict = {'x': None, 'y': None, 'z': None}
+    return temp, accel_dict, gyro_dict, magnet_dict
+
+def test_mpu9250():
+    """
+    MPU9250の疎通テストを行う。
+    引数：
+        なし
+    戻り値：
+        temp        温度
+        accel_dict  加速度データ（辞書）
+        gyro_dict   ジャイロデータ（辞書）
+        magnet_dict 磁束密度データ（辞書）
+    """
+    mpu = _mpu9250()
+    temp = mpu.readTemperature()
+    accel_dict = mpu.readAccel()
+    gyro_dict = mpu.readGyro()
+    magnet_dict = mpu.readMagnet()
+    mpu.close()
+    return temp, accel_dict, gyro_dict, magnet_dict
+
 if __name__ == "__main__":
     '''
     動作確認
     '''
-    mpu = _mpu6050()
-    print(mpu.get_temp())
-    accel_data = mpu.get_accel_data()
-    print(accel_data['x'])
-    print(accel_data['y'])
-    print(accel_data['z'])
-    gyro_data = mpu.get_gyro_data()
-    print(gyro_data['x'])
-    print(gyro_data['y'])
-    print(gyro_data['z'])
+
+    # MPU6050
+    #temp, accel_dict, gyro_dict, magnet_dict = test_mpu6050()
+
+    # MPU9250
+    temp, accel_dict, gyro_dict, magnet_dict = test_mpu9250()
+
+
+    print('Temp: {}'.format(str(temp)))
+    print('Accel: ({}, {}, {})'.format(
+        str(accel_dict['x']), str(accel_dict['y']), str(accel_dict['z'])))
+    print('Gyro: ({}, {}, {})'.format(
+        str(gyro_dict['x']), str(gyro_dict['y']), str(gyro_dict['z'])))
+    print('Magnet: ({}, {}, {})'.format(
+        str(magnet_dict['x']), str(magnet_dict['y']), str(magnet_dict['z'])))
+
