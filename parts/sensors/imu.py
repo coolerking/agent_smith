@@ -8,24 +8,38 @@ import time
 import json
 
 class Mpu6050:
+    """
+    MPU6050からIMUデータを読み取るパーツクラス。
+    シングルスレッドでのみ動作する。
+    """
     def __init__(self, pgio=None, bus=1, address=0x68, depth=3, debug=False):
         """
         MPU6050ドライバを生成しインスタンス変数へ格納する。
         引数：
-            pgip    pgio.pi()インスタンス
-            address アドレス値
-            bus     バス値
-            depth   残しておく最新データ件数
-            debug   デバッグフラグ
+            pgip    pgio.pi()インスタンス(デフォルトNone)
+            address アドレス値(デフォルト0x68)
+            bus     バス値(デフォルト1)
+            depth   残しておく最新データ件数(1以上、デフォルト3)
+            debug   デバッグフラグ(デフォルトFalse)
         戻り値：
             なし
+        例外：
+            ValueError          depthがNoneや負の場合
         """
         self.mpu = _mpu6050(pgio, address, bus)
         self.debug = debug
         self.depth = depth
+        if self.depth is None or self.depth <= 0:
+            raise ValueError('[Mpu9250] illegal value depth = {}'.format(
+                str(self.depth)))
         if self.debug:
             print('[Mpu6050] depth={}'.format(str(self.depth)))
         self.init_imu_data()
+        for _ in range(self.depth):
+            self._update()
+            time.sleep(0.1)
+        if self.debug:
+            print('[Mpu6050] pre-read data in {} times'.format(str(self.depth)))
 
     def init_imu_data(self):
         """
@@ -44,7 +58,7 @@ class Mpu6050:
         for _ in range(self.depth):
             self.recent_data.append(packed_data)
 
-    def update(self):
+    def _update(self):
         """
         IMU情報をセンサから読み取りインスタンス変数へ格納する。
         引数：
@@ -68,18 +82,7 @@ class Mpu6050:
         戻り値：
             加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
         """
-        self.update()
-        return self.run_threaded()
-    
-    def run_threaded(self):
-        """
-        インスタンス変数上のIMU情報を返却する。
-        引数：
-            なし
-        戻り値：
-            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)、気温、
-            過去最新データ（文字列）、タイムスタンプ
-        """
+        self._update()
         accel_x, accel_y, accel_z = \
             self.accel_data['x'], self.accel_data['y'] ,self.accel_data['z']
         gyro_x, gyro_y, gyro_z = \
@@ -90,6 +93,18 @@ class Mpu6050:
                 str(gyro_x), str(gyro_y), str(gyro_z), str(self.timestamp)))
         return accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, \
             self.temp, str_recent_data(self.recent_data), self.timestamp
+
+    def run_threaded(self):
+        """
+        サポートされていない。
+        引数：
+            なし
+        戻り値：
+            なし
+        例外：
+            RuntimeError 必ず発生する。
+        """
+        raise RuntimeError('[Mpu6050] unsupported run on threaded=True')
 
     def shutdown(self):
         """
@@ -385,19 +400,25 @@ class _mpu6050:
         self.pi = None
 
 class Mpu9250:
+    """
+    MPU9250からIMUデータを読み取るパーツクラス。
+    シングルスレッドのみで動作する。
+    """
     def __init__(self, pgio=None, bus=1, 
     mpu9250_address=None, ak8963_address=None, depth=3, debug=False):
         """
         MPU9250ドライバを生成しインスタンス変数へ格納する。
         引数：
-            pgip                pgio.pi() インスタンス
-            bus                 I2Cバス値
-            mpu9250_address     MPU9250 I2Cスレーブアドレス
-            ak8963_address      AK8963 I2Cスレーブアドレス
-            depth               最新データを残す件数(デフォルト:3)
+            pgip                pgio.pi() インスタンス(デフォルトNone)
+            bus                 I2Cバス値(デフォルト1)
+            mpu9250_address     MPU9250 I2Cスレーブアドレス(デフォルトNone)
+            ak8963_address      AK8963 I2Cスレーブアドレス(デフォルトNone)
+            depth               最新データを残す件数(1以上、デフォルト:3)
             debug               デバッグフラグ(デフォルト:False)
         戻り値：
             なし
+        例外：
+            ValueError          depthがNoneや負の場合
         """
         self.mpu = _mpu9250(
             pgio=pgio, 
@@ -406,9 +427,17 @@ class Mpu9250:
             debug=debug)
         self.debug = debug
         self.depth = depth
+        if self.depth is None or self.depth <= 0:
+            raise ValueError('[Mpu9250] illegal value depth = {}'.format(
+                str(self.depth)))
         if self.debug:
             print('[Mpu9250] depth={}'.format(str(self.depth)))
         self.init_imu_data()
+        for _ in range(depth):
+            self._update()
+            time.sleep(0.1)
+        if self.debug:
+            print('[Mpu9250] pre-read mpu9250 in {} times'.format(str(self.depth)))
 
     def init_imu_data(self):
         """
@@ -429,7 +458,7 @@ class Mpu9250:
         for _ in range(self.depth):
             self.recent_data.append(packed_data)
 
-    def update(self):
+    def _update(self):
         """
         IMU情報をセンサから読み取りインスタンス変数へ格納する。
         引数：
@@ -449,6 +478,18 @@ class Mpu9250:
             pack(self.timestamp, self.temp, 
                 self.accel_data, self.gyro_data, self.magnet_data))
 
+    def run_threaded(self):
+        """
+        サポートされていない。
+        引数：
+            なし
+        戻り値：
+            なし
+        例外：
+            RuntimeError 必ず発生する。
+        """
+        raise RuntimeError('[Mpu9250] unsupported on threaded=True')
+
     def run(self):
         """
         MPU9250を読み込みIMU情報を返却する。
@@ -457,18 +498,7 @@ class Mpu9250:
         戻り値：
             加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
         """
-        self.update()
-        return self.run_threaded()
-    
-    def run_threaded(self):
-        """
-        インスタンス変数上のIMU情報を返却する。
-        引数：
-            なし
-        戻り値：
-            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)、磁束密度値(x, y, z)、
-            気温、最新過去データ文字列、現在時刻
-        """
+        self._update()
         accel_x, accel_y, accel_z = \
             self.accel_data['x'], self.accel_data['y'] ,self.accel_data['z']
         gyro_x, gyro_y, gyro_z = \
