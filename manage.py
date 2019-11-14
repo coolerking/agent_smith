@@ -490,9 +490,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         from parts.sensors.imu import Mpu9250
         imu = Mpu9250(
             pgio=pgio,
-            bus=cfg.MPC9250_I2C_BUS, 
-            mpu9250_address=cfg.M9250_I2C_ADDRESS, 
-            ak8963_address=cfg.AK8963_I2C_ADDRESS, 
+            bus=cfg.MPU9250_I2C_BUS, 
+            mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
+            ak8963_address=cfg.AK8965_I2C_ADDRESS, 
             debug=use_debug)
         V.add(imu,
             outputs=[
