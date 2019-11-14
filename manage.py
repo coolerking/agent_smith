@@ -487,7 +487,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 'imu/temp', 'imu/recent', 'imu/timestamp',
             ])
         '''
-        '''MPU9250III'''
+        '''MPU9250'''
         from parts.sensors.imu import Mpu9250
         imu = Mpu9250(
             pgio=pgio,
@@ -495,7 +495,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
             ak8963_address=cfg.AK8963_I2C_ADDRESS,
             depth=cfg.MPU9250_DEPTH,
-            debug=use_debug)
+            debug=True)
         V.add(imu,
             outputs=[
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
