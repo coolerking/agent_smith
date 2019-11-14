@@ -108,7 +108,7 @@ def test_imu():
     V = dk.vehicle.Vehicle()
 
     from parts import HedgehogController
-    hedge = HedgehogController(debug=True)
+    hedge = HedgehogController(debug=False)
     V.add(hedge, outputs=[
         'usnav/id',
         'usnav/x', 'usnav/y', 'usnav/z',
