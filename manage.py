@@ -575,9 +575,6 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             inputs=['cam/image_array',
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
                 'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
-                # MPU9250 データを追加
-                'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-                'imu/recent', 'imu/mpu_timestamp',
             ]
         else:
             assert(use_aws or cfg.USE_AWS_AS_DEFAULT)
@@ -931,10 +928,18 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
     if cfg.HAVE_IMU:
         inputs += ['imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z']
+            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+            # MPU9250 データを追加
+            'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
+            'imu/recent', 'imu/mpu_timestamp',
+            ]
 
         types +=['float', 'float', 'float',
-           'float', 'float', 'float']
+           'float', 'float', 'float',
+           # MPU9250
+           'float', 'float', 'float', 'float',
+           'str', 'float'
+           ]
 
     '''
     Marvelmind位置情報システムデータ追加
@@ -942,19 +947,30 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
     # Marvelmind Mobile Beacon 使用時
     if use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
-        inputs += ['usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
+        inputs += [
+            # USNav
+            'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
+            # IMU
             'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
             'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
             'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
+            # USNav Raw
             'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
-            'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp']
+            'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
+        ]
+]
 
-        types += ['int', 'float',  'float',  'float',  'float', 'float',
+        types += [
+            # USNav
+            'int', 'float',  'float',  'float',  'float', 'float',
+            # IMU
             'float', 'float', 'float', 'float', 'float', 'float', 'float',
             'float', 'float', 'float', 'float', 'float', 'float',
             'float', 'float', 'float', 'float', 'float', 'float', 'float',
+            # USNav Raw
             'int', 'int', 'float', 'int', 'float',
-            'int', 'float', 'int', 'float', 'float']
+            'int', 'float', 'int', 'float', 'float',
+        ]
 
     '''
     距離センサ追加
