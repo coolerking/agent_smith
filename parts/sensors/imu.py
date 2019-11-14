@@ -830,11 +830,6 @@ class _mpu9250:
         temp = round((temp / 333.87 + 21.0), 3)
         return temp
 
-    ## Data Convert
-    # @param [in] self The object pointer.
-    # @param [in] data1 LSB
-    # @param [in] data2 MSB
-    # @retval Value MSB+LSB(int 16bit)
     def dataConv(self, data1, data2):
         """
         データをコンバートする。
@@ -880,15 +875,16 @@ class _mpu9250:
             reg         デバイスレジスタ
             count       読み込むバイト数
         戻り値：
-            long[]
+            int[]       read_i2c_block_dataの戻り値はlong[]だがpython3
+                        なのでint[]
+        例外：
+            ConnectionError エラーの場合
         """
         (b, d) = self.pi.i2c_read_i2c_block_data(handler, reg, count)
-        print(d)
-        print(type(d))
         if b >= 0:
             data = []
-            for i in len(count):
-                value = int(d[1][i])
+            for i in range(count):
+                value = int(d[i])
                 data.append(value)
             return data
         else:
