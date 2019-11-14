@@ -574,7 +574,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         if cfg.HAVE_IMU:
             inputs=['cam/image_array',
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z']
+                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+                # MPU9250 データを追加
+                'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
+                'imu/recent', 'imu/mpu_timestamp',
+            ]
         else:
             assert(use_aws or cfg.USE_AWS_AS_DEFAULT)
             inputs=[
