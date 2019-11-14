@@ -712,22 +712,13 @@ class _mpu9250:
         # read coef data
 
         #data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
-        data0 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 1)
-        print(data0)
-        print(type(data0))
-        print('data0[1]')
-        print(len(data0[1]))
-        print('data0[1][0]')
-        print(data0[1][0])
-        print(type(data0[1][0]))
-
-        data1 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
-        print(data1)
-        print(type(data1))
-        data2 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
-        print(data2)
-        print(type(data2))
-        data =[data0, data1, data2]
+        dataX = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 1)
+        print(dataX[1][0])
+        dataY = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
+        print(dataY[1][0])
+        dataZ = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
+        print(dataZ[1][0])
+        data =[dataX[1][0], dataY[1][0], dataZ[1][0]]
 
         self.magXcoef = (data[0] - 128) / 256.0 + 1.0
         self.magYcoef = (data[1] - 128) / 256.0 + 1.0
