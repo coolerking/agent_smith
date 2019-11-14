@@ -734,7 +734,7 @@ class _mpu9250:
         戻り値：
             boolean(OK/NG)
         """
-        drdy = self._read_byte_data(self.mpu9250_handler, self.INT_STATUS)
+        drdy = self.pi.i2c_read_byte_data(self.mpu9250_handler, self.INT_STATUS)
         if drdy & 0x01:
             return True
         else:
@@ -872,7 +872,7 @@ class _mpu9250:
             if self.debug:
                 print('[_mpu9250] close pigpio')
 
-    def _read_i2c_block_data(handler, reg, coynt):
+    def _read_i2c_block_data(self, handler, reg, count):
         """
         SMBusのread_i2c_block_dataと戻り値を合わせるための関数。
         引数：
@@ -886,7 +886,7 @@ class _mpu9250:
         if b >= 0:
             data = []
             for i in len(d):
-                value = long(d[1][i])
+                value = int(d[1][i])
                 data.append(value)
             return data
         else:
