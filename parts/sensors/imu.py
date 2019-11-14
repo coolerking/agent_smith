@@ -564,6 +564,8 @@ class _mpu9250:
     AK8963_CNTL1      = 0x0A
     AK8963_CNTL2      = 0x0B
     AK8963_ASAX       = 0x10
+    AK8963_ASAY       = 0x11
+    AK8963_ASAZ       = 0x12
 
     # CNTL1 モードセレクト
     ## パワーダウンモード
@@ -708,12 +710,18 @@ class _mpu9250:
         time.sleep(0.01)
 
         # read coef data
-        data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
 
-        print('data[1]')
-        print(data[1])
-        print(type(data[1]))
-        print(data[1].hex())
+        #data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
+        data0 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 1)
+        print(data0)
+        print(type(data0))
+        data1 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
+        print(data1)
+        print(type(data1))
+        data2 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
+        print(data2)
+        print(type(data2))
+        data =[data0, data1, data2]
 
         self.magXcoef = (data[0] - 128) / 256.0 + 1.0
         self.magYcoef = (data[1] - 128) / 256.0 + 1.0
