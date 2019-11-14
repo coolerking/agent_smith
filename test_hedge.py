@@ -150,7 +150,7 @@ def test_imu():
             'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
             'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
             'imu/recent', 'imu/mpu_timestamp'],
-        threaded=True)
+        threaded=False)
 
     '''
     from parts.broker.debug import PrintUSNav
