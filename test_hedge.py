@@ -174,6 +174,7 @@ def test_imu():
     ])
     '''
 
+    '''
     from parts.sensors.imu import PrintMpu9250
     V.add(PrintMpu9250(), inputs=[
         'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
@@ -181,6 +182,7 @@ def test_imu():
         'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
         'imu/recent', 'imu/mpu_timestamp'
     ])
+    '''
 
     try:
         V.start(rate_hz=20, max_loop_count=1000)
