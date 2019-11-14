@@ -715,8 +715,12 @@ class _mpu9250:
         data0 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 1)
         print(data0)
         print(type(data0))
+        print('data0[1]')
+        print(len(data0[1]))
+        print('data0[1][0]')
         print(data0[1][0])
         print(type(data0[1][0]))
+
         data1 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
         print(data1)
         print(type(data1))
