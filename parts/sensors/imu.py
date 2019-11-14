@@ -712,11 +712,9 @@ class _mpu9250:
 
         print('data[1]')
         print(data[1])
-        print(type(data))
-        print(data[1].decode())
-        for i in len(data):
-            print(type(data[i]))
-            print(data[i])
+        print(type(data[1]))
+        print(str(data[1]))
+
         self.magXcoef = (data[0] - 128) / 256.0 + 1.0
         self.magYcoef = (data[1] - 128) / 256.0 + 1.0
         self.magZcoef = (data[2] - 128) / 256.0 + 1.0
