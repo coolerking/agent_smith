@@ -713,7 +713,7 @@ class _mpu9250:
         print('data[1]')
         print(data[1])
         print(type(data[1]))
-        print(str(data[1]))
+        print(data[1].hex())
 
         self.magXcoef = (data[0] - 128) / 256.0 + 1.0
         self.magYcoef = (data[1] - 128) / 256.0 + 1.0
