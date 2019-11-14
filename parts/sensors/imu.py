@@ -710,8 +710,6 @@ class _mpu9250:
         time.sleep(0.01)
 
         # read coef data
-
-        #data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
         data = self._read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
 
         self.magXcoef = (data[0] - 128) / 256.0 + 1.0
@@ -817,15 +815,7 @@ class _mpu9250:
             温度(C)
         """
         data = self._read_i2c_block_data(self.mpu9250_handler, self.TEMP_OUT, 2)
-        #temp = self.dataConv(data[1], data[0])
-        print('MSB')
-        print(data[1])
-        print(data[1][0])
-        print(type(data[1][0]))
-        print('LSB')
-        print(data[1][1])
-        print(type(data[1][0]))
-        temp = self.dataConv(data[1][0], data[1][1])
+        temp = self.dataConv(data[1], data[0])
 
         temp = round((temp / 333.87 + 21.0), 3)
         return temp
