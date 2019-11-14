@@ -463,7 +463,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     #Sombrero
     if cfg.HAVE_SOMBRERO:
         from donkeycar.parts.sombrero import Sombrero
-        s = Sombrero()
+        _ = Sombrero()
 
     '''
     MPU6050/MPU9250
@@ -958,7 +958,6 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
             'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
         ]
-]
 
         types += [
             # USNav
