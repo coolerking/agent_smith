@@ -860,6 +860,19 @@ class _mpu9250:
             if self.debug:
                 print('[_mpu9250] close pigpio')
 
+class PrintMpu9250:
+    def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, recent, ts):
+        print('[MPU9250] temp:{} ts:{} a:({}, {}, {}) g:({}, {}, {}) m:({}, {}, {})'.format(
+            str(temp), str(ts),
+            str(ax), str(ay), str(az),
+            str(gx), str(gy), str(gz),
+            str(mx), str(my), str(mz)
+        ))
+        print('          {}'.format(str(recent)))
+    def shutdown(self):
+        pass
+
+
 # ユーティリティ関数群
 
 def push_recent_data(recent_data, current_dict):

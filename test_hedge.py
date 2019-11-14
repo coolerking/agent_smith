@@ -102,7 +102,92 @@ def test_hedge():
     finally:
         print('stop')
         
+def test_imu():
+    import donkeycar as dk
+    cfg = dk.load_config()
+    V = dk.vehicle.Vehicle()
+
+    from parts import HedgehogController
+    hedge = HedgehogController(debug=True)
+    V.add(hedge, outputs=[
+        'usnav/id',
+        'usnav/x', 'usnav/y', 'usnav/z',
+        'usnav/angle', 'usnav/timestamp',
+        'imu/x', 'imu/y', 'imu/z',
+        'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+        'imu/vx', 'imu/vy', 'imu/vz',
+        'imu/ax', 'imu/ay', 'imu/az',
+        'imu/gx', 'imu/gy', 'imu/gz',
+        'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
+        'dist/id',
+        'dist/b1', 'dist/b1d',
+        'dist/b2', 'dist/b2d',
+        'dist/b3', 'dist/b3d',
+        'dist/b4', 'dist/b4d',
+        'dist/timestamp',
+    ], threaded=False)
+
+    try:
+        import pigpio
+    except:
+        raise
+    pgio = pigpio.pi()
+    if not pgio.connected:
+        raise RuntimeError('cannot connect pigpiod')
+
+    from parts.sensors.imu import Mpu9250
+    imu = Mpu9250(
+        pgio=pgio,
+        bus=cfg.MPC9250_I2C_BUS, 
+        mpu9250_address=cfg.M9250_I2C_ADDRESS, 
+        ak8963_address=cfg.AK8963_I2C_ADDRESS, 
+        debug=False)
+    V.add(imu,
+        outputs=[
+            'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+            'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
+            'imu/recent', 'imu/mpu_timestamp'],
+        threaded=True)
+
+
+    from parts.broker.debug import PrintUSNav
+    usnav = PrintUSNav()
+    V.add(usnav, inputs=[
+        'usnav/id',
+        'usnav/x', 'usnav/y', 'usnav/z',
+        'usnav/angle', 'usnav/timestamp',
+    ])
+
+    from parts.broker.debug import PrintIMU
+    imu = PrintIMU()
+    V.add(imu, inputs=[
+        'imu/x', 'imu/y', 'imu/z',
+        'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+        'imu/vx', 'imu/vy', 'imu/vz',
+        'imu/ax', 'imu/ay', 'imu/az',
+        'imu/gx', 'imu/gy', 'imu/gz',
+        'imu/mx', 'imu/my', 'imu/mz',
+        'imu/timestamp',
+    ])
+
+    from parts.sensors.imu import PrintMpu9250
+    V.add(PrintMpu9250(), inputs=[
+        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+        'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
+        'imu/recent', 'imu/mpu_timestamp'
+    ])
+
+    try:
+        V.start(rate_hz=20, max_loop_count=1000)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if pgio.connected:
+            pgio.stop()
 
 
 if __name__ == '__main__':
-    test_hedge()
+    #test_hedge()
+    test_imu()
