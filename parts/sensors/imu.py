@@ -712,13 +712,7 @@ class _mpu9250:
         # read coef data
 
         #data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
-        dataX = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 1)
-        print(dataX[1][0])
-        dataY = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
-        print(dataY[1][0])
-        dataZ = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
-        print(dataZ[1][0])
-        data =[dataX[1][0], dataY[1][0], dataZ[1][0]]
+        data = self._read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
 
         self.magXcoef = (data[0] - 128) / 256.0 + 1.0
         self.magYcoef = (data[1] - 128) / 256.0 + 1.0
@@ -740,7 +734,7 @@ class _mpu9250:
         戻り値：
             boolean(OK/NG)
         """
-        drdy = self.pi.i2c_read_byte_data(self.mpu9250_handler, self.INT_STATUS)
+        drdy = self._read_byte_data(self.mpu9250_handler, self.INT_STATUS)
         if drdy & 0x01:
             return True
         else:
@@ -754,7 +748,7 @@ class _mpu9250:
         戻り値：
             辞書(x, y, z)
         """
-        data = self.pi.i2c_read_i2c_block_data(self.mpu9250_handler, self.ACCEL_OUT, 6)
+        data = self._read_i2c_block_data(self.mpu9250_handler, self.ACCEL_OUT, 6)
         x = self.dataConv(data[1], data[0])
         y = self.dataConv(data[3], data[2])
         z = self.dataConv(data[5], data[4])
@@ -773,7 +767,7 @@ class _mpu9250:
         戻り値：
             辞書(x, y, z)
         """
-        data = self.pi.i2c_read_i2c_block_data(self.mpu9250_handler, self.GYRO_OUT, 6)
+        data = self._read_i2c_block_data(self.mpu9250_handler, self.GYRO_OUT, 6)
 
         x = self.dataConv(data[1], data[0])
         y = self.dataConv(data[3], data[2])
@@ -800,7 +794,7 @@ class _mpu9250:
         # データ読み取り準備の確認
         drdy = self.pi.i2c_read_byte_data(self.ak8963_handler, self.AK8963_ST1)
         if drdy & 0x01 :
-            data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_MAGNET_OUT, 7)
+            data = self._read_i2c_block_data(self.ak8963_handler, self.AK8963_MAGNET_OUT, 7)
 
             # check overflow
             if (data[6] & 0x08)!=0x08:
@@ -822,13 +816,13 @@ class _mpu9250:
         戻り値：
             温度(C)
         """
-        data = self.pi.i2c_read_i2c_block_data(self.mpu9250_handler, self.TEMP_OUT, 2)
+        data = self._read_i2c_block_data(self.mpu9250_handler, self.TEMP_OUT, 2)
         #temp = self.dataConv(data[1], data[0])
-        print(data)
-        print(type(data))
+        print('MSB')
         print(data[1])
         print(data[1][0])
         print(type(data[1][0]))
+        print('LSB')
         print(data[1][1])
         print(type(data[1][0]))
         temp = self.dataConv(data[1][0], data[1][1])
@@ -877,6 +871,26 @@ class _mpu9250:
             self.pi.close()
             if self.debug:
                 print('[_mpu9250] close pigpio')
+
+    def _read_i2c_block_data(handler, reg, coynt):
+        """
+        SMBusのread_i2c_block_dataと戻り値を合わせるための関数。
+        引数：
+            handler     pigpio I2C ハンドラ
+            reg         デバイスレジスタ
+            count       読み込むバイト数
+        戻り値：
+            long[]
+        """
+        (b, d) = self.pi.i2c_read_i2c_block_data(handler, reg, count)
+        if b >= 0:
+            data = []
+            for i in len(d):
+                value = long(d[1][i])
+                data.append(value)
+            return data
+        else:
+            raise ConnectionError('Error:{} in i2c_read_i2c_block_data'.format(str(b)))
 
 class PrintMpu9250:
     def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, recent, ts):
