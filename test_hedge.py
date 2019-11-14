@@ -107,6 +107,7 @@ def test_imu():
     cfg = dk.load_config()
     V = dk.vehicle.Vehicle()
 
+    '''
     from parts import HedgehogController
     hedge = HedgehogController(debug=False)
     V.add(hedge, outputs=[
@@ -126,6 +127,7 @@ def test_imu():
         'dist/b4', 'dist/b4d',
         'dist/timestamp',
     ], threaded=False)
+    '''
 
     try:
         import pigpio
@@ -141,7 +143,7 @@ def test_imu():
         bus=cfg.MPU9250_I2C_BUS, 
         mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
         ak8963_address=cfg.AK8965_I2C_ADDRESS, 
-        debug=False)
+        debug=True)
     V.add(imu,
         outputs=[
             'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
@@ -150,7 +152,7 @@ def test_imu():
             'imu/recent', 'imu/mpu_timestamp'],
         threaded=True)
 
-
+    '''
     from parts.broker.debug import PrintUSNav
     usnav = PrintUSNav()
     V.add(usnav, inputs=[
@@ -170,6 +172,7 @@ def test_imu():
         'imu/mx', 'imu/my', 'imu/mz',
         'imu/timestamp',
     ])
+    '''
 
     from parts.sensors.imu import PrintMpu9250
     V.add(PrintMpu9250(), inputs=[
