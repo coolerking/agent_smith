@@ -823,7 +823,10 @@ class _mpu9250:
             温度(C)
         """
         data = self.pi.i2c_read_i2c_block_data(self.mpu9250_handler, self.TEMP_OUT, 2)
-        temp = self.dataConv(data[1], data[0])
+        #temp = self.dataConv(data[1], data[0])
+        print(data)
+        print(type(data))
+        temp = self.dataConv(data[1][0], data[1][1])
 
         temp = round((temp / 333.87 + 21.0), 3)
         return temp
