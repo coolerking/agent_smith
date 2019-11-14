@@ -484,7 +484,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
                 'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
                 'imu/temp', 'imu/recent', 'imu/timestamp',
-            ], threaded=True)
+            ])
         '''
         '''MPU9250III'''
         from parts.sensors.imu import Mpu9250
@@ -499,8 +499,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
                 'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
                 'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-                'imu/recent', 'imu/mpu_timestamp'],
-            threaded=True)
+                'imu/recent', 'imu/mpu_timestamp'])
         if use_debug:
             class PrintIMU:
                 def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, ts):
