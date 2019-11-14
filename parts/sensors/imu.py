@@ -715,6 +715,7 @@ class _mpu9250:
         data0 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 1)
         print(data0)
         print(type(data0))
+        print(data0.decode('utf-16-le'))
         data1 = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAY, 1)
         print(data1)
         print(type(data1))
