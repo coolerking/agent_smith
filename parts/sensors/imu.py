@@ -828,7 +828,9 @@ class _mpu9250:
         print(type(data))
         print(data[1])
         print(data[1][0])
+        print(type(data[1][0]))
         print(data[1][1])
+        print(type(data[1][0]))
         temp = self.dataConv(data[1][0], data[1][1])
 
         temp = round((temp / 333.87 + 21.0), 3)
