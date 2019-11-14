@@ -479,6 +479,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             pgio=pgio, 
             bus=cfg.MPU6050_I2C_BUS, 
             address=cfg.MPU6050_I2C_ADDRESS, 
+            depth=cfg.MPU6050_DEPTH,
             debug=use_debug)
         V.add(imu, outputs=[
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
@@ -492,7 +493,8 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             pgio=pgio,
             bus=cfg.MPU9250_I2C_BUS, 
             mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
-            ak8963_address=cfg.AK8965_I2C_ADDRESS, 
+            ak8963_address=cfg.AK8963_I2C_ADDRESS,
+            depth=cfg.MPU9250_DEPTH,
             debug=use_debug)
         V.add(imu,
             outputs=[

@@ -142,7 +142,8 @@ def test_imu():
         pgio=pgio,
         bus=cfg.MPU9250_I2C_BUS, 
         mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
-        ak8963_address=cfg.AK8965_I2C_ADDRESS, 
+        ak8963_address=cfg.AK8963_I2C_ADDRESS,
+        depth=cfg.MPU9250_DEPTH,
         debug=True)
     V.add(imu,
         outputs=[

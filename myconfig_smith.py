@@ -211,12 +211,14 @@ AWS_THING_NAME = 'smith'
 # HAVE_IMU = False                #when true, this add a Mpu6050 part and records the data. Can be used with a 
 HAVE_IMU = True
 # # MPU6050
+MPU6050_DEPTH = 3
 MPU6050_I2C_ADDRESS = 0x68
 MPU6050_I2C_BUS = 1
 # # MPU9250
+MPU9250_DEPTH = 3
 MPU9250_I2C_ADDRESS = 0x68
 MPU9250_I2C_BUS = 1
-AK8965_I2C_ADDRESS = 0x0C
+AK8963_I2C_ADDRESS = 0x0C
 # 
 # #SOMBRERO
 # HAVE_SOMBRERO = False           #set to true when using the sombrero hat from the Donkeycar store. This will enable pwm on the hat.
