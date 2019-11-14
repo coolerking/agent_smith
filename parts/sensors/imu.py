@@ -710,9 +710,10 @@ class _mpu9250:
         # read coef data
         data = self.pi.i2c_read_i2c_block_data(self.ak8963_handler, self.AK8963_ASAX, 3)
 
-        print('data')
-        print(data)
+        print('data[1]')
+        print(data[1])
         print(type(data))
+        print(data[1].decode())
         for i in len(data):
             print(type(data[i]))
             print(data[i])
