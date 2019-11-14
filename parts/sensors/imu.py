@@ -883,9 +883,11 @@ class _mpu9250:
             long[]
         """
         (b, d) = self.pi.i2c_read_i2c_block_data(handler, reg, count)
+        print(d)
+        print(type(d))
         if b >= 0:
             data = []
-            for i in len(d):
+            for i in len(count):
                 value = int(d[1][i])
                 data.append(value)
             return data
