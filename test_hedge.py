@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from time import sleep
 
-def test_hedge():
+def test_hedge(use_debug=True):
     import donkeycar as dk
     V = dk.vehicle.Vehicle()
 
@@ -10,7 +10,7 @@ def test_hedge():
     V.add(Timestamp(), outputs=['timestamp'])
 
     from parts import HedgehogController
-    hedge = HedgehogController(debug=True)
+    hedge = HedgehogController(debug=use_debug)
     V.add(hedge, outputs=[
         'usnav/id',
         'usnav/x', 'usnav/y', 'usnav/z',
@@ -28,21 +28,6 @@ def test_hedge():
         'dist/b4', 'dist/b4d',
         'dist/timestamp',
     ], threaded=False)
-
-    '''
-            return self.usnav_id, self.usnav_x, self.usnav_y, self.usnav_z, \
-            self.usnav_angle, self.usnav_timestamp, \
-            self.imu_x, self.imu_y, self.imu_z, \
-            self.imu_qw, self.imu_qx, self.imu_qy, self.imu_qz, \
-            self.imu_vx, self.imu_vy, self.imu_vz, \
-            self.imu_ax, self.imu_ay, self.imu_az, \
-            self.imu_gx, self.imu_gy, self.imu_gz, \
-            self.imu_mx, self.imu_my, self.imu_mz, \
-            self.imu_timestamp, \
-            self.dist_id, self.dist_b1, self.dist_b1d, self.dist_b2, self.dist_b2d, \
-            self.dist_b3, self.dist_b3d, self.dist_b4, self.dist_b4d, \
-            self.dist_timestamp
-    '''
 
     from parts.broker.debug import PrintUSNav
     usnav = PrintUSNav()
@@ -98,18 +83,17 @@ def test_hedge():
     ])
 
     try:
-        V.start(rate_hz=20, max_loop_count=10000)
+        V.start(rate_hz=20, max_loop_count=100)
     finally:
         print('stop')
         
-def test_imu():
+def test_imu(use_debug=True):
     import donkeycar as dk
     cfg = dk.load_config()
     V = dk.vehicle.Vehicle()
 
-    '''
     from parts import HedgehogController
-    hedge = HedgehogController(debug=False)
+    hedge = HedgehogController(debug=use_debug)
     V.add(hedge, outputs=[
         'usnav/id',
         'usnav/x', 'usnav/y', 'usnav/z',
@@ -127,7 +111,6 @@ def test_imu():
         'dist/b4', 'dist/b4d',
         'dist/timestamp',
     ], threaded=False)
-    '''
 
     try:
         import pigpio
@@ -144,16 +127,14 @@ def test_imu():
         mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
         ak8963_address=cfg.AK8963_I2C_ADDRESS,
         depth=cfg.MPU9250_DEPTH,
-        debug=True)
+        debug=use_debug)
     V.add(imu,
         outputs=[
             'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
             'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
             'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-            'imu/recent', 'imu/mpu_timestamp'],
-        threaded=False)
+            'imu/recent', 'imu/mpu_timestamp'])
 
-    '''
     from parts.broker.debug import PrintUSNav
     usnav = PrintUSNav()
     V.add(usnav, inputs=[
@@ -173,20 +154,9 @@ def test_imu():
         'imu/mx', 'imu/my', 'imu/mz',
         'imu/timestamp',
     ])
-    '''
-
-    '''
-    from parts.sensors.imu import PrintMpu9250
-    V.add(PrintMpu9250(), inputs=[
-        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
-        'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-        'imu/recent', 'imu/mpu_timestamp'
-    ])
-    '''
 
     try:
-        V.start(rate_hz=20, max_loop_count=1000)
+        V.start(rate_hz=20, max_loop_count=100)
     except KeyboardInterrupt:
         pass
     finally:
@@ -195,5 +165,8 @@ def test_imu():
 
 
 if __name__ == '__main__':
-    #test_hedge()
-    test_imu()
+    debug = True
+    print('*** test1: hedge and aws')
+    test_hedge(use_debug=debug)
+    print('*** test1: hedge and mpu9250')
+    test_imu(use_debug=debug)
