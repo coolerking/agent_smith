@@ -8,8 +8,10 @@ Marvelmind社の提供するサンプルコード marvelmind.py が同じディ�
 
 なお、marvelmind.py はpyserial、crcmodという２つのpythonパッケージが前提となる。
 """
-from .marvelmind import MarvelmindHedge
-
+try:
+    from .marvelmind import MarvelmindHedge
+except:
+    raise
 import datetime
 
 class USNavController:

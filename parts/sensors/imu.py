@@ -3,7 +3,6 @@
 MPU6050/MPU9250モジュールを操作するパーツクラスを提供する。
 要pigpioパッケージ、I2C接続前提。
 """
-
 import time
 import json
 
@@ -80,7 +79,14 @@ class Mpu6050:
         引数：
             なし
         戻り値：
-            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
+            accel_x     加速度X座標値(float)
+            accel_y     加速度Y座標値(float)
+            accel_z     加速度Z座標値(float)
+            gyro_x      角速度X座標値(float)
+            gyro_x      角速度X座標値(float)
+            gyro_x      角速度X座標値(float)
+            recent_data 過去最新情報(JSON形式の文字列)
+            timestamp   データ読み取り時時刻(datetime.now()結果:float)
         """
         self._update()
         accel_x, accel_y, accel_z = \
@@ -92,7 +98,7 @@ class Mpu6050:
                 str(self.temp), str(accel_x), str(accel_y), str(accel_z), 
                 str(gyro_x), str(gyro_y), str(gyro_z), str(self.timestamp)))
         return accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, \
-            self.temp, str_recent_data(self.recent_data), self.timestamp
+            str_recent_data(self.recent_data), self.timestamp
 
     def run_threaded(self):
         """
@@ -496,7 +502,17 @@ class Mpu9250:
         引数：
             なし
         戻り値：
-            加速度座標値(x,y,z)、ジャイロスコープ座標値(x,y,z)
+            accel_x     加速度X座標値(float)
+            accel_y     加速度Y座標値(float)
+            accel_z     加速度Z座標値(float)
+            gyro_x      角速度X座標値(float)
+            gyro_x      角速度X座標値(float)
+            gyro_x      角速度X座標値(float)
+            magnet_x    磁束密度X座標値(float)
+            magnet_x    磁束密度X座標値(float)
+            magnet_x    磁束密度X座標値(float)
+            recent_data 過去最新情報(JSON形式の文字列)
+            timestamp   データ読み取り時時刻(datetime.now()結果:float)
         """
         self._update()
         accel_x, accel_y, accel_z = \
@@ -911,6 +927,9 @@ class _mpu9250:
             raise ConnectionError('Error:{} in i2c_read_i2c_block_data'.format(str(b)))
 
 class PrintMpu9250:
+    """
+    MPU9250取得データを出力するデバッグ用パーツクラス
+    """
     def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, recent, ts):
         print('[MPU9250] temp:{} ts:{} a:({}, {}, {}) g:({}, {}, {}) m:({}, {}, {})'.format(
             str(temp), str(ts),

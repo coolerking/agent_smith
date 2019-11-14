@@ -151,17 +151,6 @@ class HedgePublisher(PublisherBase):
     Marvelmind モバイルルータ(IMU)データ(JSONデータ)をMQTTプロトコルで送信する
     パブリッシャパーツクラス。
     """
-    '''
-        hedge_items = [
-            'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
-            'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
-            'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
-            'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz',
-            'imu_timestamp',
-            'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
-            'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp'
-        ]
-    '''
     def run(self,
     usnav_id, usnav_x, usnav_y, usnav_z, usnav_angle, usnav_timestamp,
     imu_x, imu_y, imu_z, imu_qw, imu_qx, imu_qy, imu_qz,
@@ -322,6 +311,94 @@ class HedgePublisher(PublisherBase):
             'dist_timestamp':       dist_timestamp,
             'timestamp':            timestamp
         })
+
+class Mpu6050Publisher(PublisherBase):
+    """
+    MPU6050で取得したデータをPublishするパーツクラス。
+    """
+    model_type = 'mpu6050'
+    def run(self, acl_x, acl_y, acl_z, gyr_x, gyr_y, gyr_z, 
+    recent, timestamp):
+        """
+        MPU9250で取得したデータをPublishする。
+        引数：
+            acl_x       X軸加速度(float)
+            acl_y       Y軸加速度(float)
+            acl_z       Z軸加速度(float)
+            gyr_x       X軸角速度(float)
+            gyr_y       Y軸角速度(float)
+            gyr_z       Z軸角速度(float)
+            recent      過去数件の最新データ(str, json形式)
+            timestamp   datetime.now()戻り値(float)
+        戻り値：
+            なし
+        """
+        json_topic = create_hedge_topic(self.system, self.thing_type,
+        self.thing_group, self.thing_name, self.model_type)
+        v2f = lambda v: 0.0 if v is None else float(v)
+        json_message = json.dumps({
+            'acl_x':                v2f(acl_x),
+            'acl_y':                v2f(acl_y),
+            'acl_z':                v2f(acl_z),
+            'gyr_x':                v2f(gyr_x),
+            'gyr_y':                v2f(gyr_y),
+            'gyr_z':                v2f(gyr_z),
+            'timestamp':            v2f(timestamp),
+            'recent':               json.dumps(recent),
+        })
+        if self._client is not None:
+            is_sent = self._client.publish(json_topic, json_message, 0)
+            if self.debug:
+                print('[{}Publisher] published json  status: {}'.format(
+                    self.model_type, str(is_sent)))
+
+class Mpu9250Publisher(PublisherBase):
+    """
+    MPU9250で取得したデータをPublishするパーツクラス。
+    """
+    model_type = 'mpu9250'
+    def run(self, acl_x, acl_y, acl_z, gyr_x, gyr_y, gyr_z, 
+    mgt_x, mgt_y, mgt_z, temp, recent, timestamp):
+        """
+        MPU9250で取得したデータをPublishする。
+        引数：
+            acl_x       X軸加速度(float)
+            acl_y       Y軸加速度(float)
+            acl_z       Z軸加速度(float)
+            gyr_x       X軸角速度(float)
+            gyr_y       Y軸角速度(float)
+            gyr_z       Z軸角速度(float)
+            mgt_x       X軸磁束密度(float)
+            mgt_y       Y軸磁束密度(float)
+            mgt_z       Z軸磁束密度(float)
+            temp        セルシウス温度(float)
+            recent      過去数件の最新データ(str, json形式)
+            timestamp   datetime.now()戻り値(float)
+        戻り値：
+            なし
+        """
+        json_topic = create_hedge_topic(self.system, self.thing_type,
+        self.thing_group, self.thing_name, self.model_type)
+        v2f = lambda v: 0.0 if v is None else float(v)
+        json_message = json.dumps({
+            'acl_x':                v2f(acl_x),
+            'acl_y':                v2f(acl_y),
+            'acl_z':                v2f(acl_z),
+            'gyr_x':                v2f(gyr_x),
+            'gyr_y':                v2f(gyr_y),
+            'gyr_z':                v2f(gyr_z),
+            'mgt_x':                v2f(mgt_x),
+            'mgt_y':                v2f(mgt_y),
+            'mgt_z':                v2f(mgt_z),
+            'temp':                 v2f(temp),
+            'timestamp':            v2f(timestamp),
+            'recent':               json.dumps(recent),
+        })
+        if self._client is not None:
+            is_sent = self._client.publish(json_topic, json_message, 0)
+            if self.debug:
+                print('[{}Publisher] published json  status: {}'.format(
+                    self.model_type, str(is_sent)))
 
 
 class RangePublisher(PublisherBase):

@@ -484,7 +484,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         V.add(imu, outputs=[
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
                 'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
-                'imu/temp', 'imu/recent', 'imu/timestamp',
+                'imu/recent', 'imu/timestamp',
             ])
         '''
         '''MPU9250'''
