@@ -134,7 +134,7 @@ class MapImageCreator:
             image_array マップ画像
         """
         # 引数チェック
-        if x is None or y is None or recent:
+        if x is None or y is None or recent is None:
             if self.debug:
                 print('[MapImageCreator] return base image because None exists')
             return self.base_to_array()

@@ -943,19 +943,28 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     '''
 
     if cfg.HAVE_IMU:
-        inputs += ['imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
-            # MPU9250 データを追加
-            'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-            'imu/recent', 'imu/mpu_timestamp',
+        if cfg.IMU_TYPE == 'mpu9250':
+            '''MPU9250'''
+            inputs += [
+                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+                'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
+                'imu/recent', 'imu/mpu_timestamp',
             ]
-
-        types +=['float', 'float', 'float',
-           'float', 'float', 'float',
-           # MPU9250
-           'float', 'float', 'float', 'float',
-           'str', 'float'
-           ]
+            types +=['float', 'float', 'float',
+                'float', 'float', 'float',
+                'float', 'float', 'float', 'float',
+                'str', 'float',
+            ]
+        else:
+            '''MPU6050'''
+            inputs += [
+                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+            ]
+            types +=['float', 'float', 'float',
+                'float', 'float', 'float',
+            ]
 
     '''
     Marvelmind位置情報システムデータ追加
