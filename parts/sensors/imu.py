@@ -473,30 +473,42 @@ class Mpu9250:
             なし
         """
         temp = self.mpu.readTemperature()
-        while temp is not None:
+        cnt = 1
+        while temp is None:
             temp = self.mpu.readTemperature()
+            cnt = cnt + 1
+        if self.debug:
+            print('[Mpu9250] read temp in {} times'.format(str(cnt)))
         self.temp = temp
         accel_data = self.mpu.readAccel()
-        while not is_zeros(accel_data):
+        cnt = 1
+        while is_zeros(accel_data):
             accel_data = self.mpu.readAccel()
+            cnt = cnt + 1
+        if self.debug:
+            print('[Mpu9250] read accel data in {} times'.format(str(cnt)))
         self.accel_data = omit_none(self.accel_data, accel_data)
         gyro_data = self.mpu.readGyro()
-        while not is_zeros(gyro_data):
+        cnt = 1
+        while is_zeros(gyro_data):
             gyro_data = self.mpu.readGyro()
+            cnt = cnt + 1
+        if self.debug:
+            print('[Mpu9250] read gyro data in {} times'.format(str(cnt)))
         self.gyro_data = omit_none(self.gyro_data, gyro_data)
         magnet_data = self.mpu.readMagnet()
+        cnt = 1
         while not is_zeros(magnet_data):
             magnet_data = self.mpu.readMagnet()
-        self.magnet_data = omit_none(self.magnet_data, magnet_data)
+            cnt = cnt + 1
         if self.debug:
-            print('new magnet:{}'.format(str(self.magnet_data)))
+            print('[Mpu9250] read magnet data in {} times'.format(str(cnt)))
+        self.magnet_data = omit_none(self.magnet_data, magnet_data)
         self.timestamp = time.time()
         push_recent_data(
             self.recent_data, 
             pack(self.timestamp, self.temp, 
                 self.accel_data, self.gyro_data, self.magnet_data))
-
-
 
     def run_threaded(self):
         """
