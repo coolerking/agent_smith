@@ -110,6 +110,9 @@ class AWSShadowClientFactory(AWSConfig):
 
     def disconnect(self):
         if self._shadow_client is not None:
-            self._shadow_client.disconnect()
+            try:
+                self._shadow_client.disconnect()
+            except:
+                print('ignore exception in aws disconnecting')
         self._shadow_handler = None
         self._shadow_client = None

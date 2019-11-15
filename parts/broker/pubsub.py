@@ -138,7 +138,7 @@ class ImagePublisher(PublisherBase):
                 print('[ImagePublisher] image_array is None(ignore publishing)')
             return
         image_topic = create_image_topic(self.system, self.thing_type,
-        self.thing_group, self.thing_name, 'image')
+        self.thing_group, self.thing_name, 'tub')
         image_message = self.create_image_message(image_array)
         if self._client is not None:
             is_sent = self._client.publish(image_topic, image_message, 0)

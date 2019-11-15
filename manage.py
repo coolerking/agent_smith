@@ -252,11 +252,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
         if use_map or cfg.CAMERA_TYPE == "MAP":
 
+            if use_debug:
+                class PrintRecent:
+                    def run(self, recent):
+                        print('[PrintRecent] recent={}'.format(str(recent)))
+                V.add(PrintRecent(), inputs=['imu/recent'])
 
-            class PrintRecent:
-                def run(self, recent):
-                    print('[PrintRecent] recent={}'.format(str(recent)))
-            V.add(PrintRecent(), inputs=['imu/recent'])
             # 前方画像の代わりに2次元マップイメージを使用
             from parts import MapImageCreator
             creator = MapImageCreator(base_image_path=cfg.MAP_BASE_IMAGE_PATH, debug=use_debug)
@@ -521,7 +522,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
                 ak8963_address=cfg.AK8963_I2C_ADDRESS,
                 depth=cfg.MPU9250_DEPTH,
-                debug=True)
+                debug=use_debug)
             V.add(imu, outputs=mpu9250_items)
             if use_debug:
                 class PrintIMU:

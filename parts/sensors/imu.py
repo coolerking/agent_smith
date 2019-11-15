@@ -992,10 +992,8 @@ def push_recent_data(recent_data, current_dict):
     戻り値：
         編集後配列
     """
-    print('recent:{}, current:{}'.format(str(recent_data), str(current_dict)))
     return_data = recent_data[1:]
     return_data.append(current_dict)
-    print('return:{}'.format(str(return_data)))
     return return_data
 
 def str_recent_data(recent_data):
@@ -1023,10 +1021,8 @@ def array_recent_data(recent_str):
     """
     recent_dict = json.loads(recent_str)
     depth = len(list(recent_dict.keys()))
-    #print(recent_dict)
     return_array = []
     for i in range(depth):
-        #print(recent_dict)
         return_array.append(recent_dict.get(str(i)))
     return return_array
 
