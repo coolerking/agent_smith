@@ -520,11 +520,7 @@ class Mpu9250:
         self.timestamp = time.time()
         current_dict = pack(self.timestamp, self.temp,
             self.accel_data, self.gyro_data, self.magnet_data)
-        print('[Mpu9250] packed dict: {}'.format(str(current_dict)))
-        print('[Mpu9250] target dict: {}'.format(str(self.recent_data)))
-        push_recent_data(self.recent_data, current_dict)
-        print('[Mpu9250] pushed dict: {}'.format(str(self.recent_data)))
-
+        self.recent_data = push_recent_data(self.recent_data, current_dict)
 
     def run_threaded(self):
         """
