@@ -432,18 +432,25 @@ class Mpu9250:
             ak8963_address=ak8963_address, 
             debug=debug)
         self.debug = debug
+
+        # depth
         self.depth = depth
         if self.depth is None or self.depth <= 0:
             raise ValueError('[Mpu9250] illegal value depth = {}'.format(
                 str(self.depth)))
-        if self.debug:
-            print('[Mpu9250] depth={}'.format(str(self.depth)))
+
+        # initial set zeros
         self.init_imu_data()
+
+        cnt = 0
+        while is_zeros(self.accel_data) or is_zeros(self.gyro_data) or is_zeros(self.magnet_data) or self.temp is None:
+            self._update()
+            cnt = cnt + 1
         for _ in range(depth):
             self._update()
             time.sleep(0.1)
         if self.debug:
-            print('[Mpu9250] pre-read mpu9250 in {} times'.format(str(self.depth)))
+            print('[Mpu9250] pre-read mpu9250 in {} times'.format(str(self.depth + cnt)))
 
     def init_imu_data(self):
         """
@@ -498,7 +505,7 @@ class Mpu9250:
         self.gyro_data = omit_none(self.gyro_data, gyro_data)
         magnet_data = self.mpu.readMagnet()
         cnt = 1
-        while not is_zeros(magnet_data):
+        while is_zeros(magnet_data):
             magnet_data = self.mpu.readMagnet()
             cnt = cnt + 1
         if self.debug:
