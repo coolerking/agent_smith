@@ -411,7 +411,7 @@ class Mpu9250:
     シングルスレッドのみで動作する。
     """
     def __init__(self, pgio=None, bus=1, 
-    mpu9250_address=None, ak8963_address=None, depth=3, debug=False):
+    mpu9250_address=None, ak8963_address=None, depth=3, delay_time=0.01, debug=False):
         """
         MPU9250ドライバを生成しインスタンス変数へ格納する。
         引数：
@@ -420,6 +420,7 @@ class Mpu9250:
             mpu9250_address     MPU9250 I2Cスレーブアドレス(デフォルトNone)
             ak8963_address      AK8963 I2Cスレーブアドレス(デフォルトNone)
             depth               最新データを残す件数(1以上、デフォルト:3)
+            delay_time          連続読み込み間隔(sec, デフォルト:0.01)
             debug               デバッグフラグ(デフォルト:False)
         戻り値：
             なし
@@ -429,8 +430,9 @@ class Mpu9250:
         self.mpu = _mpu9250(
             pgio=pgio, 
             mpu9250_address=mpu9250_address, 
-            ak8963_address=ak8963_address, 
+            ak8963_address=ak8963_address,
             debug=debug)
+        self.delay_time = delay_time
         self.debug = debug
 
         # depth
@@ -482,33 +484,37 @@ class Mpu9250:
         temp = self.mpu.readTemperature()
         cnt = 1
         while temp is None:
+            time.sleep(self.delay_time)
             temp = self.mpu.readTemperature()
             cnt = cnt + 1
-        if self.debug:
+        if self.debug and cnt > 1:
             print('[Mpu9250] read temp in {} times'.format(str(cnt)))
         self.temp = temp
         accel_data = self.mpu.readAccel()
         cnt = 1
         while is_zeros(accel_data):
+            time.sleep(self.delay_time)
             accel_data = self.mpu.readAccel()
             cnt = cnt + 1
-        if self.debug:
+        if self.debug and cnt > 1:
             print('[Mpu9250] read accel data in {} times'.format(str(cnt)))
         self.accel_data = omit_none(self.accel_data, accel_data)
         gyro_data = self.mpu.readGyro()
         cnt = 1
         while is_zeros(gyro_data):
+            time.sleep(self.delay_time)
             gyro_data = self.mpu.readGyro()
             cnt = cnt + 1
-        if self.debug:
+        if self.debug and cnt > 1:
             print('[Mpu9250] read gyro data in {} times'.format(str(cnt)))
         self.gyro_data = omit_none(self.gyro_data, gyro_data)
         magnet_data = self.mpu.readMagnet()
         cnt = 1
         while is_zeros(magnet_data):
+            time.sleep(self.delay_time)
             magnet_data = self.mpu.readMagnet()
             cnt = cnt + 1
-        if self.debug:
+        if self.debug and cnt > 1:
             print('[Mpu9250] read magnet data in {} times'.format(str(cnt)))
         self.magnet_data = omit_none(self.magnet_data, magnet_data)
         self.timestamp = time.time()
