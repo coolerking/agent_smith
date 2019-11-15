@@ -1012,6 +1012,21 @@ def str_recent_data(recent_data):
         return_dict[str(i)] = recent_data[i]
     return json.dumps(return_dict)
 
+def array_recent_data(recent_str):
+    """
+    JSON形式文字列の最新データを配列化する。
+    引数：
+        recent_str      最新IMUデータ(JSON形式文字列)
+    戻り値：
+        return_array    最新IMUデータ(配列、後ろが最新)   
+    """
+    recent_dict = json.loads(recent_str)
+    depth = len(list(recent_dict.keys()))
+    return_array = []
+    for i in range(depth):
+        return_array.append(recent_str[str(i)])
+    return return_array
+
 def pack(timestamp, temp, accel_data, gyro_data, magnet_data=None):
     """
     最新位置情報データを辞書化する。
@@ -1028,6 +1043,28 @@ def pack(timestamp, temp, accel_data, gyro_data, magnet_data=None):
     if magnet_data is not None:
         return_dict['magnet'] = magnet_data
     return return_dict
+
+def unpack(imu_dict):
+    """
+    辞書化された最新位置情報データを要素ごとに切り出す。
+    引数：
+        imu_dict    辞書化された最新位置情報データ
+    戻り値：
+        timestamp   時刻
+        temp        気温(float)
+        accel_data  加速度データ（辞書）
+        gyro_data   角速度データ（辞書）
+        magnet_data 磁束密度データ（辞書）：オプション
+    戻り値：
+        最新位置情報データ群（辞書）
+    """
+    zeros = {'x':0, 'y':0, 'z':0}
+    accel_data = imu_dict.get('accel', zeros)
+    gyro_data = imu_dict.get('gyro', zeros)
+    magnet_data = imu_dict['magnet']
+    temp = imu_dict.get('temp', 0)
+    timestamp = imu_dict.get('timestamp', 0.0)
+    return timestamp, temp, accel_data, gyro_data, magnet_data
 
 def omit_none(recent_dict, current_dict):
     """

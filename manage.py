@@ -194,15 +194,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     Marvelmind 位置情報システム
     '''
     if use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
-        former_hedge_items = [
-            'usnav/id_f', 'usnav/x_f', 'usnav/y_f', 'usnav/z_f', 'usnav/angle_f', 'usnav/timestamp_f',
-            'imu/x_f', 'imu/y_f', 'imu/z_f', 'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f',
-            'imu/vx_f', 'imu/vy_f', 'imu/vz_f', 'imu/ax_f', 'imu/ay_f', 'imu/az_f',
-            'imu/gx_f', 'imu/gy_f', 'imu/gz_f', 'imu/mx_f', 'imu/my_f', 'imu/mz_f',
-            'imu/timestamp_f',
-            'dist/id_f', 'dist/b1_f', 'dist/b1d_f', 'dist/b2_f', 'dist/b2d_f', 
-            'dist/b3_f', 'dist/b3d_f', 'dist/b4_f', 'dist/b4d_f', 'dist/timestamp_f'
-        ]
+        #former_hedge_items = [
+        #    'usnav/id_f', 'usnav/x_f', 'usnav/y_f', 'usnav/z_f', 'usnav/angle_f', 'usnav/timestamp_f',
+        #    'imu/x_f', 'imu/y_f', 'imu/z_f', 'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f',
+        #    'imu/vx_f', 'imu/vy_f', 'imu/vz_f', 'imu/ax_f', 'imu/ay_f', 'imu/az_f',
+        #    'imu/gx_f', 'imu/gy_f', 'imu/gz_f', 'imu/mx_f', 'imu/my_f', 'imu/mz_f',
+        #    'imu/timestamp_f',
+        #    'dist/id_f', 'dist/b1_f', 'dist/b1d_f', 'dist/b2_f', 'dist/b2d_f', 
+        #    'dist/b3_f', 'dist/b3d_f', 'dist/b4_f', 'dist/b4d_f', 'dist/timestamp_f'
+        #]
         hedge_items = [
             'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
             'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
@@ -214,15 +214,16 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         ]
         for item in hedge_items:
             V.mem[item] = 0
-        from parts import HedgehogController, FormerHedgehogPusher
-        pusher = FormerHedgehogPusher(debug=use_debug)
-        V.add(pusher, inputs=hedge_items, outputs=former_hedge_items)
+        #from parts import HedgehogController, FormerHedgehogPusher
+        #pusher = FormerHedgehogPusher(debug=use_debug)
+        #V.add(pusher, inputs=hedge_items, outputs=former_hedge_items)
 
-        class PrtHedge:
-            def run(self, x, y, qw, qx, qy, qz, timestamp, qw_f, qx_f, qy_f, qz_f, timestamp_f):
-                print('(x, y) = ({}, {})'.format(str(x), str(y)))
-                print('[NEW] (qw, qx, qy, qz) = ({}, {}, {}, {}) ts={}'.format(str(qw), str(qx), str(qy), str(qz), str(timestamp)))
-                print('[OLD] (qw, qx, qy, qz) = ({}, {}, {}, {}) ts={}'.format(str(qw_f), str(qx_f), str(qy_f), str(qz_f), str(timestamp_f)))
+        #class PrtHedge:
+        #    def run(self, x, y, qw, qx, qy, qz, timestamp, qw_f, qx_f, qy_f, qz_f, timestamp_f):
+        #        print('(x, y) = ({}, {})'.format(str(x), str(y)))
+        #        print('[NEW] (qw, qx, qy, qz) = ({}, {}, {}, {}) ts={}'.format(str(qw), str(qx), str(qy), str(qz), str(timestamp)))
+        #        print('[OLD] (qw, qx, qy, qz) = ({}, {}, {}, {}) ts={}'.format(str(qw_f), str(qx_f), str(qy_f), str(qz_f), str(timestamp_f)))
+        from parts import HedgehogController
         hedge = HedgehogController(tty=cfg.HEDGE_SERIAL_TTY, adr=cfg.HEDGE_ID)
         V.add(hedge, outputs=hedge_items)
 
@@ -238,27 +239,27 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         ]
         
         if use_aws or cfg.USE_AWS_AS_DEFAULT:
+            # 自分のMarvelmind情報を送信
             from parts.broker import HedgePublisher
             hedge_pub = HedgePublisher(factory, debug=use_debug)
             V.add(hedge_pub, inputs=hedge_aws_items)
+
+            # 'hedge' へIDをキーとした辞書内にMarvelmind情報を受信
             from parts.broker import HedgeSubscriber
             hedge_sub = HedgeSubscriber(factory, debug=use_debug)
             V.add(hedge_sub, outputs=['hedge'])
             V.mem['hedge'] = '{}'
 
         if use_map or cfg.CAMERA_TYPE == "MAP":
-            if use_debug:
-                prt = PrtHedge()
-                V.add(prt,
-                    inputs=['imu/x', 'imu/y',
-                        'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz', 'imu/timestamp',
-                        'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f', 'imu/timestamp_f' ])
+
+            # 前方画像の代わりに2次元マップイメージを使用
             from parts import MapImageCreator
             creator = MapImageCreator(base_image_path=cfg.MAP_BASE_IMAGE_PATH, debug=use_debug)
             V.add(creator,
-                inputs=['imu/x', 'imu/y',
-                    'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz', 'imu/timestamp',
-                    'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f', 'imu/timestamp_f' ],
+                inputs=[
+                    'usnav/x', 'usnav/y',
+                    'imu/recent'
+                ],
                 outputs=['cam/image_array'])
 
 
@@ -471,53 +472,68 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
     #IMU
     if cfg.HAVE_IMU:
-        #from donkeycar.parts.imu import Mpu6050
-        #imu = Mpu6050()
-        '''MPU6050
-        from parts.sensors.imu import Mpu6050
-        imu = Mpu6050(
-            pgio=pgio, 
-            bus=cfg.MPU6050_I2C_BUS, 
-            address=cfg.MPU6050_I2C_ADDRESS, 
-            depth=cfg.MPU6050_DEPTH,
-            debug=use_debug)
-        V.add(imu, outputs=[
+        if cfg.IMU_TYPE == 'mpu6050':
+            '''MPU6050'''
+            mpu6050_items = [
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
-                'imu/recent', 'imu/timestamp',
-            ])
-        '''
-        '''MPU9250'''
-        from parts.sensors.imu import Mpu9250
-        imu = Mpu9250(
-            pgio=pgio,
-            bus=cfg.MPU9250_I2C_BUS, 
-            mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
-            ak8963_address=cfg.AK8963_I2C_ADDRESS,
-            depth=cfg.MPU9250_DEPTH,
-            debug=True)
-        V.add(imu,
-            outputs=[
+                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+                'imu/recent', 'imu/mpu_timestamp',
+            ]
+            from parts.sensors.imu import Mpu6050
+            imu = Mpu6050(
+                pgio=pgio, 
+                bus=cfg.MPU6050_I2C_BUS, 
+                address=cfg.MPU6050_I2C_ADDRESS, 
+                depth=cfg.MPU6050_DEPTH,
+                debug=use_debug)
+            V.add(imu, outputs=mpu6050_items)
+            if use_debug:
+                class PrintIMU:
+                    def run(self, ax, ay, az, gx, gy, gz, ts):
+                        print('ts:{} a:({},{},{}) g:({},{},{})'.format(
+                            str(ts),
+                            str(ax), str(ay), str(az), str(gx), str(gy), str(gz),
+                        ))
+                    def shutdown(self):
+                        pass
+                V.add(PrintIMU(), inputs=[
+                    'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+                    'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+                    'imu/mpu_timestamp'
+                ])
+        elif cfg.IMU_TYPE == 'mpu9250':
+            '''MPU9250'''
+            mpu9250_items = [
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
                 'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
                 'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-                'imu/recent', 'imu/mpu_timestamp'])
-        if use_debug:
-            class PrintIMU:
-                def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, ts):
-                    print('ts:{} temp:{}, a:({},{},{}) g:({},{},{}) m:({},{},{})'.format(
-                        str(ts), str(temp),
-                        str(ax), str(ay), str(az), str(gx), str(gy), str(gz),
-                        str(mx), str(my), str(mz)
-                    ))
-                def shutdown(self):
-                    pass
-            V.add(PrintIMU(), inputs=[
-                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
-                'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-                'imu/mpu_timestamp'
-            ])
+                'imu/recent', 'imu/mpu_timestamp',
+            ]
+            from parts.sensors.imu import Mpu9250
+            imu = Mpu9250(
+                pgio=pgio,
+                bus=cfg.MPU9250_I2C_BUS, 
+                mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
+                ak8963_address=cfg.AK8963_I2C_ADDRESS,
+                depth=cfg.MPU9250_DEPTH,
+                debug=True)
+            V.add(imu, outputs=mpu9250_items)
+            if use_debug:
+                class PrintIMU:
+                    def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, ts):
+                        print('ts:{} temp:{}, a:({},{},{}) g:({},{},{}) m:({},{},{})'.format(
+                            str(ts), str(temp),
+                            str(ax), str(ay), str(az), str(gx), str(gy), str(gz),
+                            str(mx), str(my), str(mz)
+                        ))
+                    def shutdown(self):
+                        pass
+                V.add(PrintIMU(), inputs=[
+                    'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+                    'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+                    'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
+                    'imu/mpu_timestamp'
+                ])
 
     '''
     画像前処理
