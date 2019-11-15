@@ -1022,9 +1022,11 @@ def array_recent_data(recent_str):
     """
     recent_dict = json.loads(recent_str)
     depth = len(list(recent_dict.keys()))
+    print(recent_dict)
     return_array = []
     for i in range(depth):
-        return_array.append(recent_str[str(i)])
+        #print(recent_dict)
+        return_array.append(recent_str.get(str(i)))
     return return_array
 
 def pack(timestamp, temp, accel_data, gyro_data, magnet_data=None):
