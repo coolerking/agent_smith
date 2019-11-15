@@ -252,6 +252,11 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
         if use_map or cfg.CAMERA_TYPE == "MAP":
 
+
+            class PrintRecent:
+                def run(self, recent):
+                    print('[PrintRecent] recent={}'.format(str(recent)))
+            V.add(PrintRecent(), inputs=['imu/recent'])
             # 前方画像の代わりに2次元マップイメージを使用
             from parts import MapImageCreator
             creator = MapImageCreator(base_image_path=cfg.MAP_BASE_IMAGE_PATH, debug=use_debug)

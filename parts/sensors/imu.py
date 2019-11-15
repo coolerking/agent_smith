@@ -993,8 +993,10 @@ def push_recent_data(recent_data, current_dict):
     戻り値：
         編集後配列
     """
+    print('recent:{}, current:{}'.format(str(recent_data), str(current_data)))
     return_data = recent_data[1:]
     return_data.append(current_dict)
+    print('return:{}'.format(str(return_data)))
     return return_data
 
 def str_recent_data(recent_data):
