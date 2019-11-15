@@ -442,13 +442,8 @@ class Mpu9250:
         for _ in range(depth):
             self._update()
             time.sleep(0.1)
-        cnt = 0
-        while not is_zeros(self.accel_data) and not is_zeros(self.gyro_data) and not is_zeros(self.magnet_data):
-            self._update()
-            time.sleep(0.1)
-            cnt = cnt + 1
         if self.debug:
-            print('[Mpu9250] pre-read mpu9250 in {} times'.format(str(self.depth + cnt)))
+            print('[Mpu9250] pre-read mpu9250 in {} times'.format(str(self.depth)))
 
     def init_imu_data(self):
         """
@@ -478,14 +473,21 @@ class Mpu9250:
             なし
         """
         temp = self.mpu.readTemperature()
-        if temp is not None:
-            self.temp = temp
-        self.accel_data = omit_none(self.accel_data,self.mpu.readAccel())
-        self.gyro_data = omit_none(self.gyro_data, self.mpu.readGyro())
-        if self.debug:
-            print('old magnet:{}'.format(str(self.magnet_data)))
-            print('sen magnet:{}'.format(str(self.mpu.readMagnet())))
-        self.magnet_data = omit_none(self.magnet_data, self.mpu.readMagnet())
+        while temp is not None:
+            temp = self.mpu.readTemperature()
+        self.temp = temp
+        accel_data = self.mpu.readAccel()
+        while not is_zeros(accel_data):
+            accel_data = self.mpu.readAccel()
+        self.accel_data = omit_none(self.accel_data, accel_data)
+        gyro_data = self.mpu.readGyro()
+        while not is_zeros(gyro_data):
+            gyro_data = self.mpu.readGyro()
+        self.gyro_data = omit_none(self.gyro_data, gyro_data)
+        magnet_data = self.mpu.readMagnet()
+        while not is_zeros(magnet_data):
+            magnet_data = self.mpu.readMagnet()
+        self.magnet_data = omit_none(self.magnet_data, magnet_data)
         if self.debug:
             print('new magnet:{}'.format(str(self.magnet_data)))
         self.timestamp = time.time()
@@ -493,6 +495,8 @@ class Mpu9250:
             self.recent_data, 
             pack(self.timestamp, self.temp, 
                 self.accel_data, self.gyro_data, self.magnet_data))
+
+
 
     def run_threaded(self):
         """
