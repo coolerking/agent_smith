@@ -442,8 +442,13 @@ class Mpu9250:
         for _ in range(depth):
             self._update()
             time.sleep(0.1)
+        cnt = 0
+        while not is_zeros(self.accel_data) and not is_zeros(self.gyro_data) and not is_zeros(self.magnet_data):
+            self._update()
+            time.sleep(0.1)
+            cnt = cnt + 1
         if self.debug:
-            print('[Mpu9250] pre-read mpu9250 in {} times'.format(str(self.depth)))
+            print('[Mpu9250] pre-read mpu9250 in {} times'.format(str(self.depth + cnt)))
 
     def init_imu_data(self):
         """
@@ -1005,12 +1010,18 @@ def omit_none(recent_dict, current_dict):
         Noneを1件前のデータに置き換えられた最新データ（辞書）
     """
     return_dict = {}
+    if is_zeros(current_dict):
+        return recent_dict
     for key in ['x', 'y', 'z']:
-        if current_dict[key] is None:
-            return_dict[key] = to_float(recent_dict[key])
-        else:
-            return_dict[key] = to_float(current_dict[key])
+        return_dict[key] = float(current_dict.get(key, recent_dict[key]))
     return return_dict
+
+def is_zeros(target_dict):
+    if current_dict['x'] == 0 and current_dict['y'] == 0 and current_dict['z'] == 0:
+        return True
+    elif if current_dict['x'] is None and current_dict['y'] is None and current_dict['z'] is None:
+        return True
+    return False
 
 def to_float(value):
     """
