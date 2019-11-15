@@ -479,8 +479,10 @@ class Mpu9250:
         self.gyro_data = omit_none(self.gyro_data, self.mpu.readGyro())
         if self.debug:
             print('old magnet:{}'.format(str(self.magnet_data)))
-            print('old magnet:{}'.format(str(self.mpu.readMagnet())))
+            print('sen magnet:{}'.format(str(self.mpu.readMagnet())))
         self.magnet_data = omit_none(self.magnet_data, self.mpu.readMagnet())
+        if self.debug:
+            print('new magnet:{}'.format(str(self.magnet_data)))
         self.timestamp = time.time()
         push_recent_data(
             self.recent_data, 
