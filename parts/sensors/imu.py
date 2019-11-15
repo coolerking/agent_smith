@@ -518,10 +518,13 @@ class Mpu9250:
             print('[Mpu9250] read magnet data in {} times'.format(str(cnt)))
         self.magnet_data = omit_none(self.magnet_data, magnet_data)
         self.timestamp = time.time()
-        push_recent_data(
-            self.recent_data, 
-            pack(self.timestamp, self.temp, 
-                self.accel_data, self.gyro_data, self.magnet_data))
+        current_data = pack(self.timestamp, self.temp,
+            self.accel_data, self.gyro_data, self.magnet_data)
+        print('[Mpu9250] packed dict: {}'.format(str(current_dict)))
+        print('[Mpu9250] target dict: {}'.format(str(self.recent_data)))
+        push_recent_data(self.recent_data, current_dict)
+        print('[Mpu9250] pushed dict: {}'.format(str(self.recent_data)))
+
 
     def run_threaded(self):
         """
