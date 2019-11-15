@@ -3,7 +3,7 @@
 Publisher/SubscriberモデルでAWS IoT Coreと通信を行うパーツクラス群モジュール。
 """
 import json
-from .util import arr_to_bytearray, bytearray_to_arr, create_json_topic, create_image_topic, create_hedge_topic, get_thing_name_from_hedge_topic
+from .util import arr_to_bytearray, bytearray_to_arr, create_json_topic, create_image_topic, create_hedge_topic, get_thing_name_from_hedge_topic, create_mpu6050_topic, create_mpu9250_topic, get_thing_name_from_mpu6050_topic, get_thing_name_from_mpu9250_topic
 
 class PublisherBase:
     """
@@ -630,3 +630,179 @@ class HedgeSubscriber:
         self.topic = None
         if self.debug:
             print('[HegdeSubscriber] shutdown')
+
+class Mpu6050Subscriber:
+    """
+    MPU6050データをsubscribeするパーツクラス。
+    自分以外のloaderエージェント最新位置情報を取得する。
+    """
+    def __init__(self, aws_iot_client_factory, interval=5, callback=None, debug=False):
+        """
+        サブスクライブを開始する。
+        引数：
+            aws_iot_client_factory  AWSIoTClientFactoryオブジェクト
+            interval                インターバル（秒）
+            callback                コールバック関数
+            debug                   デバッグフラグ
+        戻り値：
+            なし
+        """
+        self._client = aws_iot_client_factory.get_mqtt_client()
+        self.interval = interval
+        self.mpu6050 = {}
+        self.debug = debug
+        self.thing_name = aws_iot_client_factory.thing_name
+        self.topic = create_mpu6050_topic(
+            system=aws_iot_client_factory.system,
+            thing_type=aws_iot_client_factory.thing_type,
+            message_type='mpu6050')
+        self.callback = callback or self.subscribe_mpu6050_callback
+        self._client.subscribe(self.topic, 0, self.callback)
+        if self.debug:
+            print('[Mpu6050Subscriber] subscribe topic={}'.format(self.topic))
+
+    def subscribe_mpu6050_callback(self, client, userdata, message):
+        """
+        Subscribe時呼び出される。フィールドに命令を格納する。
+        引数：
+            client          MQTTクライアントオブジェクト
+            userdata        ユーザデータ
+            message         メッセージ
+        戻り値：
+            なし
+        """
+        if self.debug:
+            print('[Mpu6050Subscriber] subscribed: topic={} payload={}'.format(
+                str(message.topic), str(message.payload)))
+        thing_name = get_thing_name_from_mpu6050_topic(topic=str(message.topic))
+        if thing_name is None:
+            if self.debug:
+                print('[Mpu6050Subscriber] topic has no thing_name')
+        elif thing_name == self.thing_name:
+            if self.debug:
+                print('[Mpu6050Subscriber] ignore my data({})'.format(thing_name))
+        elif message.payload is None:
+            if self.debug:
+                print('[Mpu6050Subscriber] no messsage.payload')
+        elif isinstance(self.mpu6050, dict):
+            import ast
+            self.mpu6050[thing_name] = ast.literal_eval(message.payload.decode('utf-8'))
+            #self.mpu6050[thing_name] = json.loads(message.payload)
+        else:
+            if self.debug:
+                print('[Mpu6050Subscriber] unknown type self.hedge')
+
+    def run(self):
+        """
+        コレまでに取得した他のモノの最新位置情報を返却する。
+        引数：
+            なし
+        戻り値：
+            hedge       文字列型（｛モノの名前：JSON文字列｝）
+        """
+        if self.debug:
+            print('[Mpu6050Subscriber] run return {}'.format(str(self.mpu6050)))
+        return str(self.mpu6050)
+
+    def shutdown(self):
+        """
+        Unsubscribeしてフィールドを開放する。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        self._client.unsubscribe(self.topic, 0)
+        self.order = None
+        self._client = None
+        self.topic = None
+        if self.debug:
+            print('[Mpu6050Subscriber] shutdown')
+
+class Mpu9250Subscriber:
+    """
+    MPU9250データをsubscribeするパーツクラス。
+    自分以外のloaderエージェント最新位置情報を取得する。
+    """
+    def __init__(self, aws_iot_client_factory, interval=5, callback=None, debug=False):
+        """
+        サブスクライブを開始する。
+        引数：
+            aws_iot_client_factory  AWSIoTClientFactoryオブジェクト
+            interval                インターバル（秒）
+            callback                コールバック関数
+            debug                   デバッグフラグ
+        戻り値：
+            なし
+        """
+        self._client = aws_iot_client_factory.get_mqtt_client()
+        self.interval = interval
+        self.mpu9250 = {}
+        self.debug = debug
+        self.thing_name = aws_iot_client_factory.thing_name
+        self.topic = create_mpu9250_topic(
+            system=aws_iot_client_factory.system,
+            thing_type=aws_iot_client_factory.thing_type,
+            message_type='mpu9250')
+        self.callback = callback or self.subscribe_hedge_callback
+        self._client.subscribe(self.topic, 0, self.callback)
+        if self.debug:
+            print('[Mpu9250Subscriber] subscribe topic={}'.format(self.topic))
+
+    def subscribe_hedge_callback(self, client, userdata, message):
+        """
+        Subscribe時呼び出される。フィールドに命令を格納する。
+        引数：
+            client          MQTTクライアントオブジェクト
+            userdata        ユーザデータ
+            message         メッセージ
+        戻り値：
+            なし
+        """
+        if self.debug:
+            print('[Mpu9250Subscriber] subscribed: topic={} payload={}'.format(
+                str(message.topic), str(message.payload)))
+        thing_name = get_thing_name_from_mpu9250_topic(topic=str(message.topic))
+        if thing_name is None:
+            if self.debug:
+                print('[Mpu9250Subscriber] topic has no thing_name')
+        elif thing_name == self.thing_name:
+            if self.debug:
+                print('[Mpu9250Subscriber] ignore my data({})'.format(thing_name))
+        elif message.payload is None:
+            if self.debug:
+                print('[Mpu9250Subscriber] no messsage.payload')
+        elif isinstance(self.mpu9250, dict):
+            import ast
+            self.mpu9250[thing_name] = ast.literal_eval(message.payload.decode('utf-8'))
+            #self.mpu9250[thing_name] = json.loads(message.payload)
+        else:
+            if self.debug:
+                print('[Mpu9250Subscriber] unknown type self.hedge')
+
+    def run(self):
+        """
+        コレまでに取得した他のモノの最新位置情報を返却する。
+        引数：
+            なし
+        戻り値：
+            hedge       文字列型（｛モノの名前：JSON文字列｝）
+        """
+        if self.debug:
+            print('[Mpu9250Subscriber] run return {}'.format(str(self.mpu9250)))
+        return str(self.mpu9250)
+
+    def shutdown(self):
+        """
+        Unsubscribeしてフィールドを開放する。
+        引数：
+            なし
+        戻り値：
+            なし
+        """
+        self._client.unsubscribe(self.topic, 0)
+        self.order = None
+        self._client = None
+        self.topic = None
+        if self.debug:
+            print('[Mpu9250Subscriber] shutdown')

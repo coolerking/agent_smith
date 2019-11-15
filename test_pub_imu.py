@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-def test_imu():
+def test_pub_imu():
     
     try:
         import donkeycar as dk
@@ -94,4 +94,4 @@ def test_imu():
             pgio.stop()
 
 if __name__ == '__main__':
-    test_imu()
+    test_pub_imu()

@@ -82,8 +82,32 @@ def create_hedge_topic(system='real', thing_type='agent', thing_group='loader',
 thing_name='+', message_type='hedge'):
     return _create_base_topic(system, thing_type, thing_group, thing_name, message_type) + '/json'
 
+def create_mpu6050_topic(system='real', thing_type='agent', thing_group='loader', 
+thing_name='+', message_type='mpu6050'):
+    return _create_base_topic(system, thing_type, thing_group, thing_name, message_type) + '/json'
+
+def create_mpu9250_topic(system='real', thing_type='agent', thing_group='loader', 
+thing_name='+', message_type='mpu9250'):
+    return _create_base_topic(system, thing_type, thing_group, thing_name, message_type) + '/json'
+
 def get_thing_name_from_hedge_topic(system='real', thing_type='agent', 
 thing_group='loader', message_type='hedge', topic=None):
+    if topic is None:
+        return None
+    prefix = '/' + system + '/' + thing_type + '/' + thing_group + '/'
+    suffix = '/' + message_type + '/json'
+    return topic[len(prefix):(-1 * len(suffix))]
+
+def get_thing_name_from_mpu6050_topic(system='real', thing_type='agent', 
+thing_group='loader', message_type='mpu6050', topic=None):
+    if topic is None:
+        return None
+    prefix = '/' + system + '/' + thing_type + '/' + thing_group + '/'
+    suffix = '/' + message_type + '/json'
+    return topic[len(prefix):(-1 * len(suffix))]
+
+def get_thing_name_from_mpu9250_topic(system='real', thing_type='agent', 
+thing_group='loader', message_type='mpu9250', topic=None):
     if topic is None:
         return None
     prefix = '/' + system + '/' + thing_type + '/' + thing_group + '/'
