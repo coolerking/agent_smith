@@ -1017,9 +1017,17 @@ def omit_none(recent_dict, current_dict):
     return return_dict
 
 def is_zeros(target_dict):
-    if current_dict['x'] == 0 and current_dict['y'] == 0 and current_dict['z'] == 0:
+    """
+    引数で渡された辞書内の'x', 'y', 'z'値がすべてNoneもしくはゼロの場合
+    真値を返す。
+    引数：
+        target_dict     対象となる辞書
+    戻り値：
+        真偽値
+    """
+    if target_dict['x'] == 0 and target_dict['y'] == 0 and target_dict['z'] == 0:
         return True
-    elif if current_dict['x'] is None and current_dict['y'] is None and current_dict['z'] is None:
+    elif target_dict['x'] is None and target_dict['y'] is None and target_dict['z'] is None:
         return True
     return False
 
