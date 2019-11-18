@@ -6,7 +6,7 @@ import time
 import json
 import donkeycar as dk
 import numpy as np
-from topic import is_json, is_image, is_bin, is_thing_name
+from .topic import is_json, is_image, is_bin, is_thing_name
 
 class SubscriberBase:
     """
