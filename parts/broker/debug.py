@@ -167,6 +167,7 @@ def get_timestamp():
 
 cnt = 1
 def get_ts():
+    global cnt
     cnt = cnt + 1
     return cnt
     #return int(time.time()*100)
