@@ -60,7 +60,7 @@ class USNavPublisher(PublisherBase):
             'usnav/x':          to_float(usnav_x),
             'usnav/y':          to_float(usnav_y),
             'usnav/z':          to_float(usnav_z),
-            'usnav/timestamp':  to_str(usnav_timestamp),
+            'usnav/timestamp':  to_float(usnav_timestamp),
         }
         return json.dumps(message)
 
