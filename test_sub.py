@@ -6,7 +6,7 @@ def test_sub():
     V = dk.vehicle.Vehicle()
 
     from parts.broker import AWSShadowClientFactory
-    factory = AWSShadowClientFactory('conf/aws/smith.yml', 'smith')
+    factory = AWSShadowClientFactory('conf/aws/tom.yml', 'tom')
 
     from parts.broker import PowerReporter
     power = PowerReporter(factory, debug=True)
@@ -17,7 +17,7 @@ def test_sub():
 
     from parts.broker.sub import Subscriber
     sub = Subscriber(factory, debug=True)
-    V.add(sub, inputs=[
+    V.add(sub, outputs=[
         'user/angle', 'user/throttle', 'user/lift_throttle',
         'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
         'user/mode', 'timestamp'
