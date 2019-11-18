@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 MarvelmindデータをAWS IoT Core から Subscribeするパーツクラスを定義するモジュール。
-同じシステム分類内のagent/loaderをSubscribeする。
+real/agent/loaderをSubscribeする。
 """
 from .base import SubscriberBase
 from .topic import sub_hedge_usnav_json_topic, sub_hedge_usnav_raw_json_topic, sub_hedge_imu_json_topic, THING_TYPE_AGENT, THING_GROUP_LOADER
@@ -15,7 +15,7 @@ class USNavSubscriber(SubscriberBase):
     def __init__(self, aws_iot_client_factory, debug=False):
         """
         Subscribeを実行する。
-        同じシステム分類内のagent/loaderをSubscribeする。
+        real/agent/loaderをSubscribeする。
         引数：
             aws_iot_client_factory  AWS IoT Coreファクトリオブジェクト
             debug                   デバッグフラグ
@@ -23,7 +23,7 @@ class USNavSubscriber(SubscriberBase):
             なし
         """
         self.topic = sub_hedge_usnav_json_topic(
-            self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
+            SYSTEM_REAL, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
             print('[USNavSubscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='USNav', topic_name=self.topic, debug=debug)
@@ -57,7 +57,7 @@ class USNavRawSubscriber(SubscriberBase):
     def __init__(self, aws_iot_client_factory, debug=False):
         """
         Subscribeを実行する。
-        同じシステム分類内のagent/loaderをSubscribeする。
+        real/agent/loaderをSubscribeする。
         引数：
             aws_iot_client_factory  AWS IoT Coreファクトリオブジェクト
             debug                   デバッグフラグ
@@ -65,7 +65,7 @@ class USNavRawSubscriber(SubscriberBase):
             なし
         """
         self.topic = sub_hedge_usnav_raw_json_topic(
-            self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
+            SYSTEM_REAL, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
             print('[USNavRawSubscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='USNavRaw', topic_name=self.topic, debug=debug)
@@ -108,7 +108,7 @@ class IMUSubscriber(SubscriberBase):
     def __init__(self, aws_iot_client_factory, debug=False):
         """
         Subscribeを実行する。
-        同じシステム分類内のagent/loaderをSubscribeする。
+        real/agent/loaderをSubscribeする。
         引数：
             aws_iot_client_factory  AWS IoT Coreファクトリオブジェクト
             debug                   デバッグフラグ
@@ -116,7 +116,7 @@ class IMUSubscriber(SubscriberBase):
             なし
         """
         self.topic = sub_hedge_imu_json_topic(
-            self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
+            SYSTEM_REAL, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
             print('[IMUSubscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='IMU', topic_name=self.topic, debug=debug)
