@@ -219,7 +219,7 @@ def is_json(topic_name):
     """
     if topic_name is None or topic_name == '':
         return False
-    return topic_name.endsWith(DATA_TYPE_JSON)
+    return topic_name.endswith(DATA_TYPE_JSON)
 
 def is_image(topic_name):
     """
@@ -231,7 +231,7 @@ def is_image(topic_name):
     """
     if topic_name is None or topic_name == '':
         return False
-    return topic_name.endsWith(DATA_TYPE_IMAGE)
+    return topic_name.endswith(DATA_TYPE_IMAGE)
 
 def is_bin(topic_name):
     """
@@ -243,7 +243,7 @@ def is_bin(topic_name):
     """
     if topic_name is None or topic_name == '':
         return False
-    return topic_name.endsWith(DATA_TYPE_BIN)
+    return topic_name.endswith(DATA_TYPE_BIN)
 
 def is_thing_name(system, thing_type, thing_group, thing_name, topic_name):
     """
@@ -262,4 +262,4 @@ def is_thing_name(system, thing_type, thing_group, thing_name, topic_name):
         SEP + thing_name + SEP
     if topic_name is None or topic_name == '':
         return False
-    return topic_name.startsWith(prefix)
+    return topic_name.startswith(prefix)
