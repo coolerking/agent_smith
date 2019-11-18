@@ -47,6 +47,7 @@ class USNavSubscriber(SubscriberBase):
             self.message.get('usnav/x', 0.0), \
             self.message.get('usnav/y', 0.0), \
             self.message.get('usnav/z', 0.0), \
+            self.message.get('usnav/angle', 0.0), \
             self.message.get('usnav/timestamp', 0)
 
 class USNavRawSubscriber(SubscriberBase):

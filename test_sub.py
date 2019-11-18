@@ -72,11 +72,13 @@ def test_sub():
     ])
     '''
 
+    ''' bug here!'''
     from parts.broker.sub import USNavSubscriber
     usnav_sub = USNavSubscriber(factory, debug=True)
     V.add(usnav_sub, outputs=[
         'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
     ])
+    '''bug here! '''
 
     from parts.broker.sub import USNavRawSubscriber
     usnav_raw_sub = USNavRawSubscriber(factory, debug=True)
