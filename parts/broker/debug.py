@@ -165,5 +165,8 @@ def get_user_mode():
 def get_timestamp():
     return str(datetime.now())
 
+cnt = 1
 def get_ts():
-    return int(time.time()*100)
+    cnt = cnt + 1
+    return cnt
+    #return int(time.time()*100)

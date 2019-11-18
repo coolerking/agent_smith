@@ -69,7 +69,7 @@ class Mpu9250Subscriber(SubscriberBase):
         self.topic = sub_mpu9250_json_topic(
             SYSTEM_REAL, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
-            print('[Mpu6050Subscriber] topic name = {}'.format(self.topic))
+            print('[Mpu9250Subscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='Mpu9250', topic_name=self.topic, debug=debug)
 
     def run(self):

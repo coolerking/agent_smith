@@ -4,7 +4,7 @@ MarvelmindデータをAWS IoT Core から Subscribeするパーツクラスを�
 real/agent/loaderをSubscribeする。
 """
 from .base import SubscriberBase
-from .topic import sub_hedge_usnav_json_topic, sub_hedge_usnav_raw_json_topic, sub_hedge_imu_json_topic, THING_TYPE_AGENT, THING_GROUP_LOADER
+from .topic import sub_hedge_usnav_json_topic, sub_hedge_usnav_raw_json_topic, sub_hedge_imu_json_topic, SYSTEM_REAL, THING_TYPE_AGENT, THING_GROUP_LOADER
 
 
 class USNavSubscriber(SubscriberBase):
@@ -28,7 +28,7 @@ class USNavSubscriber(SubscriberBase):
             print('[USNavSubscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='USNav', topic_name=self.topic, debug=debug)
 
-    def run(self, usnav_id, usnav_x, us_nav_y, usnav_z, usnav_angle, usnav_timestamp):
+    def run(self):
         """
         Subscribe した Marvelmind データ(辞書型、位置情報データのみ)を取得する。
         引数：
