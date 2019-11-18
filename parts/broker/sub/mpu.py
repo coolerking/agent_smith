@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 MPU9250から取得したIMUデータをSubscribeするパーツクラス群。
+同じシステム分類内のagent/loaderをSubscribeする。
 """
-from base import SubscriberBase
-from topic import sub_mpu6050_json_topic, sub_mpu9250_json_topic
+from .base import SubscriberBase
+from .topic import sub_mpu6050_json_topic, sub_mpu9250_json_topic, THING_TYPE_AGENT, THING_GROUP_LOADER
 
 class Mpu6050Subscriber(SubscriberBase):
     """
@@ -13,6 +14,7 @@ class Mpu6050Subscriber(SubscriberBase):
     def __init__(self, aws_iot_client_factory, debug=False):
         """
         Subscribeを実行する。
+        同じシステム分類内のagent/loaderをSubscribeする。
         引数：
             aws_iot_client_factory  AWS IoT Coreファクトリオブジェクト
             debug                   デバッグフラグ
@@ -20,7 +22,7 @@ class Mpu6050Subscriber(SubscriberBase):
             なし
         """
         self.topic = sub_mpu6050_json_topic(
-            self.system, self.thing_type, self.thing_group)
+            self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
             print('[Mpu6050Subscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='Mpu6050', topic_name=self.topic, debug=debug)
@@ -57,6 +59,7 @@ class Mpu9250Subscriber(SubscriberBase):
     def __init__(self, aws_iot_client_factory, debug=False):
         """
         Subscribeを実行する。
+        同じシステム分類内のagent/loaderをSubscribeする。
         引数：
             aws_iot_client_factory  AWS IoT Coreファクトリオブジェクト
             debug                   デバッグフラグ
@@ -64,7 +67,7 @@ class Mpu9250Subscriber(SubscriberBase):
             なし
         """
         self.topic = sub_mpu9250_json_topic(
-            self.system, self.thing_type, self.thing_group)
+            self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
             print('[Mpu6050Subscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='Mpu9250', topic_name=self.topic, debug=debug)

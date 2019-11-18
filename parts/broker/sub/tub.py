@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 TubデータをAWS IoT Core から Subscribe するパーツクラスを定義するモジュール。
+同じシステム分類内のagent/loaderをSubscribeする。
 """
-from base import SubscriberBase, bytearray_to_arr
-from topic import sub_tub_json_topic, sub_tub_image_topic
+from .base import SubscriberBase, bytearray_to_arr
+from .topic import sub_tub_json_topic, sub_tub_image_topic, THING_TYPE_AGENT, THING_GROUP_LOADER
 
 class UserSubscriber(SubscriberBase):
     """
@@ -12,6 +13,7 @@ class UserSubscriber(SubscriberBase):
     def __init__(self, aws_iot_client_factory, debug=False):
         """
         Subscribeを実行する。
+        同じシステム分類内のagent/loaderをSubscribeする。
         引数：
             aws_iot_client_factory  AWS IoT Coreファクトリオブジェクト
             debug                   デバッグフラグ
@@ -19,7 +21,7 @@ class UserSubscriber(SubscriberBase):
             なし
         """
         self.topic = sub_tub_json_topic(
-            self.system, self.thing_type, self.thing_group)
+            self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
             print('[UserSubscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='User', topic_name=self.topic, debug=debug)
@@ -66,6 +68,7 @@ class Subscriber(SubscriberBase):
     def __init__(self, aws_iot_client_factory, debug=False):
         """
         Subscribeを実行する。
+        同じシステム分類内のagent/loaderをSubscribeする。
         引数：
             aws_iot_client_factory  AWS IoT Coreファクトリオブジェクト
             debug                   デバッグフラグ
@@ -73,7 +76,7 @@ class Subscriber(SubscriberBase):
             なし
         """
         self.topic = sub_tub_json_topic(
-            self.system, self.thing_type, self.thing_group)
+            self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
             print('[UserSubscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='', topic_name=self.topic, debug=debug)
@@ -129,6 +132,7 @@ class ImageSubscriber(SubscriberBase):
     def __init__(self, aws_iot_client_factory, debug=False):
         """
         Subscribeを実行する。
+        同じシステム分類内のagent/loaderをSubscribeする。
         引数：
             aws_iot_client_factory  AWS IoT Coreファクトリオブジェクト
             debug                   デバッグフラグ
@@ -136,7 +140,7 @@ class ImageSubscriber(SubscriberBase):
             なし
         """
         self.topic = sub_tub_image_topic(
-            self.system, self.thing_type, self.thing_group)
+            self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
             print('[ImageSubscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='Image', topic_name=self.topic, debug=debug)

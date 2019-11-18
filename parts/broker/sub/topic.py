@@ -113,7 +113,7 @@ data_type=WILDCARD_ONE):
         SEP + message_type + \
         SEP + data_type
 
-def sub_tub_json_topic(system, thing_type, thing_group):
+def sub_tub_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """
     Tubデータ(辞書型)を Subscribe する際に使用するトピック名を返却する。
     引数：
@@ -126,7 +126,7 @@ def sub_tub_json_topic(system, thing_type, thing_group):
     return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
         MESSAGE_TYPE_TUB, DATA_TYPE_JSON)
 
-def sub_tub_image_topic(system, thing_type, thing_group):
+def sub_tub_image_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """
     Tubデータ(イメージ、nd.array型)を Subscribe する際に使用するトピック名を返却する。
     引数：
@@ -139,7 +139,7 @@ def sub_tub_image_topic(system, thing_type, thing_group):
     return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
         MESSAGE_TYPE_TUB, DATA_TYPE_IMAGE)
 
-def sub_mpu9250_json_topic(system, thing_type, thing_group):
+def sub_mpu9250_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """
     MPU9250データ(辞書型)を Subscribe する際に使用するトピック名を返却する。
     引数：
@@ -152,7 +152,7 @@ def sub_mpu9250_json_topic(system, thing_type, thing_group):
     return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
         MESSAGE_TYPE_MPU9250, DATA_TYPE_JSON)
 
-def sub_mpu6050_json_topic(system, thing_type, thing_group):
+def sub_mpu6050_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """
     MPU6050データ(辞書型)を Subscribe する際に使用するトピック名を返却する。
     引数：
@@ -165,7 +165,7 @@ def sub_mpu6050_json_topic(system, thing_type, thing_group):
     return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
         MESSAGE_TYPE_MPU6050, DATA_TYPE_JSON)
 
-def sub_hedge_usnav_json_topic(system, thing_type, thing_group):
+def sub_hedge_usnav_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """
     Marvelmindデータ(辞書型、位置情報のみ)を Subscribe する際に
     使用するトピック名を返却する。
@@ -179,7 +179,7 @@ def sub_hedge_usnav_json_topic(system, thing_type, thing_group):
     return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
         MESSAGE_TYPE_HEDGE_USNAV, DATA_TYPE_JSON)
 
-def sub_hedge_usnav_raw_json_topic(system, thing_type, thing_group):
+def sub_hedge_usnav_raw_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """
     Marvelmindデータ(辞書型、距離情報のみ)を Subscribe する際に
     使用するトピック名を返却する。
@@ -193,7 +193,7 @@ def sub_hedge_usnav_raw_json_topic(system, thing_type, thing_group):
     return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
         MESSAGE_TYPE_HEDGE_USNAV_RAW, DATA_TYPE_JSON)
 
-def sub_hedge_imu_json_topic(system, thing_type, thing_group):
+def sub_hedge_imu_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """
     Marvelmindデータ(辞書型、IMU情報のみ)を Subscribe する際に
     使用するトピック名を返却する。
