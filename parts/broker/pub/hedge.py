@@ -152,7 +152,8 @@ class IMUPublisher(PublisherBase):
         self.qos = 0
 
     def run(self, imu_x, imu_y, imu_z, imu_qw, imu_qx, imu_qy, imu_qz,
-    imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az, imu_mx, imu_my, imu_mz,
+    imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz,
+    imu_mx, imu_my, imu_mz,
     imu_timestamp):
         """
         Marvelmindデータ(辞書型、IMUデータのみ)をPublishする。
@@ -170,6 +171,9 @@ class IMUPublisher(PublisherBase):
             imu_ax          加速度(X軸)
             imu_ay          加速度(Y軸)
             imu_az          加速度(Z軸)
+            imu_gx          角速度(X軸)
+            imu_gy          角速度(Y軸)
+            imu_gz          角速度(Z軸)
             imu_mx          磁束密度(X軸)
             imu_my          磁束密度(Y軸)
             imu_mz          磁束密度(Z軸)
@@ -182,7 +186,7 @@ class IMUPublisher(PublisherBase):
             self.to_message(
                 imu_x, imu_y, imu_z, imu_qw, imu_qx, imu_qy, imu_qz,
                 imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az,
-                imu_mx, imu_my, imu_mz,
+                imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz,
                 imu_timestamp), 
             self.qos)
         if self.debug:
@@ -192,6 +196,7 @@ class IMUPublisher(PublisherBase):
     imu_qw=None, imu_qx=None, imu_qy=None, imu_qz=None,
     imu_vx=None, imu_vy=None, imu_vz=None,
     imu_ax=None, imu_ay=None, imu_az=None,
+    imu_gx=None, imu_gy=None, imu_gz=None,
     imu_mx=None, imu_my=None, imu_mz=None,
     imu_timestamp=None):
         """
@@ -211,6 +216,9 @@ class IMUPublisher(PublisherBase):
             imu_ax          加速度(X軸)
             imu_ay          加速度(Y軸)
             imu_az          加速度(Z軸)
+            imu_gx          角速度(X軸)
+            imu_gy          角速度(Y軸)
+            imu_gz          角速度(Z軸)
             imu_mx          磁束密度(X軸)
             imu_my          磁束密度(Y軸)
             imu_mz          磁束密度(Z軸)
@@ -232,6 +240,9 @@ class IMUPublisher(PublisherBase):
             'imu/ax':           to_float(imu_ax),
             'imu/ay':           to_float(imu_ay),
             'imu/az':           to_float(imu_az),
+            'imu/gx':           to_float(imu_gx),
+            'imu/gy':           to_float(imu_gy),
+            'imu/gz':           to_float(imu_gz),
             'imu/mx':           to_float(imu_mx),
             'imu/my':           to_float(imu_my),
             'imu/mz':           to_float(imu_mz),

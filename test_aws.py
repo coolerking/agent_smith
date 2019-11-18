@@ -39,12 +39,13 @@ def test_aws():
     from parts.broker.debug import GetHedge
     hedge = GetHedge()
     V.add(hedge, outputs=[
+        # USNav 6
         'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
-        # IMU
+        # IMU 20
         'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
         'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
         'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
-        # USNav Raw
+        # USNav Raw 10
         'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
         'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
     ])
