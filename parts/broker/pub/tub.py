@@ -51,7 +51,7 @@ class UserPublisher(PublisherBase):
             メッセージ文字列
         """
         message = {
-            'user/aggle':           to_float(user_angle),
+            'user/angle':           to_float(user_angle),
             'user/throttle':        to_float(user_throttle),
             'user/lift_throttle':   to_float(user_lift_throttle),
             'user/mode':            to_str(user_mode),
@@ -111,10 +111,10 @@ class Publisher(PublisherBase):
             メッセージ文字列
         """
         message = {
-            'user/aggle':           to_float(user_angle),
+            'user/angle':           to_float(user_angle),
             'user/throttle':        to_float(user_throttle),
             'user/lift_throttle':   to_float(user_lift_throttle),
-            'pilot/aggle':          to_float(pilot_angle),
+            'pilot/angle':          to_float(pilot_angle),
             'pilot/throttle':       to_float(pilot_throttle),
             'pilot/lift_throttle':  to_float(pilot_lift_throttle),
             'user/mode':            to_str(user_mode),
