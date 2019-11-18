@@ -78,7 +78,7 @@ class Subscriber(SubscriberBase):
         self.topic = sub_tub_json_topic(
             self.system, THING_TYPE_AGENT, THING_GROUP_LOADER)
         if debug:
-            print('[UserSubscriber] topic name = {}'.format(self.topic))
+            print('[Subscriber] topic name = {}'.format(self.topic))
         super().__init__(aws_iot_client_factory, name='', topic_name=self.topic, debug=debug)
 
     def run(self):

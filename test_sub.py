@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from time import sleep
 
-
-def test_aws():
+def test_sub():
     import donkeycar as dk
     V = dk.vehicle.Vehicle()
 
@@ -14,44 +13,34 @@ def test_aws():
     print('on')
     power.on()
 
-    from parts.broker.debug import GetTub
-    tub = GetTub()
-    V.add(tub, outputs=[
-        'user/mode',
+    # Subscriber
+
+    from parts.broker.sub import Subscriber
+    sub = Subscriber(factory, debug=True)
+    V.add(sub, inputs=[
         'user/angle', 'user/throttle', 'user/lift_throttle',
         'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
-        'timestamp'
+        'user/mode', 'timestamp'
     ])
 
-    from parts.broker.debug import GetImage
-    image = GetImage()
-    V.add(image, outputs=['cam/image_array'])
-
-    # Publisher
-
-    from parts.broker.pub import Publisher
-    pub = Publisher(factory, debug=False)
-    V.add(pub, inputs=[
+    '''
+    from parts.broker.sub import UserSubscriber
+    user_sub = UserSubscriber(factory, debug=True)
+    V.add(user_sub, outputs=[
         'user/angle', 'user/throttle', 'user/lift_throttle',
-        'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
-        'user/mode'
+        #'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
+        'user/mode', 'timestamp'
     ])
+    '''
 
-    from parts.broker.pub import UserPublisher
-    tub_pub = UserPublisher(factory, debug=False)
-    V.add(tub_pub, inputs=[
-        'user/angle', 'user/throttle', 'user/lift_throttle',
-        'user/mode'
-    ])
-
-    from parts.broker.pub import ImagePublisher
-    image_pub = ImagePublisher(factory, debug=False)
-    V.add(image_pub, inputs=[
+    from parts.broker.sub import ImageSubscriber
+    image_sub = ImageSubscriber(factory, debug=True)
+    V.add(image_sub, outputs=[
         'cam/image_array',
     ])
 
     try:
-        V.start(rate_hz=20, max_loop_count=10000)
+        V.start(rate_hz=20, max_loop_count=1000)
 
     except KeyboardInterrupt:
         print('Keyboard Interrupt')
@@ -60,5 +49,6 @@ def test_aws():
         print('off')
         sleep(20)
 
+
 if __name__ == '__main__':
-    test_aws()
+    test_sub()
