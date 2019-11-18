@@ -27,7 +27,7 @@ def test_aws():
     image = GetImage()
     V.add(image, outputs=['cam/image_array'])
 
-    V.mem['user/mode'] = 'user'
+    #V.mem['user/mode'] = 'user'
 
     from parts.broker.pub import Publisher
     pub = Publisher(factory, debug=True)

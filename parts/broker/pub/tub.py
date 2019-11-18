@@ -90,7 +90,8 @@ class Publisher(PublisherBase):
         ret = self.client.publish(
             self.topic, 
             self.to_message(
-                user_angle, user_throttle, user_lift_throttle, user_mode), 
+                user_angle, user_throttle, user_lift_throttle,
+                pilot_angle, pilot_throttle, pilot_lift_throttle, user_mode), 
                 self.qos)
         if self.debug:
             print('[Publisher] publish topic={} ret={}'.format(self.topic, str(ret)))
