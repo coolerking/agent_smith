@@ -19,49 +19,49 @@ class Mpu6050Publisher(PublisherBase):
             print('[Mpu6050Publisher] topic name = {}'.format(self.topic))
         self.qos = 0
 
-    def run(self, imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az):
+    def run(self, imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz):
         """
         MPU6050 IMUデータ(辞書型)をPublishする。
         引数：
-            imu_vx          速度(X軸)
-            imu_vy          速度(Y軸)
-            imu_vz          速度(Z軸)
             imu_ax          加速度(X軸)
             imu_ay          加速度(Y軸)
             imu_az          加速度(Z軸)
+            imu_gx          重力加速度(X軸)
+            imu_gy          重力加速度(Y軸)
+            imu_gz          重力加速度(Z軸)
         戻り値：
             なし
         """
         ret = self.client.publish(
             self.topic, 
             self.to_message(
-                imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az), 
+                imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz), 
             self.qos)
         if self.debug:
             print('[Mpu6050Publisher] publish topic={} ret={}'.format(self.topic, str(ret)))
 
-    def to_message(self,  imu_vx=None, imu_vy=None, imu_vz=None,
-    imu_ax=None, imu_ay=None, imu_az=None):
+    def to_message(self,  imu_ax=None, imu_ay=None, imu_az=None,
+    imu_gx=None, imu_gy=None, imu_gz=None):
         """
         手動運転のみのTubデータをメッセージ文字列化する。
         引数：
-            imu_vx          速度(X軸)
-            imu_vy          速度(Y軸)
-            imu_vz          速度(Z軸)
             imu_ax          加速度(X軸)
             imu_ay          加速度(Y軸)
             imu_az          加速度(Z軸)
+            imu_gx          角速度(X軸)
+            imu_gy          角速度(Y軸)
+            imu_gz          角速度(Z軸)
         戻り値：
             メッセージ文字列
         """
         message = {
-            'imu/vx':           to_float(imu_vx),
-            'imu/vy':           to_float(imu_vy),
-            'imu/vz':           to_float(imu_vz),
-            'imu/ax':           to_float(imu_ax),
-            'imu/ay':           to_float(imu_ay),
-            'imu/az':           to_float(imu_az),
-            'imu/timestamp':    to_float(time.time()),
+            'imu/acl_x':            to_float(imu_ax),
+            'imu/acl_y':            to_float(imu_ay),
+            'imu/acl_z':            to_float(imu_az),
+            'imu/gyr_x':            to_float(imu_gx),
+            'imu/gyr_y':            to_float(imu_gy),
+            'imu/gyr_z':            to_float(imu_gz),
+            'imu/mpu_timestamp':    to_float(time.time()),
         }
         return json.dumps(message)
 
@@ -77,16 +77,16 @@ class Mpu9250Publisher(PublisherBase):
             print('[Mpu9250Publisher] topic name = {}'.format(self.topic))
         self.qos = 0
 
-    def run(self, imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az, imu_mx, imu_my, imu_mz):
+    def run(self, imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz):
         """
         MPU9250 IMUデータ(辞書型)をPublishする。
         引数：
-            imu_vx          速度(X軸)
-            imu_vy          速度(Y軸)
-            imu_vz          速度(Z軸)
             imu_ax          加速度(X軸)
             imu_ay          加速度(Y軸)
             imu_az          加速度(Z軸)
+            imu_gx          角速度(X軸)
+            imu_gy          角速度(Y軸)
+            imu_gz          角速度(Z軸)
             imu_mx          磁束密度(X軸)
             imu_my          磁束密度(Y軸)
             imu_mz          磁束密度(Z軸)
@@ -96,22 +96,22 @@ class Mpu9250Publisher(PublisherBase):
         ret = self.client.publish(
             self.topic, 
             self.to_message(
-                imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az, imu_mx, imu_my, imu_mz), 
+                imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz), 
             self.qos)
         if self.debug:
             print('[Mpu9250Publisher] publish topic={} ret={}'.format(self.topic, str(ret)))
 
-    def to_message(self,  imu_vx=None, imu_vy=None, imu_vz=None,
-    imu_ax=None, imu_ay=None, imu_az=None, imu_mx=None, imu_my=None, imu_mz=None):
+    def to_message(self,  imu_ax=None, imu_ay=None, imu_az=None,
+    imu_gx=None, imu_gy=None, imu_gz=None, imu_mx=None, imu_my=None, imu_mz=None):
         """
-        手動運転のみのTubデータをメッセージ文字列化する。
+        MPU9250 IMUデータ(辞書型)をメッセージ文字列に変換する。
         引数：
-            imu_vx          速度(X軸)
-            imu_vy          速度(Y軸)
-            imu_vz          速度(Z軸)
             imu_ax          加速度(X軸)
             imu_ay          加速度(Y軸)
             imu_az          加速度(Z軸)
+            imu_gx          角速度(X軸)
+            imu_gy          角速度(Y軸)
+            imu_gz          角速度(Z軸)
             imu_mx          磁束密度(X軸)
             imu_my          磁束密度(Y軸)
             imu_mz          磁束密度(Z軸)
@@ -119,15 +119,15 @@ class Mpu9250Publisher(PublisherBase):
             メッセージ文字列
         """
         message = {
-            'imu/vx':           to_float(imu_vx),
-            'imu/vy':           to_float(imu_vy),
-            'imu/vz':           to_float(imu_vz),
-            'imu/ax':           to_float(imu_ax),
-            'imu/ay':           to_float(imu_ay),
-            'imu/az':           to_float(imu_az),
-            'imu/mx':           to_float(imu_mx),
-            'imu/my':           to_float(imu_my),
-            'imu/mz':           to_float(imu_mz),
-            'imu/timestamp':    to_float(time.time()),
+            'imu/acl_x':            to_float(imu_ax),
+            'imu/acl_y':            to_float(imu_ay),
+            'imu/acl_z':            to_float(imu_az),
+            'imu/gyr_x':            to_float(imu_gx),
+            'imu/gyr_y':            to_float(imu_gy),
+            'imu/gyr_z':            to_float(imu_gz),
+            'imu/mgt_x':            to_float(imu_mx),
+            'imu/mgt_y':            to_float(imu_my),
+            'imu/mgt_z':            to_float(imu_mz),
+            'imu/mpu_timestamp':    to_float(time.time()),
         }
         return json.dumps(message)

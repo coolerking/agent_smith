@@ -27,6 +27,28 @@ def test_aws():
     image = GetImage()
     V.add(image, outputs=['cam/image_array'])
 
+    from parts.broker.debug import GetMpu
+    mpu = GetMpu()
+    V.add(mpu, outputs=[
+        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+        'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
+        'imu/temp', 'imu/mpu_timestamp'
+    ])
+
+    from parts.broker.debug import GetHedge
+    hedge = GetHedge()
+    V.add(hedge, outputs=[
+        'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
+        # IMU
+        'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+        'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
+        'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
+        # USNav Raw
+        'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
+        'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
+    ])
+
     # Publisher
 
     from parts.broker.pub import Publisher
@@ -48,6 +70,29 @@ def test_aws():
     image_pub = ImagePublisher(factory, debug=False)
     V.add(image_pub, inputs=[
         'cam/image_array',
+    ])
+
+    from parts.broker.pub import USNavPublisher
+    usnav = USNavPublisher(factory, debug=True)
+    V.add(usnav, inputs=[
+        'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
+    ])
+
+    from parts.broker.pub import USNavRawPublisher
+    usnav_raw = USNavRawPublisher(factory, debug=True)
+    V.add(usnav_raw, inputs=[
+        # USNav Raw
+        'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
+        'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
+    ])
+
+    from parts.broker.pub import IMUPublisher
+    imu = IMUPublisher(factory, debug=True)
+    V.add(imu, inputs=[
+        # IMU
+        'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+        'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
+        'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
     ])
 
     try:

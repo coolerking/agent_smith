@@ -42,7 +42,7 @@ class USNavSubscriber(SubscriberBase):
             usnav_timestamp 位置情報取得時刻
         """
         if self.message is None:
-            return '0', 0.0, 0.0, 0.0, 0.0, 0.0
+            self.message = {}
         return self.message.get('usnav/id', '0'), \
             self.message.get('usnav/x', 0.0), \
             self.message.get('usnav/y', 0.0), \
@@ -88,7 +88,7 @@ class USNavRawSubscriber(SubscriberBase):
             dist_timestamp  ビーコン間距離取得時刻
         """
         if self.message is None:
-            return '0', '0', 0.0, '0', 0.0, '0', 0.0, '0', 0.0, 0
+            self.message = {}
         return self.message.get('dist/id', '0'), \
             self.message.get('dist/b1', '0'), \
             self.message.get('dist/b1d', 0.0), \
@@ -98,7 +98,7 @@ class USNavRawSubscriber(SubscriberBase):
             self.message.get('dist/b3d', 0.0), \
             self.message.get('dist/b4', '0'), \
             self.message.get('dist/b4d', 0.0), \
-            self.message.get('usnav/timestamp', 0)
+            self.message.get('dist/timestamp', 0)
 
 class IMUSubscriber(SubscriberBase):
     """
@@ -146,11 +146,7 @@ class IMUSubscriber(SubscriberBase):
             imu_timestamp   IMUデータ取得時刻
         """
         if self.message is None:
-            return 0.0, 0.0, 0.0, \
-                0.0, 0.0, 0.0, 0.0, \
-                0.0, 0.0, 0.0, \
-                0.0, 0.0, 0.0, \
-                0.0, 0.0, 0.0, 0
+            self.message = {}
         return self.message.get('imu/x', 0.0), \
             self.message.get('imu/y', 0.0), \
             self.message.get('imu/z', 0.0), \
@@ -167,4 +163,4 @@ class IMUSubscriber(SubscriberBase):
             self.message.get('imu/mx', 0.0), \
             self.message.get('imu/my', 0.0), \
             self.message.get('imu/mz', 0.0), \
-            self.message.get('usnav/timestamp', 0)
+            self.message.get('imu/timestamp', 0)

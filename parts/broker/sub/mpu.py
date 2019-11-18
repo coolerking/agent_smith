@@ -33,23 +33,23 @@ class Mpu6050Subscriber(SubscriberBase):
         引数：
             なし
         戻り値：
-            imu_vx          速度(X軸)
-            imu_vy          速度(Y軸)
-            imu_vz          速度(Z軸)
-            imu_ax          加速度(X軸)
-            imu_ay          加速度(Y軸)
-            imu_az          加速度(Z軸)
-            imu_timestamp   Subscribeした時刻(time.time()結果)
+            imu/acl_x           加速度(X軸)
+            imu/acl_y           加速度(Y軸)
+            imu/acl_z           加速度(Z軸)
+            imu/gyr_x           角速度(X軸)
+            imu/gyr_y           角速度(Y軸)
+            imu/gyr_z           角速度(Z軸)
+            imu/mpu_timestamp   Subscribeした時刻(time.time()結果)
         """
         if self.message is None:
-            return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-        return self.message.get('imu/vx', 0.0), \
-            self.message.get('imu/vy', 0.0), \
-            self.message.get('imu/vz', 0.0), \
-            self.message.get('imu/ax', 0.0), \
-            self.message.get('imu/ay', 0.0), \
-            self.message.get('imu/az', 0.0), \
-            self.message.get('imu/timestamp', 0.0)
+            self.message = {}
+        return self.message.get('imu/acl_x', 0.0), \
+            self.message.get('imu/acl_y', 0.0), \
+            self.message.get('imu/acl_z', 0.0), \
+            self.message.get('imu/gyr_x', 0.0), \
+            self.message.get('imu/gyr_y', 0.0), \
+            self.message.get('imu/gyr_z', 0.0), \
+            self.message.get('imu/mpu_timestamp', 0.0)
 
 class Mpu9250Subscriber(SubscriberBase):
     """
@@ -78,26 +78,28 @@ class Mpu9250Subscriber(SubscriberBase):
         引数：
             なし
         戻り値：
-            imu_vx          速度(X軸)
-            imu_vy          速度(Y軸)
-            imu_vz          速度(Z軸)
             imu_ax          加速度(X軸)
             imu_ay          加速度(Y軸)
             imu_az          加速度(Z軸)
+            imu_gx          角速度(X軸)
+            imu_gy          角速度(Y軸)
+            imu_gz          角速度(Z軸)
             imu_mx          磁束密度(X軸)
             imu_my          磁束密度(Y軸)
             imu_mz          磁束密度(Z軸)
+            imu_temp        温度(C)
             imu_timestamp   Subscribeした時刻(time.time()結果)
         """
         if self.message is None:
-            return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-        return self.message.get('imu/vx', 0.0), \
-            self.message.get('imu/vy', 0.0), \
-            self.message.get('imu/vz', 0.0), \
-            self.message.get('imu/ax', 0.0), \
-            self.message.get('imu/ay', 0.0), \
-            self.message.get('imu/az', 0.0), \
-            self.message.get('imu/mx', 0.0), \
-            self.message.get('imu/my', 0.0), \
-            self.message.get('imu/mz', 0.0), \
-            self.message.get('imu/timestamp', 0.0)
+            self.message = {}
+        return self.message.get('imu/acl_x', 0.0), \
+            self.message.get('imu/acl_y', 0.0), \
+            self.message.get('imu/acl_z', 0.0), \
+            self.message.get('imu/gyr_x', 0.0), \
+            self.message.get('imu/gyr_y', 0.0), \
+            self.message.get('imu/gyr_z', 0.0), \
+            self.message.get('imu/mgt_x', 0.0), \
+            self.message.get('imu/mgt_y', 0.0), \
+            self.message.get('imu/mgt_z', 0.0), \
+            self.message.get('imu/temp', 0.0), \
+            self.message.get('imu/mpu_timestamp', 0.0)

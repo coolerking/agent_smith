@@ -4,6 +4,7 @@ Vehicle上のデータを標準出力に表示するデバッグパーツ群。
 """
 import os
 import glob
+import time
 import random
 import numpy as np
 #import donkeycar as dk
@@ -108,9 +109,48 @@ class GetTub:
     def shutdown(self):
         pass
 
+'''
+        inputs += [
+            # USNav
+            'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
+            # IMU
+            'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+            'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
+            'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
+            # USNav Raw
+            'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
+            'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
+        ]
+'''
+
+
+class GetHedge:
+
+    def run(self):
+        return get_id(), get_imu(), get_imu(), get_imu(), get_imu(), get_ts(), \
+        get_imu(), get_imu(), get_imu(), get_imu(), get_imu(), get_imu(), get_imu(), \
+        get_imu(), get_imu(), get_imu(), get_imu(), get_imu(), get_imu(), \
+        get_imu(), get_imu(), get_imu(), get_imu(), get_imu(), get_imu(), get_ts(), \
+        get_id(), get_id(), get_cms(), get_id(), get_cms(), \
+        get_id(), get_cms(), get_id(), get_cms(), get_ts()
+
+class GetMpu:
+
+    def run(self):
+        return get_imu(), get_imu(), get_imu(), \
+            get_imu(), get_imu(), get_imu(), \
+            get_imu(), get_imu(), get_imu(), \
+            get_cms(), time.time()
+
+def get_id():
+    all_id = ['11', '22', '33', '44', '55']
+    return all_id[random.randrange(len(all_id))]
 
 def get_value():
     return random.uniform(1.0, -1.0)
+
+def get_imu():
+    return random.uniform(300.0, -300.0)
 
 def get_volts():
     return random.uniform(3.05, 0.0)
@@ -124,3 +164,6 @@ def get_user_mode():
 
 def get_timestamp():
     return str(datetime.now())
+
+def get_ts():
+    return int(time.time()*100)

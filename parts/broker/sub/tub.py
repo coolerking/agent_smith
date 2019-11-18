@@ -53,8 +53,8 @@ class UserSubscriber(SubscriberBase):
             timestamp           Subscribe時点の時刻(time.time()結果)
         """
         if self.message is None:
-            return 0.0, 0.0, 0.0, 'user', 0.0
-        return self.message.get('user/aggle', 0.0), \
+            self.message = {}
+        return self.message.get('user/angle', 0.0), \
             self.message.get('user/throttle', 0.0), \
             self.message.get('user/lift_throttle', 0.0), \
             self.message.get('user/mode', 'user'), \
@@ -114,11 +114,11 @@ class Subscriber(SubscriberBase):
             timestamp           Subscribe時点の時刻(time.time()結果)
         """
         if self.message is None:
-            return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 'user', 0.0
-        return self.message.get('user/aggle', 0.0), \
+            self.message = {}
+        return self.message.get('user/angle', 0.0), \
             self.message.get('user/throttle', 0.0), \
             self.message.get('user/lift_throttle', 0.0), \
-            self.message.get('pilot/aggle', 0.0), \
+            self.message.get('pilot/angle', 0.0), \
             self.message.get('pilot/throttle', 0.0), \
             self.message.get('pilot/lift_throttle', 0.0), \
             self.message.get('user/mode', 'user'), \
