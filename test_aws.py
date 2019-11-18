@@ -43,7 +43,7 @@ def test_aws():
     ])
 
     from parts.broker.pub import ImagePublisher
-    image_pub = ImagePublister(factory, debug=True)
+    image_pub = ImagePublisher(factory, debug=True)
     V.add(image_pub, inputs=[
         'cam/image_array',
     ])
