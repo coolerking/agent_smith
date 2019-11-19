@@ -977,9 +977,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
 
             inputs += tub_imu_inputs
             types += tub_imu_input_types
-        elif cfg.HAVE_IMU:
-            inputs += tub_imu_inputs
-            types += tub_imu_input_types
+    else:
+        inputs += tub_imu_inputs
+        types += tub_imu_input_types
 
     if cfg.RECORD_DURING_AI:
         '''
