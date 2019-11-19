@@ -14,14 +14,15 @@ def test_sub():
     power.on()
 
     # Subscriber
-    ''''''
+    '''ok'''
     from parts.broker.sub import Subscriber
-    sub = Subscriber(factory, debug=False)
+    sub = Subscriber(factory, debug=True)
     V.add(sub, outputs=[
         'user/angle', 'user/throttle', 'user/lift_throttle',
         'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
         'user/mode', 'timestamp'
     ])
+
     '''
     from parts.broker.sub import UserSubscriber
     user_sub = UserSubscriber(factory, debug=False)
@@ -33,22 +34,24 @@ def test_sub():
     '''
 
     from parts.broker.sub import ImageSubscriber
-    image_sub = ImageSubscriber(factory, debug=False)
+    image_sub = ImageSubscriber(factory, debug=True)
     V.add(image_sub, outputs=[
         'cam/image_array',
     ])
 
+    ''' ok '''
     class CheckImageType:
         def run(self, image_array):
             print('[CheckImageType] image_array')
             print(type(image_array))
-            print(image_array)
+            #print(image_array)
     V.add(CheckImageType(), inputs=[
         'cam/image_array',
     ])
+    '''ok'''
 
     from parts.broker.sub import Mpu9250Subscriber
-    mpu_sub = Mpu9250Subscriber(factory, debug=False)
+    mpu_sub = Mpu9250Subscriber(factory, debug=True)
     V.add(mpu_sub, outputs=[
         'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
         'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
@@ -57,6 +60,7 @@ def test_sub():
         'imu/mpu_timestamp',
     ])
 
+    ''' ok '''
     class PrintMpu9250:
         def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, ts):
             print('[Mpu9260] a:({},{},{}) g:({},{},{}) m:({},{},{}) t:{} ts:{}'.format(
@@ -69,7 +73,9 @@ def test_sub():
         'imu/temp',
         'imu/mpu_timestamp',
     ])
+    '''ok'''
 
+    '''
     from parts.broker.sub import Mpu6050Subscriber
     mpu_sub = Mpu6050Subscriber(factory, debug=False)
     V.add(mpu_sub, outputs=[
@@ -79,29 +85,16 @@ def test_sub():
         #'imu/temp',
         'imu/mpu_timestamp',
     ])
-
-    '''
-        V.add(hedge, outputs=[
-        # USNav 6
-        'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
-        # IMU 20
-        'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
-        'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
-        'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
-        # USNav Raw 10
-        'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
-        'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
-    ])
     '''
 
-    ''' bug here!'''
+
     from parts.broker.sub import USNavSubscriber
-    usnav_sub = USNavSubscriber(factory, debug=False)
+    usnav_sub = USNavSubscriber(factory, debug=True)
     V.add(usnav_sub, outputs=[
         'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
     ])
-    '''bug here! '''
 
+    ''' ok '''
     class PrintUSNav:
         def run(self, ids, x, y, z, a, ts):
             print('[USNav] id:{} ({}, {}, {}) a:{}, ts:{}'.format(
@@ -110,6 +103,7 @@ def test_sub():
     V.add(PrintUSNav(), inputs=[
         'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
     ])
+    '''ok'''
 
     from parts.broker.sub import USNavRawSubscriber
     usnav_raw_sub = USNavRawSubscriber(factory, debug=True)
@@ -118,6 +112,7 @@ def test_sub():
         'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
     ])
 
+    ''' ok'''
     class PrintUSNavRaw:
         def run(self, ids, b1, b1d, b2, b2d, b3, b3d, b4, b4d, ts):
             print('[USNavRaw] id:{}, [{}]:{} [{}]:{} [{}]:{} [{}]:{} ts:{}'.format(
@@ -127,6 +122,7 @@ def test_sub():
         'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
         'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
     ])
+    '''ok'''
 
     from parts.broker.sub import IMUSubscriber
     imu_sub = IMUSubscriber(factory, debug=True)
@@ -136,6 +132,7 @@ def test_sub():
         'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
     ])
 
+    '''ok'''
     class PrintIMU:
         def run(self, x,y,z,qw,qx,qy,qz,vx,vy,vz,ax,ay,az,gx,gy,gz,mx,my,mz,ts):
             print('[IMU]({},{},{}) q({},{},{},{}) v({},{},{}) a({},{},{}) g({},{},{}) m({},{},{}) ts:{}'.format(
@@ -148,6 +145,7 @@ def test_sub():
         'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
         'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
     ])
+    '''ok'''
 
     try:
         V.start(rate_hz=20, max_loop_count=100)

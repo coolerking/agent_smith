@@ -41,6 +41,8 @@ class Mpu6050Subscriber(SubscriberBase):
             imu/gyr_z           角速度(Z軸)
             imu/mpu_timestamp   Subscribeした時刻(time.time()結果)
         """
+        if self.debug:
+            print('[Mpu6050Subscriber] subscribed:{}'.format(str(self.arrive)))
         if self.message is None:
             self.message = {}
         return self.message.get('imu/acl_x', 0.0), \
@@ -90,6 +92,8 @@ class Mpu9250Subscriber(SubscriberBase):
             imu_temp        温度(C)
             imu_timestamp   Subscribeした時刻(time.time()結果)
         """
+        if self.debug:
+            print('[Mpu9250Subscriber] subscribed:{}'.format(str(self.arrive)))
         if self.message is None:
             self.message = {}
         return self.message.get('imu/acl_x', 0.0), \

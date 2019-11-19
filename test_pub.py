@@ -14,6 +14,7 @@ def test_pub():
     print('on')
     power.on()
 
+    # Tub json
     '''
     from parts.broker.debug import GetTub
     tub = GetTub()
@@ -33,13 +34,16 @@ def test_pub():
     V.mem['user/mode'] = 'user'
     value = 0.0
     for key in tubs:
-        value +=1.0
+        value = value + 1.0
         V.mem[key]=value
-
+        print('key:{} value:{}'.format(key, str(value)))
+    
+    # Tub image
     from parts.broker.debug import GetImage
     image = GetImage()
     V.add(image, outputs=['cam/image_array'])
 
+    # mpu
     '''
     from parts.broker.debug import GetMpu
     mpu = GetMpu()
@@ -58,8 +62,9 @@ def test_pub():
     ]
     value = 0.0
     for key in mpus:
-        value +=1.0
+        value = value + 1.0
         V.mem[key]=value
+        print('key:{} value:{}'.format(key, str(value)))
 
     '''
     from parts.broker.debug import GetHedge
@@ -96,8 +101,10 @@ def test_pub():
     ]
     value = 0.0
     for key in hedges:
-        value +=1.0
+        value = value + 1.0
         V.mem[key]=value
+        print('key:{} value:{}'.format(key, str(value)))
+    
     hedges_str = [
         'usnav/id',
         # USNav Raw 10
@@ -107,8 +114,9 @@ def test_pub():
         'dist/b4', 
     ]
     for i in range(len(hedges_str)):
-        V.mem[hedges_str[i]] = str(i)
-
+        V.mem[hedges_str[i]] = str(i+1)
+        print('key:{} value:{}'.format(hedges_str[i], str(i+1)))
+    
     # Publisher
 
     from parts.broker.pub import Publisher
@@ -119,15 +127,17 @@ def test_pub():
         'user/mode'
     ])
 
+    '''
     from parts.broker.pub import UserPublisher
     tub_pub = UserPublisher(factory, debug=False)
     V.add(tub_pub, inputs=[
         'user/angle', 'user/throttle', 'user/lift_throttle',
         'user/mode'
     ])
+    '''
 
     from parts.broker.pub import ImagePublisher
-    image_pub = ImagePublisher(factory, debug=False)
+    image_pub = ImagePublisher(factory, debug=True)
     V.add(image_pub, inputs=[
         'cam/image_array',
     ])
@@ -153,6 +163,24 @@ def test_pub():
         'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
         'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
         'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
+    ])
+
+    from parts.broker.pub import Mpu9250Publisher
+    mpu = Mpu9250Publisher(factory, debug=True)
+    V.add(mpu, inputs=[
+        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+        'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
+        'imu/temp',
+    ])
+
+    from parts.broker.pub import Mpu6050Publisher
+    mpu = Mpu6050Publisher(factory, debug=True)
+    V.add(mpu, inputs=[
+        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+        #'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
+        #'imu/temp',
     ])
 
     try:

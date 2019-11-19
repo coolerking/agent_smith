@@ -20,7 +20,7 @@ class USNavPublisher(PublisherBase):
             print('[USNavPublisher] topic name = {}'.format(self.topic))
         self.qos = 0
 
-    def run(self, usnav_id, usnav_x, us_nav_y, usnav_z, usnav_angle, usnav_timestamp):
+    def run(self, usnav_id, usnav_x, usnav_y, usnav_z, usnav_angle, usnav_timestamp):
         """
         Marvelmindデータ(辞書型、位置情報データのみ)をPublishする。
         引数：
@@ -36,13 +36,15 @@ class USNavPublisher(PublisherBase):
         ret = self.client.publish(
             self.topic, 
             self.to_message(
-                usnav_id, usnav_x, us_nav_y, usnav_z, usnav_angle, usnav_timestamp), 
+                usnav_id, usnav_x, usnav_y, usnav_z, usnav_angle, usnav_timestamp), 
                 self.qos)
         if self.debug:
             print('[USNavPublisher] publish topic={} ret={}'.format(self.topic, str(ret)))
+            print('[USNavPublisher] msg={}'.format(self.to_message(
+                usnav_id, usnav_x, usnav_y, usnav_z, usnav_angle, usnav_timestamp)))
 
-    def to_message(self, usnav_id=None, usnav_x=None, usnav_y=None, usnav_z=None, 
-    usnav_angle=None, usnav_timestamp=None):
+    def to_message(self, usnav_id, usnav_x, usnav_y, usnav_z, 
+    usnav_angle, usnav_timestamp):
         """
         手動運転のみのTubデータをメッセージ文字列化する。
         引数：
@@ -60,6 +62,7 @@ class USNavPublisher(PublisherBase):
             'usnav/x':          to_float(usnav_x),
             'usnav/y':          to_float(usnav_y),
             'usnav/z':          to_float(usnav_z),
+            'usnav/angle':      to_float(usnav_angle),
             'usnav/timestamp':  to_float(usnav_timestamp),
         }
         return json.dumps(message)
@@ -99,14 +102,16 @@ class USNavRawPublisher(PublisherBase):
             self.topic, 
             self.to_message(
                 dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d,
-                dist_b3, dist_b3d, dist_timestamp), 
+                dist_b3, dist_b3d, dist_b4, dist_b4d, dist_timestamp), 
             self.qos)
         if self.debug:
             print('[USNavRawPublisher] publish topic={} ret={}'.format(self.topic, str(ret)))
+            print('[USNavRawPublisher] msg={}'.format(self.to_message(
+                dist_id, dist_b1, dist_b1d, dist_b2, dist_b2d,
+                dist_b3, dist_b3d, dist_b4, dist_b4d, dist_timestamp)))
 
-    def to_message(self, dist_id=None, dist_b1=None, dist_b1d=None, dist_b2=None,
-    dist_b2d=None, dist_b3=None, dist_b3d=None, dist_b4=None, dist_b4d=None,
-    dist_timestamp=None):
+    def to_message(self, dist_id, dist_b1, dist_b1d, dist_b2,
+    dist_b2d, dist_b3, dist_b3d, dist_b4, dist_b4d, dist_timestamp):
         """
         Marvelmindデータ(辞書型、ビーコン間距離データのみ)を
         メッセージ文字列化する。
@@ -134,7 +139,7 @@ class USNavRawPublisher(PublisherBase):
             'dist/b3d':         to_float(dist_b3d),
             'dist/b4':          to_str(dist_b4),
             'dist/b4d':         to_float(dist_b4d),
-            'dist/timestamp':   to_str(dist_timestamp),
+            'dist/timestamp':   to_float(dist_timestamp),
         }
         return json.dumps(message)
 
@@ -145,7 +150,7 @@ class IMUPublisher(PublisherBase):
     """
     def __init__(self, aws_iot_client_factory, debug=False):
         super().__init__(aws_iot_client_factory, 'IMU', debug)
-        self.topic = pub_hedge_usnav_raw_json_topic(
+        self.topic = pub_hedge_imu_json_topic(
             self.system, self.thing_type, self.thing_group, self.thing_name)
         if self.debug:
             print('[IMUPublisher] topic name = {}'.format(self.topic))
@@ -191,14 +196,19 @@ class IMUPublisher(PublisherBase):
             self.qos)
         if self.debug:
             print('[IMUPublisher] publish topic={} ret={}'.format(self.topic, str(ret)))
+            print('[IMUPublisher] msg={}'.format(self.to_message(
+                imu_x, imu_y, imu_z, imu_qw, imu_qx, imu_qy, imu_qz,
+                imu_vx, imu_vy, imu_vz, imu_ax, imu_ay, imu_az,
+                imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz,
+                imu_timestamp)))
 
-    def to_message(self, imu_x=None, imu_y=None, imu_z=None,
-    imu_qw=None, imu_qx=None, imu_qy=None, imu_qz=None,
-    imu_vx=None, imu_vy=None, imu_vz=None,
-    imu_ax=None, imu_ay=None, imu_az=None,
-    imu_gx=None, imu_gy=None, imu_gz=None,
-    imu_mx=None, imu_my=None, imu_mz=None,
-    imu_timestamp=None):
+    def to_message(self, imu_x, imu_y, imu_z,
+    imu_qw, imu_qx, imu_qy, imu_qz,
+    imu_vx, imu_vy, imu_vz,
+    imu_ax, imu_ay, imu_az,
+    imu_gx, imu_gy, imu_gz,
+    imu_mx, imu_my, imu_mz,
+    imu_timestamp):
         """
         Marvelmindデータ(辞書型、IMUデータのみ)を
         メッセージ文字列化する。
@@ -246,6 +256,6 @@ class IMUPublisher(PublisherBase):
             'imu/mx':           to_float(imu_mx),
             'imu/my':           to_float(imu_my),
             'imu/mz':           to_float(imu_mz),
-            'imu/timestamp':    to_str(imu_timestamp),
+            'imu/timestamp':    to_float(imu_timestamp),
         }
         return json.dumps(message)

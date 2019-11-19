@@ -38,20 +38,8 @@ class UserSubscriber(SubscriberBase):
             user_mode           運転モード
             timestamp           Subscribe時点の時刻(time.time()結果)
         """
-        return self.to_values()
-
-    def to_values(self):
-        """
-        手動運転のみのTubデータをメッセージ文字列から抽出する。
-        引数： 
-            なし
-        戻り値：
-            user_angle          手動ステアリング値
-            user_throttle       手動スロットル値
-            user_lift_throttle  手動リフト値
-            user_mode           運転モード
-            timestamp           Subscribe時点の時刻(time.time()結果)
-        """
+        if self.debug:
+            print('[UserSubscriber] subscribed:{}'.format(str(self.arrive)))
         if self.message is None:
             self.message = {}
         return self.message.get('user/angle', 0.0), \
@@ -96,23 +84,8 @@ class Subscriber(SubscriberBase):
             user_mode           運転モード
             timestamp           Subscribe時点の時刻(time.time()結果)
         """
-        return self.to_values()
-
-    def to_values(self):
-        """
-        手動・自動運転両方のTubデータをメッセージ文字列化する。
-        引数：
-            なし
-        戻り値：
-            user_angle          手動ステアリング値
-            user_throttle       手動スロットル値
-            user_lift_throttle  手動リフト値
-            pilot_angle         自動ステアリング値
-            pilot_throttle      自動スロットル値
-            pilot_lift_throttle 自動リフト値
-            user_mode           運転モード
-            timestamp           Subscribe時点の時刻(time.time()結果)
-        """
+        if self.debug:
+            print('[Subscriber] subscribed:{}'.format(str(self.arrive)))
         if self.message is None:
             self.message = {}
         return self.message.get('user/angle', 0.0), \
@@ -153,4 +126,6 @@ class ImageSubscriber(SubscriberBase):
         戻り値：
             イメージデータ(nd.array形式)
         """
+        if self.debug:
+            print('[ImageSubscriber] subscribed:{}'.format(str(self.arrive)))
         return self.message

@@ -77,7 +77,8 @@ class Mpu9250Publisher(PublisherBase):
             print('[Mpu9250Publisher] topic name = {}'.format(self.topic))
         self.qos = 0
 
-    def run(self, imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz):
+    def run(self, imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz, 
+    imu_mx, imu_my, imu_mz, temp):
         """
         MPU9250 IMUデータ(辞書型)をPublishする。
         引数：
@@ -90,19 +91,20 @@ class Mpu9250Publisher(PublisherBase):
             imu_mx          磁束密度(X軸)
             imu_my          磁束密度(Y軸)
             imu_mz          磁束密度(Z軸)
+            temp            温度(C)
         戻り値：
             なし
         """
         ret = self.client.publish(
             self.topic, 
             self.to_message(
-                imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz), 
+                imu_ax, imu_ay, imu_az, imu_gx, imu_gy, imu_gz, imu_mx, imu_my, imu_mz, temp), 
             self.qos)
         if self.debug:
             print('[Mpu9250Publisher] publish topic={} ret={}'.format(self.topic, str(ret)))
 
     def to_message(self,  imu_ax=None, imu_ay=None, imu_az=None,
-    imu_gx=None, imu_gy=None, imu_gz=None, imu_mx=None, imu_my=None, imu_mz=None):
+    imu_gx=None, imu_gy=None, imu_gz=None, imu_mx=None, imu_my=None, imu_mz=None, temp=None):
         """
         MPU9250 IMUデータ(辞書型)をメッセージ文字列に変換する。
         引数：
@@ -115,6 +117,7 @@ class Mpu9250Publisher(PublisherBase):
             imu_mx          磁束密度(X軸)
             imu_my          磁束密度(Y軸)
             imu_mz          磁束密度(Z軸)
+            temp            温度(C)
         戻り値：
             メッセージ文字列
         """
@@ -128,6 +131,7 @@ class Mpu9250Publisher(PublisherBase):
             'imu/mgt_x':            to_float(imu_mx),
             'imu/mgt_y':            to_float(imu_my),
             'imu/mgt_z':            to_float(imu_mz),
+            'imu/temp':             to_float(temp),
             'imu/mpu_timestamp':    to_float(time.time()),
         }
         return json.dumps(message)

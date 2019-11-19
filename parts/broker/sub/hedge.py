@@ -41,6 +41,8 @@ class USNavSubscriber(SubscriberBase):
             usnav_angle     位置情報(向き)
             usnav_timestamp 位置情報取得時刻
         """
+        if self.debug:
+            print('[USNavSubscriber] subscribed:{}'.format(str(self.arrive)))
         if self.message is None:
             self.message = {}
         return self.message.get('usnav/id', '0'), \
@@ -88,6 +90,8 @@ class USNavRawSubscriber(SubscriberBase):
             dist_b4d        ビーコンID4との距離
             dist_timestamp  ビーコン間距離取得時刻
         """
+        if self.debug:
+            print('[USNavRawSubscriber] subscribed:{}'.format(str(self.arrive)))
         if self.message is None:
             self.message = {}
         return self.message.get('dist/id', '0'), \
@@ -149,6 +153,8 @@ class IMUSubscriber(SubscriberBase):
             imu_mz          磁束密度(Z軸)
             imu_timestamp   IMUデータ取得時刻
         """
+        if self.debug:
+            print('[IMUSubscriber] subscribed:{}'.format(str(self.arrive)))
         if self.message is None:
             self.message = {}
         return self.message.get('imu/x', 0.0), \

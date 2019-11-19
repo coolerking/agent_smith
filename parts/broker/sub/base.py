@@ -34,6 +34,7 @@ class SubscriberBase:
         self.name = name
         self.message = None
         self.debug = debug
+        self.arrive = False
         if self.debug:
             print('[{}Publisher] init thing_name = {}'.format(
                 self.name, self.thing_name))
@@ -58,6 +59,7 @@ class SubscriberBase:
         戻り値：
             なし
         """
+        self.arrive = True
         if not is_thing_name(self.system, self.thing_type, 
         self.thing_group, self.thing_name, message.topic):
             if is_image(message.topic):
@@ -117,6 +119,16 @@ class SubscriberBase:
             print('[{}Subscriber] image subscribed topic={}'.format(self.name, self.topic_name))
         self.message = message.payload
 
+    def is_subscribed(self):
+        """
+        Subscribeデータを1件でも取得したかどうか判別する。
+        引数：
+            なし
+        戻り値：
+            真偽値
+        """
+        return self.arrive
+
     def shutdown(self):
         """
         実装なし。
@@ -126,6 +138,7 @@ class SubscriberBase:
             なし
         """
         self.client = None
+        self.arrive = False
         if self.debug:
             print('[{}Publisher] shutdown thing_name = {}'.format(self.name, self.thing_name))
 
