@@ -173,10 +173,14 @@ JOYSTICK_MAX_LIFT_THROTTLE = 1.0
 JOYSTICK_DEBUG = False
 
 # Marvelmind Mobile Beacon
-HAVE_HEDGE = False
+HAVE_HEDGE = True
 USE_HEDGE_AS_DEFAULT = False
 HEDGE_SERIAL_TTY = '/dev/ttyACM0'
 HEDGE_ID = 59 # 59/79(yellow)
+# # Marvelmind Functions
+USE_HEDGE_USNAV = True
+USE_HEDGE_USNAV_RAW = False
+USE_HEDGE_IMU = False
 
 HAVE_RANGE = False
 USE_RANGE_AS_DEFAULT = False

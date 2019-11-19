@@ -29,7 +29,7 @@ def test_pub():
         #'user/mode',
         'user/angle', 'user/throttle', 'user/lift_throttle',
         'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
-        'timestamp',
+        'user/mode',
     ]
     V.mem['user/mode'] = 'user'
     value = 0.0

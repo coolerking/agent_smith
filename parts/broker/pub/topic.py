@@ -53,6 +53,7 @@ MESSAGE_TYPE_HEDGE_USNAV_RAW = 'dist'
 MESSAGE_TYPE_HEDGE_IMU = 'imu'
 MESSAGE_TYPE_MPU6050 = 'mpu6050'
 MESSAGE_TYPE_MPU9250 = 'mpu9250'
+MESSAGE_TYPE_JOYSTICK = 'joystick'
 MESSAGE_TYPES = [
     MESSAGE_TYPE_TUB,
     MESSAGE_TYPE_IMAGE,
@@ -61,6 +62,7 @@ MESSAGE_TYPES = [
     MESSAGE_TYPE_HEDGE_IMU,
     MESSAGE_TYPE_MPU6050,
     MESSAGE_TYPE_MPU9250,
+    MESSAGE_TYPE_JOYSTICK,
     #WILDCARD_ONE,
 ]
 
@@ -213,3 +215,18 @@ def pub_hedge_imu_json_topic(system, thing_type, thing_group, thing_name):
     """
     return _pub_base_topic(system, thing_type, thing_group, thing_name, 
         MESSAGE_TYPE_HEDGE_IMU, DATA_TYPE_JSON)
+
+def pub_joystick_json_topic(system, thing_type, thing_group, thing_name):
+    """
+    ジョイスティック出力データ(辞書型)をPublishする際に
+    使用するトピック名を返却する。
+    引数：
+        system      システムの種類
+        thing_type  モノのタイプ
+        thing_group モノのグループ
+        thing_name  モノの名前
+    戻り値：
+        トピック名
+    """
+    return _pub_base_topic(system, thing_type, thing_group, thing_name, 
+        MESSAGE_TYPE_JOYSTICK, DATA_TYPE_JSON)

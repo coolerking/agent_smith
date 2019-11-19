@@ -4,7 +4,7 @@
 Scripts to drive a donkey 2 car
 
 Usage:
-    manage.py (drive) [--model=<model>] [--js] [--range] [--spi] [--hedge] [--aws] [--map] [--debug] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|latent|tflite_linear)] [--camera=(single|stereo)] [--meta=<key:value> ...]
+    manage.py (drive) [--model=<model>] [--js] [--hedge] [--aws] [--map] [--debug] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|latent|tflite_linear)] [--camera=(single|stereo)] [--meta=<key:value> ...]
     manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--transfer=<model>] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|tflite_linear)] [--continuous] [--aug]
 
 
@@ -38,7 +38,7 @@ from donkeycar.parts.file_watcher import FileWatcher
 from donkeycar.parts.launch import AiLaunch
 from donkeycar.utils import *
 
-def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=False, use_hedge=False, use_aws=False, use_map=False, use_debug=False, model_type=None, camera_type='single', meta=[] ):
+def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=False, use_map=False, use_debug=False, model_type=None, camera_type='single', meta=[] ):
     '''
     Construct a working robotic vehicle from many parts.
     Each part runs as a job in the Vehicle loop, calling either
@@ -72,23 +72,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     #Initialize car
     V = dk.vehicle.Vehicle()
 
-    # v3.0.0よりなくなったTimestampを復活させる
-    from parts import Timestamp
-    clock = Timestamp()
-    V.add(clock, outputs=['timestamp']) # datetime.now() 文字列化
-
-    # AWS IoT Coreを使用する場合
-    if use_aws or cfg.USE_AWS_AS_DEFAULT:
-        from parts.broker import AWSShadowClientFactory, PowerReporter
-        factory = AWSShadowClientFactory(cfg.AWS_CONFIG_PATH, cfg.AWS_THING_NAME)
-        # Power ON 情報の送信
-        power = PowerReporter(factory, debug=use_debug)
-        power.on()
-
     '''
     カメラ
     '''
-
     if camera_type == "stereo":
 
         if cfg.CAMERA_TYPE == "WEBCAM":
@@ -113,15 +99,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         V.add(StereoPair(), inputs=['cam/image_array_a', 'cam/image_array_b'], 
             outputs=['cam/image_array'])
 
-    elif cfg.CAMERA_TYPE != "MAP" and use_map == False:
 
+    elif cfg.CAMERA_TYPE != "MAP" and use_map == False:
         print("cfg.CAMERA_TYPE", cfg.CAMERA_TYPE)
         if cfg.DONKEY_GYM:
             from donkeycar.parts.dgym import DonkeyGymEnv 
         
         inputs = []
         threaded = True
-        print("cfg.CAMERA_TYPE", cfg.CAMERA_TYPE)
+        #print("cfg.CAMERA_TYPE", cfg.CAMERA_TYPE)
         if cfg.DONKEY_GYM:
             from donkeycar.parts.dgym import DonkeyGymEnv 
             cam = DonkeyGymEnv(cfg.DONKEY_SIM_PATH, env_name=cfg.DONKEY_GYM_ENV_NAME)
@@ -149,140 +135,199 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             raise(Exception("Unkown camera type: %s" % cfg.CAMERA_TYPE))
             
         V.add(cam, inputs=inputs, outputs=['cam/image_array'], threaded=threaded)
-
-    if use_aws or cfg.USE_AWS_AS_DEFAULT:
-        from parts.broker import ImagePublisher
-        image_pub = ImagePublisher(factory, debug=use_debug)
-        V.add(image_pub, inputs=['cam/image_array'])
-
-    '''
-    距離センサ
-    '''
-    if use_range or cfg.USE_RANGE_AS_DEFAULT:
-        from parts import get_range_part
-
-        ctr = get_range_part(cfg, pgio)
-        V.add(ctr, outputs=['range/cms'])
-
-        if use_aws or cfg.USE_AWS_AS_DEFAULT:
-            from parts.broker import RangePublisher
-            range_pub = RangePublisher(factory, debug=use_debug)
-            V.add(range_pub, inputs=['range/cms', 'timestamp'])
-
-    '''
-    圧力センサほか(SPI)
-    '''
-    if use_spi or cfg.USE_SPI_AS_DEFAULT:
-        from parts import PIGPIO_SPI_ADC
-
-        adc = PIGPIO_SPI_ADC(pgio=pgio,
-            vref_volts=cfg.SPI_VREF_VOLTS,
-            spi_channel=cfg.SPI_CHANNEL,
-            spi_baud=cfg.SPI_BAUD,
-            spi_flags=cfg.SPI_FLAGS)
-        V.mem['adc_force_ch'] = cfg.ADC_FORCE_CH
-        V.mem['adc_bend_ch'] = cfg.ADC_BEND_CH
-        V.add(adc, inputs=['adc_force_ch'], outputs=['force/volts'])
-        V.add(adc, inputs=['adc_bend_ch'], outputs=['bend/volts'])
-
-        if use_aws or cfg.USE_AWS_AS_DEFAULT:
-            from parts.broker import ADCPublisher
-            adc_pub = ADCPublisher(factory, debug=use_debug)
-            V.add(adc_pub, inputs=['force/volts', 'bend/volts', 'timestamp'])
     
     '''
     Marvelmind 位置情報システム
     '''
-    if use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
-        #former_hedge_items = [
-        #    'usnav/id_f', 'usnav/x_f', 'usnav/y_f', 'usnav/z_f', 'usnav/angle_f', 'usnav/timestamp_f',
-        #    'imu/x_f', 'imu/y_f', 'imu/z_f', 'imu/qw_f', 'imu/qx_f', 'imu/qy_f', 'imu/qz_f',
-        #    'imu/vx_f', 'imu/vy_f', 'imu/vz_f', 'imu/ax_f', 'imu/ay_f', 'imu/az_f',
-        #    'imu/gx_f', 'imu/gy_f', 'imu/gz_f', 'imu/mx_f', 'imu/my_f', 'imu/mz_f',
-        #    'imu/timestamp_f',
-        #    'dist/id_f', 'dist/b1_f', 'dist/b1d_f', 'dist/b2_f', 'dist/b2d_f', 
-        #    'dist/b3_f', 'dist/b3d_f', 'dist/b4_f', 'dist/b4d_f', 'dist/timestamp_f'
-        #]
-        hedge_items = [
-            'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
-            'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
-            'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
-            'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz',
-            'imu/timestamp',
-            'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
-            'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp'
-        ]
-        for item in hedge_items:
-            V.mem[item] = 0
-        #from parts import HedgehogController, FormerHedgehogPusher
-        #pusher = FormerHedgehogPusher(debug=use_debug)
-        #V.add(pusher, inputs=hedge_items, outputs=former_hedge_items)
+    # Marvelmind USNav データ
+    usnav_items = [
+        'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
+    ]
+    usnav_types = [
+        'str', 'float', 'float', 'float', 'float', 'float',
+    ]
+    hedge_items = usnav_items
+    hedge_types = usnav_types
+    # Marvelmind USNav Raw データ
+    usnav_raw_items = [
+        'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
+        'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp'
+    ]
+    usnav_raw_types = [
+        'str', 'str', 'float', 'str', 'float',
+        'str', 'float', 'str', 'float', 'float',
+    ]
+    hedge_items += usnav_raw_items
+    hedge_types += usnav_raw_items
+    # Marvelmind IMU データ
+    imu_items = [
+        'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+        'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
+        'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz',
+        'imu/timestamp',
+    ]
+    imu_types = [
+        'float', 'float', 'float', 'float', 'float', 'float', 'float',
+        'float', 'float', 'float', 'float', 'float', 'float',
+        'float', 'float', 'float', 'float', 'float', 'float',
+        'float'
+    ]
+    # Marvelmind 全データ
+    hedge_items += imu_items
+    hedge_types += imu_types
+    # Veichle上の Marvelmind 全データ初期化
+    for i in range(len(hedge_items)):
+        _item = hedge_items[i]
+        _type = hedge_types[i]
+        if _type == 'str':
+            V.mem[_item] = '0'
+        elif _type == 'float':
+            V.mem[_item] = 0.0
+        else:
+            raise ValueError('unknown type:{}'.format(_type))
 
-        #class PrtHedge:
-        #    def run(self, x, y, qw, qx, qy, qz, timestamp, qw_f, qx_f, qy_f, qz_f, timestamp_f):
-        #        print('(x, y) = ({}, {})'.format(str(x), str(y)))
-        #        print('[NEW] (qw, qx, qy, qz) = ({}, {}, {}, {}) ts={}'.format(str(qw), str(qx), str(qy), str(qz), str(timestamp)))
-        #        print('[OLD] (qw, qx, qy, qz) = ({}, {}, {}, {}) ts={}'.format(str(qw_f), str(qx_f), str(qy_f), str(qz_f), str(timestamp_f)))
+    if cfg.HAVE_HEDGE and (use_hedge or cfg.USE_HEDGE_AS_DEFAULT):
+        '''
+        Marvelmind システムを使用する場合
+        '''
+        print('Using Marvelmind Mobile Beacon')
+        # Marvelmind モバイルビーコンパーツ追加
         from parts import HedgehogController
         hedge = HedgehogController(tty=cfg.HEDGE_SERIAL_TTY, adr=cfg.HEDGE_ID)
         V.add(hedge, outputs=hedge_items)
 
-        hedge_aws_items = [
-            'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
-            'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
-            'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
-            'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz',
-            'imu/timestamp',
-            'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
-            'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
-            'timestamp',
-        ]
+    '''
+    IMU(MPU9250/MPU6050)
+    '''
+    mpu6050_items = [
+        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+        'imu/recent', 'imu/mpu_timestamp',
+    ]
+    mpu6050_types = [
+        'float', 'float', 'float',
+        'float', 'float', 'float',
+        'str', 'float',
+    ]
+    mpu9250_items = [
+        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
+        'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
+        'imu/temp',
+        'imu/recent', 'imu/mpu_timestamp',
+    ]
+    mpu9250_types = [
+        'float', 'float', 'float',
+        'float', 'float', 'float',
+        'float', 'float', 'float',
+        'float',
+        'str', 'float',
+    ]
+    if cfg.HAVE_IMU:
+        if cfg.IMU_TYPE == 'mpu6050':
+            '''
+            MPU6050を使用する場合
+            '''
+            mpu_items = mpu6050_items
+            #mpu_types = mpu6050_types
+            from parts.sensors.imu import Mpu6050
+            imu = Mpu6050(
+                pgio=pgio, 
+                bus=cfg.MPU6050_I2C_BUS, 
+                address=cfg.MPU6050_I2C_ADDRESS, 
+                depth=cfg.MPU6050_DEPTH,
+                debug=use_debug)
+
+        elif cfg.IMU_TYPE == 'mpu9250':
+            '''
+            MPU9250を使用する場合
+            '''
+            mpu_items = mpu9250_items
+            mpu_types = mpu9250_types
+            from parts.sensors.imu import Mpu9250
+            imu = Mpu9250(
+                pgio=pgio,
+                bus=cfg.MPU9250_I2C_BUS, 
+                mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
+                ak8963_address=cfg.AK8963_I2C_ADDRESS,
+                depth=cfg.MPU9250_DEPTH,
+                debug=use_debug)
+        else:
+            raise ValueError('unknown IMU_TYPE = {}'.format(str(cfg.IMU_TYPE)))
+
+        # Veihcle上のIMUデータを初期化
+        for i in range(len(mpu_items)):
+            _item = mpu_items[i]
+            _type = mpu_types[i]
+            if _type == 'str':
+                V.mem[_item] = '{}'
+            elif _type == 'float':
+                V.mem[_item] = 0.0
+            else:
+                raise ValueError('unknown type:{}'.format(_type))
         
-        if use_aws or cfg.USE_AWS_AS_DEFAULT:
-            # 自分のMarvelmind情報を送信
-            from parts.broker import HedgePublisher
-            hedge_pub = HedgePublisher(factory, debug=use_debug)
-            V.add(hedge_pub, inputs=hedge_aws_items)
+        # IMUパーツの追加
+        V.add(imu, inputs=mpu_items)
 
-            # 'hedge' へIDをキーとした辞書内にMarvelmind情報を受信
-            from parts.broker import HedgeSubscriber
-            hedge_sub = HedgeSubscriber(factory, debug=use_debug)
-            V.add(hedge_sub, outputs=['hedge'])
-            V.mem['hedge'] = '{}'
+    '''
+    2D マップ画像 (usnav/x, usnav/y, imu/recent を使用する)
+    '''
+    map_items = [
+        'usnav/x', 'usnav/y', 'imu/recent',
+    ]
+    map_types = [
+        'float', 'float', 'str',
+    ]
+    if use_map or cfg.CAMERA_TYPE == "MAP":
+        '''
+        2D マップ画像でカメラの代替とする場合
+        '''
+        if cfg.HAVE_HEDGE and (use_hedge or cfg.USE_HEDGE_AS_DEFAULT):
+            '''
+            Marvelmindが有効である場合
+            '''
+            if (cfg.HAE_IMU and cfg.IMU_TYPE == 'mpu9250'):
+                '''
+                MPU9250を使用する場合
+                '''
+                # 2D マップ生成パーツを追加
+                from parts import MapImageCreator
+                creator = MapImageCreator(base_image_path=cfg.MAP_BASE_IMAGE_PATH, debug=use_debug)
+                V.add(creator,
+                    inputs=map_items,
+                    outputs=['cam/image_array'])
+            else:
+                raise ValueError('2D map needs mpu9250 data')
+        else:
+            raise ValueError('2D map needs Marvelmind USNav data')
 
-        if use_map or cfg.CAMERA_TYPE == "MAP":
-
-            if use_debug:
-                class PrintRecent:
-                    def run(self, recent):
-                        print('[PrintRecent] recent={}'.format(str(recent)))
-                V.add(PrintRecent(), inputs=['imu/recent'])
-
-            # 前方画像の代わりに2次元マップイメージを使用
-            from parts import MapImageCreator
-            creator = MapImageCreator(base_image_path=cfg.MAP_BASE_IMAGE_PATH, debug=use_debug)
-            V.add(creator,
-                inputs=[
-                    'usnav/x', 'usnav/y',
-                    'imu/recent'
-                ],
-                outputs=['cam/image_array'])
-
-
+    '''
+    ジョイスティック
+    '''
+    user_items = [
+        'user/angle', 'user/throttle', 'user/lift_throttle', 'user/mode',
+    ]
+    user_types = [
+        'float', 'float', 'float', 'str',
+    ]
+    joystick_items = user_items
+    joystick_types = user_types
+    joystick_items += ['recording']
+    joystick_types += ['boolean']
+    # ジョイスティックパーツのアウトプット値なのでここでは初期化せず
 
     if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
         '''
-        ジョイスティック
+        ジョイスティックを使用する場合
         '''
-
-        #modify max_throttle closer to 1.0 to have more power
-        #modify steering_scale lower than 1.0 to have less responsive steering
-        #from donkeycar.parts.controller import get_js_controller
+        #　フォークリフト用ジョイスティックパーツ取得ファクトリ関数を呼び出す
         from parts import get_js_controller
-        
         ctr = get_js_controller(cfg)
         
         if cfg.USE_NETWORKED_JS:
+            '''
+            ネットワーク経由で操作する場合(Donkeycar標準)
+            '''
             from donkeycar.parts.controller import JoyStickSub
             netwkJs = JoyStickSub(cfg.NETWORK_JS_SERVER_IP)
             V.add(netwkJs, threaded=True)
@@ -291,33 +336,28 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         # リフト値の追加
         V.add(ctr, 
             inputs=['cam/image_array'],
-            outputs=['user/angle', 'user/throttle', 'user/lift_throttle', 'user/mode', 'recording'],
+            outputs=joystick_items,
             threaded=True)
 
     else:
-        
         '''
-        Webコントローラ
+        Webコントローラを使用する
         '''
-
-        #This web controller will create a web server that is capable
-        #of managing steering, throttle, and modes, and more.
-        try:
-            from .parts import LocalWebForkliftController
-        except:
-            raise
+        # user/lift_throttle 値が常に0となるWebコントローラパーツを生成
+        from parts import LocalWebForkliftController
         ctr = LocalWebForkliftController()
-        #ctr = LocalWebController()
 
         V.add(ctr, 
             inputs=['cam/image_array'],
-            outputs=['user/angle', 'user/throttle', 'user/lift_throttle', 'user/mode', 'recording'],
+            outputs=joystick_items,
             threaded=True)
+
+    # 変数ctrはこの後でも使用する
 
     '''
     スロットルフィルタ(ワンタップESC後進)
     '''
-
+    # 入力値はジョイスティックパーツがアウトプット
     #this throttle filter will allow one tap back for esc reverse
     th_filter = ThrottleFilter()
     V.add(th_filter, inputs=['user/throttle'], outputs=['user/throttle'])
@@ -326,7 +366,6 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     '''
     手動運転・自動運転判定フラグ設定
     '''
-
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
     class PilotCondition:
@@ -335,13 +374,13 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
                 return False
             else:
                 return True       
-
     V.add(PilotCondition(), inputs=['user/mode'], outputs=['run_pilot'])
+    # run_pilot 値はboolean(偽：手動運転、真：一部もしくは全て自動運転)
+
 
     '''
     3色LED表示
     '''
-
     class LedConditionLogic:
         def __init__(self, cfg):
             self.cfg = cfg
@@ -449,10 +488,16 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     '''
 
     if cfg.AUTO_RECORD_ON_THROTTLE and isinstance(ctr, JoystickController):
+        """
+        自動記録指定されておりかつジョイスティックを使用する場合
+        """
         #then we are not using the circle button. hijack that to force a record count indication
         def show_record_acount_status():
             rec_tracker_part.last_num_rec_print = 0
             rec_tracker_part.force_alert = 1
+        
+        # ジョイスティックのボタンにレコード件数表示用のボタン割当
+
         # F710
         if cfg.CONTROLLER_TYPE == 'F710' or cfg.CONTROLLER_TYPE == 'F710_Forklift':
             ctr.set_button_down_trigger('back', show_record_acount_status)
@@ -466,80 +511,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     '''
     Sombero HAT
     '''
-
     #Sombrero
     if cfg.HAVE_SOMBRERO:
         from donkeycar.parts.sombrero import Sombrero
         _ = Sombrero()
 
-    '''
-    MPU6050/MPU9250
-    '''
-
-    #IMU
-    if cfg.HAVE_IMU:
-        if cfg.IMU_TYPE == 'mpu6050':
-            '''MPU6050'''
-            mpu6050_items = [
-                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
-                'imu/recent', 'imu/mpu_timestamp',
-            ]
-            from parts.sensors.imu import Mpu6050
-            imu = Mpu6050(
-                pgio=pgio, 
-                bus=cfg.MPU6050_I2C_BUS, 
-                address=cfg.MPU6050_I2C_ADDRESS, 
-                depth=cfg.MPU6050_DEPTH,
-                debug=use_debug)
-            V.add(imu, outputs=mpu6050_items)
-            if use_debug:
-                class PrintIMU:
-                    def run(self, ax, ay, az, gx, gy, gz, ts):
-                        print('ts:{} a:({},{},{}) g:({},{},{})'.format(
-                            str(ts),
-                            str(ax), str(ay), str(az), str(gx), str(gy), str(gz),
-                        ))
-                    def shutdown(self):
-                        pass
-                V.add(PrintIMU(), inputs=[
-                    'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                    'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
-                    'imu/mpu_timestamp'
-                ])
-        elif cfg.IMU_TYPE == 'mpu9250':
-            '''MPU9250'''
-            mpu9250_items = [
-                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
-                'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-                'imu/recent', 'imu/mpu_timestamp',
-            ]
-            from parts.sensors.imu import Mpu9250
-            imu = Mpu9250(
-                pgio=pgio,
-                bus=cfg.MPU9250_I2C_BUS, 
-                mpu9250_address=cfg.MPU9250_I2C_ADDRESS, 
-                ak8963_address=cfg.AK8963_I2C_ADDRESS,
-                depth=cfg.MPU9250_DEPTH,
-                debug=use_debug)
-            V.add(imu, outputs=mpu9250_items)
-            if use_debug:
-                class PrintIMU:
-                    def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, ts):
-                        print('ts:{} temp:{}, a:({},{},{}) g:({},{},{}) m:({},{},{})'.format(
-                            str(ts), str(temp),
-                            str(ax), str(ay), str(az), str(gx), str(gy), str(gz),
-                            str(mx), str(my), str(mz)
-                        ))
-                    def shutdown(self):
-                        pass
-                V.add(PrintIMU(), inputs=[
-                    'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                    'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',  
-                    'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-                    'imu/mpu_timestamp'
-                ])
+    # この段階でカメラ or 2Dマップ画像が cam/image_array に格納されている
 
     '''
     画像前処理
@@ -557,8 +534,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             return normalize_and_crop(img_arr, self.cfg)
 
     if "coral" in model_type:
+        '''
+        coral を使用する場合は画像をそのまま使用
+        '''
         inf_input = 'cam/image_array'
     else:
+        '''
+        自動運転時のみ正規化・CROP処理する
+        '''
         inf_input = 'cam/normalized/cropped'
         V.add(ImgPreProcess(cfg),
             inputs=['cam/image_array'],
@@ -569,14 +552,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
     #Behavioral state
     if cfg.TRAIN_BEHAVIORS:
-        
         '''
-        振る舞い状態
+        behaviorモデルを使用する場合
         '''
 
         bh = BehaviorPart(cfg.BEHAVIOR_LIST)
         V.add(bh, outputs=['behavior/state', 'behavior/label', "behavior/one_hot_state_array"])
         try:
+            # L1ボタンにbehavior状態更新を割当
             ctr.set_button_down_trigger('L1', bh.increment_state)
         except:
             pass
@@ -586,39 +569,58 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
     #IMU
     elif model_type == "imu":
-        
         '''
-        IMU（MPU6050）モデル
+        IMU（MPU9250/MPU6050）モデル
         '''
 
         #assert(cfg.HAVE_IMU)
         #Run the pilot if the mode is not user.
         if cfg.HAVE_IMU:
+            # 機械学習モデルのインプットにMPU9250/6050の加速度、角速度を追加
             inputs=['cam/image_array',
                 'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
                 'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
             ]
-        else:
-            assert(use_aws or cfg.USE_AWS_AS_DEFAULT)
+        elif cfg.HAVE_HEDGE and (use_hedge or cfg.USE_HEDGE_AS_DEFAULT) and cfg.USE_HEDGE_IMU:
+            # 機械学習モデルのインプットにMarvelmindの加速度、角速度を追加
             inputs=[
                 'cam/image_array',
                 'imu/ax', 'imu/ay', 'imu/az',
                 'imu/vx', 'imu/vy', 'imu/vz'
             ]
+        else:
+            raise ValueError('can not use imu model without imu data')
     else:
+        # 機械学習モデルのインプットは画像のみ
         inputs=[inf_input]
 
     '''
-    モデル
+    機械学習モデル
     '''
 
     def load_model(kl, model_path):
+        """
+        機械学習モデルに学習済みパラメータをロードする。
+        引数：
+            kl          機械学習モデルオブジェクト
+            model_path  学習済みパラーメータファイルのパス
+        戻り値：
+            なし
+        """
         start = time.time()
         print('loading model', model_path)
         kl.load(model_path)
         print('finished loading in %s sec.' % (str(time.time() - start)) )
 
     def load_weights(kl, weights_path):
+        """
+        機械学習モデルに学習済みパラメータをロードする。
+        引数：
+            kl          機械学習モデルオブジェクト
+            model_path  学習済みパラーメータファイルのパス
+        戻り値：
+            なし
+        """
         start = time.time()
         try:
             print('loading model weights', weights_path)
@@ -733,6 +735,8 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
           inputs=['user/mode', 'user/angle', 'user/throttle', 'user/lift_throttle',
                   'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle'], 
           outputs=['angle', 'throttle', 'lift_throttle'])
+
+    # Donkeycarへの最終的な指示が angle, throttle, lift_throttle 値となる
 
     '''
     AIランチャ
@@ -855,10 +859,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
 
         if use_debug:
             class Prt:
-                def run(self,  left_verf, left_in1, left_in2, right_verf, right_in1, right_in2, lift_verf, lift_in1, lift_in2):
-                    print('ForkliftMD left   verf:{}, in1:{}, in2:{}'.format(str(left_verf), str(left_in1), str(left_in2)))
-                    print('ForkliftMD right  verf:{}, in1:{}, in2:{}'.format(str(right_verf), str(right_in1), str(right_in2)))
-                    print('ForkliftMD lift   verf:{}, in1:{}, in2:{}'.format(str(lift_verf), str(lift_in1), str(lift_in2)))
+                def run(self,  left_vref, left_in1, left_in2, right_vref, right_in1, right_in2, lift_vref, lift_in1, lift_in2):
+                    print('ForkliftMD left   vref:{}, in1:{}, in2:{}'.format(str(left_vref), str(left_in1), str(left_in2)))
+                    print('ForkliftMD right  vref:{}, in1:{}, in2:{}'.format(str(right_vref), str(right_in1), str(right_in2)))
+                    print('ForkliftMD lift   vref:{}, in1:{}, in2:{}'.format(str(lift_vref), str(lift_in1), str(lift_in2)))
 
             V.add(Prt(),inputs=[
                     'left_motor_vref', 'left_motor_in1', 'left_motor_in2',
@@ -915,134 +919,83 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     '''
     Tubデータ
     '''
-
-    #add tub to save data
-
-    inputs=['cam/image_array',
-            'user/angle', 'user/throttle', 'user/lift_throttle',
-            'user/mode']
-
-    types=['image_array',
-           'float', 'float', 'float',
-           'str']
-
-    '''
-    timestamp追加
-    '''
-
-    # timestamp
-    inputs += ['timestamp']
-    # float
-    #types += ['float']
-    types += ['str']
-
-    '''
-    behaviorモデルの場合
-    '''
+    # ベースとなるTubデータ
+    inputs=['cam/image_array']
+    inputs += user_items
+    types=['image_array']
+    types += user_types
 
     if cfg.TRAIN_BEHAVIORS:
-        inputs += ['behavior/state', 'behavior/label', "behavior/one_hot_state_array"]
+        '''
+        behaviorモデルを使用する場合の入力データを追加
+        '''
+        inputs += ['behavior/state', 'behavior/label', 'behavior/one_hot_state_array']
         types += ['int', 'str', 'vector']
 
     '''
     IMU(MPU6050)データ追加
     '''
 
-    if cfg.HAVE_IMU:
-        if cfg.IMU_TYPE == 'mpu9250':
-            '''MPU9250'''
-            inputs += [
-                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
-                'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z', 'imu/temp',
-                'imu/recent', 'imu/mpu_timestamp',
-            ]
-            types +=['float', 'float', 'float',
-                'float', 'float', 'float',
-                'float', 'float', 'float', 'float',
-                'str', 'float',
-            ]
-        else:
-            '''MPU6050'''
-            inputs += [
-                'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-                'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
-            ]
-            types +=['float', 'float', 'float',
-                'float', 'float', 'float',
-            ]
-
-    '''
-    Marvelmind位置情報システムデータ追加
-    '''
-
-    # Marvelmind Mobile Beacon 使用時
-    if use_hedge or cfg.USE_HEDGE_AS_DEFAULT:
-        inputs += [
-            # USNav
-            'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
-            # IMU
-            'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
-            'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
-            'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
-            # USNav Raw
-            'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
-            'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
+    if cfg.DEFAULT_MODEL_TYPE == 'imu':
+        '''
+        IMUモデルを使用する場合
+        '''
+        # 入力データに加速度、角速度を追加
+        imu_inputs = [
+            'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
         ]
-
-        types += [
-            # USNav
-            'int', 'float',  'float',  'float',  'float', 'float',
-            # IMU
-            'float', 'float', 'float', 'float', 'float', 'float', 'float',
-            'float', 'float', 'float', 'float', 'float', 'float',
-            'float', 'float', 'float', 'float', 'float', 'float', 'float',
-            # USNav Raw
-            'int', 'int', 'float', 'int', 'float',
-            'int', 'float', 'int', 'float', 'float',
+        imu_input_types = [
+            'float', 'float', 'float',
+            'float', 'float', 'float',
         ]
-
-    '''
-    距離センサ追加
-    '''
-
-    # Range Sensor 使用時
-    if use_range or cfg.USE_RANGE_AS_DEFAULT:
-        inputs +=['range/cms']
-
-        types += ['float']
-
-    '''
-    圧力センサ他(SPI)追加
-    '''
-
-    # Force/Bend Sensors via SPI ADC 使用時
-    if use_spi or cfg.USE_SPI_AS_DEFAULT:
-        inputs += ['force/volts', 'bend/volts']
-
-        types += ['float', 'float']
-
-    '''
-    AI推論結果追加
-    '''
+        inputs += imu_inputs
+        types += imu_input_types
+            
+        if not cfg.HAVE_IMU:
+            '''
+            MPU9250/MPU6050を持っていない場合
+            '''
+            if cfg.HAVE_HEDGE and (use_hedge or cfg.USE_HEDGE_AS_DEFAULT):
+                '''
+                Marvelmind が有効な場合
+                '''
+                if cfg.USE_HEDGE_IMU:
+                    '''
+                    Marvelmind IMUが使用可能な場合
+                    '''
+                    # 必要な Marvelmind IMUデータを移動させる
+                    class MoveIMU:
+                        def run(self, ax, ay, az, gx, gy, gz):
+                            return ax, ay, az, gx, gy, gz
+                    move = MoveIMU()
+                    V.add(move, 
+                        inputs=[
+                            'imu/ax', 'imu/ay', 'imu/az',
+                            'imu/gx', 'imu/gy', 'imu/gz',
+                        ],
+                        outputs=imu_inputs)
 
     if cfg.RECORD_DURING_AI:
+        '''
+        自動運転中であっても記録しておくモードの場合
+        '''
+        # pilot/* を Tub データに加える
         inputs += ['pilot/angle', 'pilot/throttle', 'pilot/lift_throttle']
         types += ['float', 'float', 'float']
 
     '''
     Tubデータ書き込み
     '''
-
     th = TubHandler(path=cfg.DATA_PATH)
     tub = th.new_tub_writer(inputs=inputs, types=types, user_meta=meta)
     V.add(tub, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
 
-    '''
-    カメライメージを通信して貰う場合
-    '''
 
     if cfg.PUB_CAMERA_IMAGES:
+        '''
+        カメライメージを通信して貰う場合(Donkeycar標準)
+        '''
         from donkeycar.parts.network import TCPServeValue
         from donkeycar.parts.image import ImgArrToJpg
         pub = TCPServeValue("camera")
@@ -1054,20 +1007,31 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
     '''
 
     if type(ctr) is LocalWebController:
+        '''
+        LocalWebController を使用している場合の usage を表示
+        '''
         print("You can now go to <your pi ip address>:8887 to drive your car.")
     elif isinstance(ctr, JoystickController):
+        '''
+        ジョイスティックを使用している場合の usage を表示
+        '''
         print("You can now move your joystick to drive your car.")
         #tell the controller about the tub        
         ctr.set_tub(tub)
         
         if cfg.BUTTON_PRESS_NEW_TUB:
+            '''
+            cfg.BUTTON_PRESS_NEW_TUB が True の場合、ボタンを押すごとに別のTubディレクトリに
+            データが格納されるようになる（デフォルト:False）。
+            '''
     
             def new_tub_dir():
                 V.parts.pop()
                 tub = th.new_tub_writer(inputs=inputs, types=types, user_meta=meta)
                 V.add(tub, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
                 ctr.set_tub(tub)
-    
+
+            # ボタン割当
             # F710
             if cfg.CONTROLLER_TYPE == 'F710' or cfg.CONTROLLER_TYPE == 'F710_Forklift':
                 ctr.set_button_down_trigger('A', new_tub_dir)
@@ -1078,7 +1042,101 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
             else:
                 ctr.set_button_down_trigger('cross', new_tub_dir)
 
+        # 現時点のボタン割当状態を表示
         ctr.print_controls()
+
+
+    """
+    AWS IoT Core
+    """
+    if use_aws or cfg.USE_AWS_AS_DEFAULT:
+        print('AWS Configuration')
+        from parts.broker import AWSShadowClientFactory, PowerReporter
+        factory = AWSShadowClientFactory(cfg.AWS_CONFIG_PATH, cfg.AWS_THING_NAME)
+        # Power ON 情報の送信
+        power = PowerReporter(factory, debug=use_debug)
+        power.on()
+
+        # Tubデータ(json)送信
+        from parts.broker.pub import Publisher
+        pub_tub = Publisher(factory, debug=use_debug)
+        V.add(pub_tub, inputs=[
+            'user/angle', 'user/throttle', 'user/lift_throttle',
+            'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
+            'user/mode'
+        ])
+
+        # Tubデータ(イメージ)送信
+        from parts.broker.pub import ImagePublisher
+        pub_img = ImagePublisher(factory, debug=use_debug)
+        V.add(pub_img, inputs=[
+            'cam/image_array',
+        ])
+
+        '''
+        ジョイスティックデータの送信
+        '''
+        if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
+            '''
+            ジョイスティックを使用している場合
+            '''
+            from parts.broker.pub import JoystickPublisher
+            pub_joy = JoystickPublisher(factory, debug=use_debug)
+            V.add(pub_joy, inputs=joystick_items)
+
+        '''
+        Marvelmind システムデータの送信
+        '''
+        if cfg.HAVE_HEDGE and (use_hedge or cfg.USE_HEDGE_AS_DEFAULT):
+            '''
+            Marvelmind システムを使用している場合
+            '''
+            if cfg.USE_HEDGE_USNAV:
+                '''
+                Marvelmind 位置情報を使用している場合
+                '''
+                from parts.broker.pub import USNavPublisher
+                pub_usn = USNavPublisher(factory, debug=use_debug)
+                V.add(pub_usn, inputs=usnav_items)
+
+            if cfg.USE_HEDGE_USNAV_RAW:
+                '''
+                Marvelmind 距離情報を使用している場合
+                '''
+                from parts.broker.pub import USNavRawPublisher
+                pub_raw = USNavRawPublisher(factory, debug=use_debug)
+                V.add(pub_raw, inputs=usnav_raw_items)
+
+            if cfg.USE_HEDGE_IMU:
+                '''
+                Marvelmind IMU情報を使用している場合
+                '''
+                from parts.broker.pub import IMUPublisher
+                pub_imu = IMUPublisher(factory, debug=use_debug)
+                V.add(pub_imu, inputs=imu_items)
+
+        '''
+        MPU9250/MPU6050 データの送信
+        '''
+        if cfg.HAVE_IMU:
+            '''
+            MPU9250/MPU6050 を使用している場合
+            '''
+            if cfg.IMU_TYPE == 'mpu6050':
+                '''
+                MPU6050を使用している場合
+                '''
+                from parts.broker.pub import Mpu6050Publisher
+                pub_mpu = Mpu6050Publisher(factory, debug=use_debug)
+                V.add(pub_mpu, inputs=mpu_items)
+            
+            elif cfg.IMU_TYPE == 'mpu9250':
+                '''
+                MPU6050を使用している場合
+                '''
+                from parts.broker.pub import Mpu9250Publisher
+                pub_mpu = Mpu9250Publisher(factory, debug=use_debug)
+                V.add(pub_mpu, inputs=mpu_items)
 
     '''
     運転ループ
@@ -1100,15 +1158,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_range=False, use_spi=Fal
         pgio.stop()
         if use_aws or cfg.USE_AWS_AS_DEFAULT:
             if power is not None:
+                # Power Off 情報の送信
                 if use_debug:
                     print('Sending power off')
                 power.off()
-                power = None
-            if factory is not None:
-                if use_debug:
-                    print('Disconnecting aws iot')
-                factory.disconnect()
-                factory = None
+                # 送信するまで待機
+                time.sleep(1)
         print('Stopped')
 
 
@@ -1119,14 +1174,16 @@ if __name__ == '__main__':
     if args['drive']:
         model_type = args['--type']
         camera_type = args['--camera']
+        use_map = args['--map']
+        use_hedge = args['--hedge']
+        if use_map and (not use_hedge):
+            raise ValueError('map option needs hedge input')
         drive(cfg,
             model_path = args['--model'],
             use_joystick = args['--js'],
-            use_range = args['--range'],
-            use_spi = args['--spi'],
-            use_hedge = args['--hedge'],
+            use_hedge = use_hedge,
             use_aws = args['--aws'],
-            use_map = args['--map'],
+            use_map = use_map,
             use_debug = args['--debug'],
             model_type = model_type,
             camera_type = camera_type,
