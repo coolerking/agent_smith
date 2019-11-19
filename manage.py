@@ -267,7 +267,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
                 raise ValueError('unknown type:{}'.format(_type))
         
         # IMUパーツの追加
-        V.add(imu, oututs=mpu_items)
+        V.add(imu, outputs=mpu_items)
 
     '''
     2D マップ画像 (usnav/x, usnav/y, imu/recent を使用する)
