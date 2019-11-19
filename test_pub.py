@@ -65,6 +65,7 @@ def test_pub():
         value = value + 1.0
         V.mem[key]=value
         print('key:{} value:{}'.format(key, str(value)))
+    V.mem['imu/recent'] = '{}'
 
     '''
     from parts.broker.debug import GetHedge
@@ -124,7 +125,7 @@ def test_pub():
     V.add(pub, inputs=[
         'user/angle', 'user/throttle', 'user/lift_throttle',
         'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
-        'user/mode'
+        'user/mode',
     ])
 
     '''
@@ -136,12 +137,14 @@ def test_pub():
     ])
     '''
 
+    
     from parts.broker.pub import ImagePublisher
     image_pub = ImagePublisher(factory, debug=True)
     V.add(image_pub, inputs=[
         'cam/image_array',
     ])
 
+    
     from parts.broker.pub import USNavPublisher
     usnav = USNavPublisher(factory, debug=True)
     V.add(usnav, inputs=[
@@ -172,6 +175,7 @@ def test_pub():
         'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
         'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
         'imu/temp',
+        'imu/recent', 'imu/mpu_timestamp',
     ])
 
     from parts.broker.pub import Mpu6050Publisher
@@ -181,7 +185,9 @@ def test_pub():
         'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
         #'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
         #'imu/temp',
+        'imu/recent', 'imu/mpu_timestamp',
     ])
+    
 
     try:
         V.start(rate_hz=20, max_loop_count=1000)

@@ -39,6 +39,7 @@ class Mpu6050Subscriber(SubscriberBase):
             imu/gyr_x           角速度(X軸)
             imu/gyr_y           角速度(Y軸)
             imu/gyr_z           角速度(Z軸)
+            imu/recent          過去データ文字列
             imu/mpu_timestamp   Subscribeした時刻(time.time()結果)
         """
         if self.debug:
@@ -51,6 +52,7 @@ class Mpu6050Subscriber(SubscriberBase):
             self.message.get('imu/gyr_x', 0.0), \
             self.message.get('imu/gyr_y', 0.0), \
             self.message.get('imu/gyr_z', 0.0), \
+            self.message.get('imu/recent', '{}'), \
             self.message.get('imu/mpu_timestamp', 0.0)
 
 class Mpu9250Subscriber(SubscriberBase):
@@ -80,17 +82,18 @@ class Mpu9250Subscriber(SubscriberBase):
         引数：
             なし
         戻り値：
-            imu_ax          加速度(X軸)
-            imu_ay          加速度(Y軸)
-            imu_az          加速度(Z軸)
-            imu_gx          角速度(X軸)
-            imu_gy          角速度(Y軸)
-            imu_gz          角速度(Z軸)
-            imu_mx          磁束密度(X軸)
-            imu_my          磁束密度(Y軸)
-            imu_mz          磁束密度(Z軸)
-            imu_temp        温度(C)
-            imu_timestamp   Subscribeした時刻(time.time()結果)
+            imu_ax              加速度(X軸)
+            imu_ay              加速度(Y軸)
+            imu_az              加速度(Z軸)
+            imu_gx              角速度(X軸)
+            imu_gy              角速度(Y軸)
+            imu_gz              角速度(Z軸)
+            imu_mx              磁束密度(X軸)
+            imu_my              磁束密度(Y軸)
+            imu_mz              磁束密度(Z軸)
+            imu_temp            温度(C)
+            imu_recent          過去データ文字列
+            imu_mpu_timestamp   Subscribeした時刻(time.time()結果)
         """
         if self.debug:
             print('[Mpu9250Subscriber] subscribed:{}'.format(str(self.arrive)))
@@ -106,4 +109,5 @@ class Mpu9250Subscriber(SubscriberBase):
             self.message.get('imu/mgt_y', 0.0), \
             self.message.get('imu/mgt_z', 0.0), \
             self.message.get('imu/temp', 0.0), \
+            self.message.get('imu/recent', '{}'), \
             self.message.get('imu/mpu_timestamp', 0.0)

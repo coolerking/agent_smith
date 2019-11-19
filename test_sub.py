@@ -20,7 +20,7 @@ def test_sub():
     V.add(sub, outputs=[
         'user/angle', 'user/throttle', 'user/lift_throttle',
         'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
-        'user/mode', 'timestamp'
+        'user/mode',
     ])
 
     '''
@@ -29,7 +29,7 @@ def test_sub():
     V.add(user_sub, outputs=[
         'user/angle', 'user/throttle', 'user/lift_throttle',
         #'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
-        'user/mode', 'timestamp'
+        'user/mode',
     ])
     '''
 
@@ -56,21 +56,23 @@ def test_sub():
         'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
         'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
         'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
-        'imu/temp',
+        'imu/temp', 'imu/recent',
         'imu/mpu_timestamp',
     ])
 
     ''' ok '''
     class PrintMpu9250:
-        def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, ts):
-            print('[Mpu9260] a:({},{},{}) g:({},{},{}) m:({},{},{}) t:{} ts:{}'.format(
-                str(ax), str(ay), str(az), str(gx), str(gy), str(gz), str(mx), str(my), str(mz), str(temp), str(ts)
+        def run(self, ax, ay, az, gx, gy, gz, mx, my, mz, temp, recent, ts):
+            print('[Mpu9260] a:({},{},{}) g:({},{},{}) m:({},{},{}) t:{} ts:{} recent:{}'.format(
+                str(ax), str(ay), str(az), str(gx), str(gy), str(gz), 
+                str(mx), str(my), str(mz), str(temp), str(ts), str(recent)
             ))
     V.add(PrintMpu9250(), inputs=[
         'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
         'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
         'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
         'imu/temp',
+        'imu/recent',
         'imu/mpu_timestamp',
     ])
     '''ok'''
@@ -83,6 +85,7 @@ def test_sub():
         'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
         #'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
         #'imu/temp',
+        'imu/recent',
         'imu/mpu_timestamp',
     ])
     '''
