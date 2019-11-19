@@ -942,7 +942,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
     IMU(MPU6050)データ追加
     '''
 
-    if cfg.DEFAULT_MODEL_TYPE == 'imu':
+    if model_type == 'imu' or cfg.DEFAULT_MODEL_TYPE == 'imu':
         '''
         IMUモデルを使用する場合
         '''
