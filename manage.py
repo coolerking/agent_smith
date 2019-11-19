@@ -1097,6 +1097,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
                 '''
                 from parts.broker.pub import USNavPublisher
                 pub_usn = USNavPublisher(factory, debug=use_debug)
+                print('usnav')
                 print(usnav_items)
                 V.add(pub_usn, inputs=usnav_items)
 
@@ -1106,6 +1107,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
                 '''
                 from parts.broker.pub import USNavRawPublisher
                 pub_raw = USNavRawPublisher(factory, debug=use_debug)
+                print('usnav_raw')
                 print(usnav_raw_items)
                 V.add(pub_raw, inputs=usnav_raw_items)
 
@@ -1115,6 +1117,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
                 '''
                 from parts.broker.pub import IMUPublisher
                 pub_imu = IMUPublisher(factory, debug=use_debug)
+                print('imu')
                 print(imu_items)
                 V.add(pub_imu, inputs=imu_items)
 
