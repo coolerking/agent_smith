@@ -14,6 +14,7 @@ def test_pub():
     print('on')
     power.on()
 
+    '''
     from parts.broker.debug import GetTub
     tub = GetTub()
     V.add(tub, outputs=[
@@ -22,11 +23,24 @@ def test_pub():
         'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
         'timestamp'
     ])
+    '''
+    tubs = [
+        #'user/mode',
+        'user/angle', 'user/throttle', 'user/lift_throttle',
+        'pilot/angle', 'pilot/throttle', 'pilot/lift_throttle',
+        'timestamp',
+    ]
+    V.mem['user/mode'] = 'user'
+    value = 0.0
+    for key in tubs:
+        value +=1.0
+        V.mem[key]=value
 
     from parts.broker.debug import GetImage
     image = GetImage()
     V.add(image, outputs=['cam/image_array'])
 
+    '''
     from parts.broker.debug import GetMpu
     mpu = GetMpu()
     V.add(mpu, outputs=[
@@ -35,7 +49,19 @@ def test_pub():
         'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
         'imu/temp', 'imu/mpu_timestamp'
     ])
+    '''
+    mpus = [
+        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+        'imu/mgt_x', 'imu/mgt_y', 'imu/mgt_z',
+        'imu/temp', 'imu/mpu_timestamp'
+    ]
+    value = 0.0
+    for key in mpus:
+        value +=1.0
+        V.mem[key]=value
 
+    '''
     from parts.broker.debug import GetHedge
     hedge = GetHedge()
     V.add(hedge, outputs=[
@@ -49,6 +75,39 @@ def test_pub():
         'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
         'dist/b3', 'dist/b3d', 'dist/b4', 'dist/b4d', 'dist/timestamp',
     ])
+    '''
+    hedges = [
+        # USNav 6
+        #'usnav/id',
+        'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
+        # IMU 20
+        'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
+        'imu/vx', 'imu/vy', 'imu/vz', 'imu/ax', 'imu/ay', 'imu/az',
+        'imu/gx', 'imu/gy', 'imu/gz', 'imu/mx', 'imu/my', 'imu/mz', 'imu/timestamp',
+        # USNav Raw 10
+        #'dist/id', 'dist/b1', 
+        'dist/b1d', 
+        #'dist/b2', 
+        'dist/b2d', 
+        #'dist/b3', 
+        'dist/b3d', 
+        #'dist/b4', 
+        'dist/b4d', 'dist/timestamp',
+    ]
+    value = 0.0
+    for key in hedges:
+        value +=1.0
+        V.mem[key]=value
+    hedges_str = [
+        'usnav/id',
+        # USNav Raw 10
+        'dist/id', 'dist/b1', 
+        'dist/b2', 
+        'dist/b3', 
+        'dist/b4', 
+    ]
+    for i in range(len(hedges_str)):
+        V.mem[hedges_str[i]] = str(i)
 
     # Publisher
 
@@ -104,7 +163,7 @@ def test_pub():
     finally:
         power.off()
         print('off')
-        sleep(20)
+        sleep(3)
 
 
 if __name__ == '__main__':

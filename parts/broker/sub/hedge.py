@@ -141,6 +141,9 @@ class IMUSubscriber(SubscriberBase):
             imu_ax          加速度(X軸)
             imu_ay          加速度(Y軸)
             imu_az          加速度(Z軸)
+            imu_gx          角速度(X軸)
+            imu_gy          角速度(Y軸)
+            imu_gz          角速度(Z軸)
             imu_mx          磁束密度(X軸)
             imu_my          磁束密度(Y軸)
             imu_mz          磁束密度(Z軸)
@@ -161,6 +164,9 @@ class IMUSubscriber(SubscriberBase):
             self.message.get('imu/ax', 0.0), \
             self.message.get('imu/ay', 0.0), \
             self.message.get('imu/az', 0.0), \
+            self.message.get('imu/gx', 0.0), \
+            self.message.get('imu/gy', 0.0), \
+            self.message.get('imu/gz', 0.0), \
             self.message.get('imu/mx', 0.0), \
             self.message.get('imu/my', 0.0), \
             self.message.get('imu/mz', 0.0), \

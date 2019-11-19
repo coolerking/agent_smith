@@ -61,7 +61,7 @@ def _bin_to_arr(binary):
     if type(binary) is np.ndarray:
         return binary
     elif type(binary) is bytes:
-        return dk.utils.img_to_arr(dk.util.img.binary_to_img(binary))
+        return dk.utils.img_to_arr(dk.utils.binary_to_img(binary))
     else:
         raise ValueError('unknown type=' +str(type(binary)))
 
