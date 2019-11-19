@@ -942,45 +942,44 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
     IMU(MPU6050)データ追加
     '''
 
-    if model_type == 'imu' or cfg.DEFAULT_MODEL_TYPE == 'imu':
+    # Tubへ格納する加速度、角速度
+    tub_imu_inputs = [
+        'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+        'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+    ]
+    tub_imu_input_types = [
+        'float', 'float', 'float',
+        'float', 'float', 'float',
+    ]
+    if not cfg.HAVE_IMU:
         '''
-        IMUモデルを使用する場合
-        '''
-        # 入力データに加速度、角速度を追加
-        imu_inputs = [
-            'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
-            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
-        ]
-        imu_input_types = [
-            'float', 'float', 'float',
-            'float', 'float', 'float',
-        ]
-        inputs += imu_inputs
-        types += imu_input_types
-            
-        if not cfg.HAVE_IMU:
-            '''
             MPU9250/MPU6050を持っていない場合
+        '''
+        if cfg.HAVE_HEDGE and (use_hedge or cfg.USE_HEDGE_AS_DEFAULT):
             '''
-            if cfg.HAVE_HEDGE and (use_hedge or cfg.USE_HEDGE_AS_DEFAULT):
+            Marvelmind が有効な場合
+            '''
+            if cfg.USE_HEDGE_IMU:
                 '''
-                Marvelmind が有効な場合
+                Marvelmind IMUが使用可能な場合
                 '''
-                if cfg.USE_HEDGE_IMU:
-                    '''
-                    Marvelmind IMUが使用可能な場合
-                    '''
-                    # 必要な Marvelmind IMUデータを移動させる
-                    class MoveIMU:
-                        def run(self, ax, ay, az, gx, gy, gz):
-                            return ax, ay, az, gx, gy, gz
-                    move = MoveIMU()
-                    V.add(move, 
-                        inputs=[
-                            'imu/ax', 'imu/ay', 'imu/az',
-                            'imu/gx', 'imu/gy', 'imu/gz',
-                        ],
-                        outputs=imu_inputs)
+                # 必要な Marvelmind IMUデータを移動させる
+                class MoveIMU:
+                    def run(self, ax, ay, az, gx, gy, gz):
+                        return ax, ay, az, gx, gy, gz
+                move = MoveIMU()
+                V.add(move, 
+                    inputs=[
+                        'imu/ax', 'imu/ay', 'imu/az',
+                        'imu/gx', 'imu/gy', 'imu/gz',
+                    ],
+                    outputs=tub_imu_inputs)
+
+            inputs += tub_imu_inputs
+            types += tub_imu_input_types
+        elif cfg.HAVE_IMU:
+            inputs += tub_imu_inputs
+            types += tub_imu_input_types
 
     if cfg.RECORD_DURING_AI:
         '''
