@@ -1097,6 +1097,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
                 '''
                 from parts.broker.pub import USNavPublisher
                 pub_usn = USNavPublisher(factory, debug=use_debug)
+                print(usnav_items)
                 V.add(pub_usn, inputs=usnav_items)
 
             if cfg.USE_HEDGE_USNAV_RAW:
@@ -1105,6 +1106,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
                 '''
                 from parts.broker.pub import USNavRawPublisher
                 pub_raw = USNavRawPublisher(factory, debug=use_debug)
+                print(usnav_raw_items)
                 V.add(pub_raw, inputs=usnav_raw_items)
 
             if cfg.USE_HEDGE_IMU:
@@ -1113,6 +1115,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
                 '''
                 from parts.broker.pub import IMUPublisher
                 pub_imu = IMUPublisher(factory, debug=use_debug)
+                print(imu_items)
                 V.add(pub_imu, inputs=imu_items)
 
         '''
@@ -1122,6 +1125,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
             '''
             MPU9250/MPU6050 を使用している場合
             '''
+            print(mpu_items)
             if cfg.IMU_TYPE == 'mpu6050':
                 '''
                 MPU6050を使用している場合
