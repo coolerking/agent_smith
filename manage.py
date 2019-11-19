@@ -286,7 +286,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
             '''
             Marvelmindが有効である場合
             '''
-            if (cfg.HAE_IMU and cfg.IMU_TYPE == 'mpu9250'):
+            if (cfg.HAVE_IMU and cfg.IMU_TYPE == 'mpu9250'):
                 '''
                 MPU9250を使用する場合
                 '''
