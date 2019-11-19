@@ -140,14 +140,16 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
     Marvelmind 位置情報システム
     '''
     # Marvelmind USNav データ
+    hedge_items = []
+    hedge_types = []
     usnav_items = [
         'usnav/id', 'usnav/x', 'usnav/y', 'usnav/z', 'usnav/angle', 'usnav/timestamp',
     ]
     usnav_types = [
         'str', 'float', 'float', 'float', 'float', 'float',
     ]
-    hedge_items = usnav_items
-    hedge_types = usnav_types
+    hedge_items += usnav_items
+    hedge_types += usnav_types
     # Marvelmind USNav Raw データ
     usnav_raw_items = [
         'dist/id', 'dist/b1', 'dist/b1d', 'dist/b2', 'dist/b2d', 
@@ -224,12 +226,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
         'str', 'float',
     ]
     if cfg.HAVE_IMU:
+        mpu_items = []
+        mpu_types = []
         if cfg.IMU_TYPE == 'mpu6050':
             '''
             MPU6050を使用する場合
             '''
-            mpu_items = mpu6050_items
-            #mpu_types = mpu6050_types
+            mpu_items += mpu6050_items
+            mpu_types += mpu6050_types
             from parts.sensors.imu import Mpu6050
             imu = Mpu6050(
                 pgio=pgio, 
@@ -242,8 +246,8 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
             '''
             MPU9250を使用する場合
             '''
-            mpu_items = mpu9250_items
-            mpu_types = mpu9250_types
+            mpu_items += mpu9250_items
+            mpu_types += mpu9250_types
             from parts.sensors.imu import Mpu9250
             imu = Mpu9250(
                 pgio=pgio,
@@ -310,8 +314,10 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
     user_types = [
         'float', 'float', 'float', 'str',
     ]
-    joystick_items = user_items
-    joystick_types = user_types
+    joystick_items = []
+    joystick_types = []
+    joystick_items += user_items
+    joystick_types += user_types
     joystick_items += ['recording']
     joystick_types += ['boolean']
     # ジョイスティックパーツのアウトプット値なのでここでは初期化せず
@@ -1128,6 +1134,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
             '''
             MPU9250/MPU6050 を使用している場合
             '''
+            print('mpu')
             print(mpu_items)
             if cfg.IMU_TYPE == 'mpu6050':
                 '''
