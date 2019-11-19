@@ -158,7 +158,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
         'str', 'float', 'str', 'float', 'float',
     ]
     hedge_items += usnav_raw_items
-    hedge_types += usnav_raw_items
+    hedge_types += usnav_raw_types
     # Marvelmind IMU データ
     imu_items = [
         'imu/x', 'imu/y', 'imu/z', 'imu/qw', 'imu/qx', 'imu/qy', 'imu/qz',
