@@ -5,7 +5,7 @@ Joystick データをAWS IoT Core から Subscribe するパーツクラスを�
 from .base import SubscriberBase
 from .topic import sub_joystick_json_topic, SYSTEM_REAL, THING_TYPE_AGENT, THING_GROUP_LOADER
 
-class JoystickPublisher(SubscriberBase):
+class JoystickSubscriber(SubscriberBase):
     """
     ジョイスティックデータをAWS IoT CoreへPublishするパーツクラス。
     """

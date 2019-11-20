@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from time import sleep
 
-
 user_items = [
     'user/angle', 'user/throttle', 'user/lift_throttle', 'user/mode',
 ]
@@ -21,27 +20,42 @@ class PrintJoystick:
             str(mode), str(an), str(th), str(lth), str(rec)
         ))
 
-
-def test_joy_sub(use_debug=True):
+def test_joy_pub(use_debug=True):
     import donkeycar as dk
-    #cfg = dk.load_config()
+    cfg = dk.load_config()
     V = dk.vehicle.Vehicle()
 
     from parts.broker import AWSShadowClientFactory
-    factory = AWSShadowClientFactory('conf/aws/jones.yml', 'jones')
+    factory = AWSShadowClientFactory('conf/aws/tom.yml', 'tom')
 
     from parts.broker import PowerReporter
     power = PowerReporter(factory, debug=use_debug)
     print('on')
     power.on()
 
-    from parts.broker.sub import JoystickSubscriber
-    sub_joy = JoystickSubscriber(factory, debug=use_debug)
-    V.add(sub_joy, outputs=joystick_items)
-    
-    
-    V.add(PrintJoystick(), inputs=joystick_items)
+    # ダミー Tub image パーツ
+    from parts.broker.debug import GetImage
+    image = GetImage()
+    V.add(image, outputs=['cam/image_array'])
 
+    # Joystick パーツ
+    from parts import get_js_controller
+    ctr = get_js_controller(cfg)
+    V.add(ctr, 
+            inputs=['cam/image_array'],
+            outputs=joystick_items,
+            threaded=True)
+
+    # Joystick入力値表示パーツ
+    if use_debug:
+        V.add(PrintJoystick(), inputs=joystick_items)
+
+    # Publisherパーツ
+    from parts.broker.pub import JoystickPublisher
+    pub_joy = JoystickPublisher(factory, debug=use_debug)
+    V.add(pub_joy, inputs=joystick_items)
+
+    # ループ
     try:
         V.start(rate_hz=20, max_loop_count=10000)
 
@@ -53,4 +67,4 @@ def test_joy_sub(use_debug=True):
         sleep(5)
 
 if __name__ == '__main__':
-    test_joy_sub()
+    test_joy_pub()

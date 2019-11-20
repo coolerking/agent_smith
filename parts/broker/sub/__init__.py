@@ -9,4 +9,4 @@ from .hedge import USNavSubscriber, USNavRawSubscriber, IMUSubscriber
 # IMUデータ(MPU6050:6軸、MPU9250:9軸)
 from .mpu import Mpu6050Subscriber, Mpu9250Subscriber
 # ジョイスティックデータ
-from .joystick import JoystickPublisher
+from .joystick import JoystickSubscriber
