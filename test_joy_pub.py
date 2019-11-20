@@ -26,7 +26,7 @@ def test_joy_pub(use_debug=True):
     V = dk.vehicle.Vehicle()
 
     from parts.broker import AWSShadowClientFactory
-    factory = AWSShadowClientFactory('conf/aws/tom.yml', 'tom')
+    factory = AWSShadowClientFactory('conf/aws/smith.yml', 'smith')
 
     from parts.broker import PowerReporter
     power = PowerReporter(factory, debug=use_debug)
