@@ -209,6 +209,20 @@ def sub_hedge_imu_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing
     return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
         MESSAGE_TYPE_HEDGE_IMU, DATA_TYPE_JSON)
 
+def sub_joystick_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
+    """
+    ジョイスティック出力データ(辞書型)をSubscribeする際に
+    使用するトピック名を返却する。
+    引数：
+        system      システムの種類
+        thing_type  モノのタイプ
+        thing_group モノのグループ
+    戻り値：
+        トピック名
+    """
+    return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE,
+        MESSAGE_TYPE_JOYSTICK, DATA_TYPE_JSON)
+
 ''' トピック名分類ユーティリティ '''
 
 def is_json(topic_name):
@@ -265,3 +279,4 @@ def is_thing_name(system, thing_type, thing_group, thing_name, topic_name):
     if topic_name is None or topic_name == '':
         return False
     return topic_name.startswith(prefix)
+
