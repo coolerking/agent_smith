@@ -4,21 +4,22 @@
 Scripts to drive a donkey 2 car
 
 Usage:
-    manage.py (drive) [--model=<model>] [--js] [--hedge] [--aws] [--map] [--debug] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|latent|tflite_linear)] [--camera=(single|stereo)] [--meta=<key:value> ...]
+    manage.py (drive) [--model=<model>] [--js] [--hedge] [--aws] [--map] [--debug] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|latent|tflite_linear)] [--camera=(single|stereo)] [--meta=<key:value> ...] [--write_both_images]
     manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--transfer=<model>] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|tflite_linear)] [--continuous] [--aug]
 
 
 Options:
-    -h --help          Show this screen.
-    --js               Use physical joystick.
-    --range            Use range sensor
-    --spi              Use sensors via SPI
-    --hedge            Use Marvelmind Mobile Beacon via USB
-    --aws              Use AWS IoT Core
-    --map              Use 2d map image instead of camera
-    --debug            Show debug message
-    -f --file=<file>   A text file containing paths to tub files, one per line. Option may be used more than once.
-    --meta=<key:value> Key/Value strings describing describing a piece of meta data about this drive. Option may be used more than once.
+    -h --help            Show this screen.
+    --js                 Use physical joystick.
+    --range              Use range sensor
+    --spi                Use sensors via SPI
+    --hedge              Use Marvelmind Mobile Beacon via USB
+    --aws                Use AWS IoT Core
+    --map                Use 2d map image instead of camera
+    --write_both_images  Write both 2d map image and camera image
+    --debug              Show debug message
+    -f --file=<file>     A text file containing paths to tub files, one per line. Option may be used more than once.
+    --meta=<key:value>   Key/Value strings describing describing a piece of meta data about this drive. Option may be used more than once.
 """
 import os
 import time
@@ -38,7 +39,7 @@ from donkeycar.parts.file_watcher import FileWatcher
 from donkeycar.parts.launch import AiLaunch
 from donkeycar.utils import *
 
-def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=False, use_map=False, use_debug=False, model_type=None, camera_type='single', meta=[] ):
+def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=False, use_map=False, use_debug=False, model_type=None, camera_type='single', write_both_images=False, meta=[] ):
     '''
     Construct a working robotic vehicle from many parts.
     Each part runs as a job in the Vehicle loop, calling either
@@ -100,7 +101,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
             outputs=['cam/image_array'])
 
 
-    elif cfg.CAMERA_TYPE != "MAP" and use_map == False:
+    elif write_both_images or (cfg.CAMERA_TYPE != "MAP" and use_map == False):
         print("cfg.CAMERA_TYPE", cfg.CAMERA_TYPE)
         if cfg.DONKEY_GYM:
             from donkeycar.parts.dgym import DonkeyGymEnv 
@@ -133,8 +134,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
             cam = MockCamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, image_d=cfg.IMAGE_DEPTH)
         else:
             raise(Exception("Unkown camera type: %s" % cfg.CAMERA_TYPE))
-            
-        V.add(cam, inputs=inputs, outputs=['cam/image_array'], threaded=threaded)
+        
+        # 前方画像を保管するV.memキー名
+        if write_both_images:
+            from parts.datastore import FWD_CAMERA_KEY
+            outputs = [FWD_CAMERA_KEY]
+        else:
+            outputs = ['cam/image_array']
+
+        V.add(cam, inputs=inputs, outputs=outputs, threaded=threaded)
     
     '''
     Marvelmind 位置情報システム
@@ -926,9 +934,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
     Tubデータ
     '''
     # ベースとなるTubデータ
-    inputs=['cam/image_array']
+    if write_both_images:
+        from parts.datastore import FWD_CAMERA_KEY
+        inputs=['cam/image_array', FWD_CAMERA_KEY]
+        types=['image_array', 'image_array']
+    else:
+        inputs=['cam/image_array']
+        types=['image_array']
     inputs += user_items
-    types=['image_array']
     types += user_types
 
     if cfg.TRAIN_BEHAVIORS:
@@ -993,6 +1006,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
     Tubデータ書き込み
     '''
     th = TubHandler(path=cfg.DATA_PATH)
+    if write_both_images:
+        from parts.datastore import TubHandler as NewTubHandler
+        th = NewTubHandler(path=cfg.DATA_PATH)
     tub = th.new_tub_writer(inputs=inputs, types=types, user_meta=meta)
     V.add(tub, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
 
@@ -1181,6 +1197,7 @@ if __name__ == '__main__':
         camera_type = args['--camera']
         use_map = args['--map']
         use_hedge = args['--hedge']
+        write_both_images = args['--write_both_images']
         if use_map and (not use_hedge):
             raise ValueError('map option needs hedge input')
         drive(cfg,
@@ -1192,6 +1209,7 @@ if __name__ == '__main__':
             use_debug = args['--debug'],
             model_type = model_type,
             camera_type = camera_type,
+            write_both_images = write_both_images,
             meta = args['--meta'])
     
     if args['train']:
