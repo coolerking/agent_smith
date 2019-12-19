@@ -63,11 +63,16 @@ class Tub(OldTub):
         return self.current_ix
 
     def erase_record(self, i):
+        print('arrived erase_record i={}'.format(str(i)))
         super().erase_record(i)
         img_filename = '%d_cam-image_array_.jpg' % (i)
         camera_img_path = os.path.join(self.camera_path, img_filename)
+        print(camera_img_path)
         if os.path.exists(camera_img_path):
+            print('erase {}'.format(str(camera_img_path)))
             os.unlink(camera_img_path)
+        else:
+            print('not exists {}'.format(str(camera_img_path)))
 
     def get_record(self, ix):
 
