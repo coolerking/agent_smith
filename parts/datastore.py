@@ -48,6 +48,7 @@ class Tub(OldTub):
                 img = Image.fromarray(np.uint8(val))
                 name = self.make_file_name(key, ext='.jpg')
                 if key == FWD_CAMERA_KEY:
+                    name = name.replace('fwd', 'cam')
                     img.save(os.path.join(self.camera_path, name))
                 else:
                     img.save(os.path.join(self.path, name))
