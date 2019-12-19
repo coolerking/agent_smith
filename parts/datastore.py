@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+Tubディレクトリ内に前方画像格納用ディレクトリを作成し、この中に
+前方画像JPGファイルを格納する。
+ファイル名は、2D Mapと同じ名前で格納される。
 
+donkeycar.parts.datastore をオーバライドして作成。
+"""
 import os
 import time
 import glob
@@ -9,11 +15,25 @@ import pandas as pd
 from PIL import Image
 from donkeycar.parts.datastore import Tub as OldTub
 
-CAMERA_DIR = 'camera'
-FWD_CAMERA_KEY = 'fwd/image_array'
+CAMERA_PREFIX = 'cam'
+FWD_CAMERA_PREFIX = 'fwd'
+CAMERA_DIR = FWD_CAMERA_PREFIX
+FWD_CAMERA_KEY = '{}/image_array'.format(str(FWD_CAMERA_PREFIX))
 
 class Tub(OldTub):
-    def __init__(self, path, inputs=None, types=None, user_meta=[], camera_dir=CAMERA_DIR):
+    """
+    TubディレクトリをDecorateして前方画像、Map画像両方を格納する機能を追加したクラス。
+    """
+    def __init__(self, path, inputs=None, types=None, user_meta=[], camera_dir=FWD_CAMERA_PREFIX):
+        """
+        親クラスのコンストラクタ処理後、前方画像格納ディレクトリを作成する。
+        引数：
+            path        Tubディレクトリパス
+            inputs      入力キー群
+            types       入力値タイプ群
+            user_meta   メタ配列
+            camera_dir  前方視界画像格納サブディレクトリ名
+        """
         super().__init__(path, inputs, types, user_meta)
         self.camera_path = os.path.join(self.path, camera_dir)
         if not os.path.exists(self.camera_path):
@@ -22,9 +42,12 @@ class Tub(OldTub):
 
     def put_record(self, data):
         """
-        Save values like images that can't be saved in the csv log and
-        return a record with references to the saved values that can
-        be saved in a csv.
+        引数dataで渡されたTubデータをmeta.jsonで定義されたタイプ別にファイルへ書き込む。
+        元クラスの同名メソッドをオーバライド。
+        引数：
+            data    Tubデータ（辞書型）
+        戻り値：
+            なし
         """
         json_data = {}
         self.current_ix += 1
@@ -48,7 +71,7 @@ class Tub(OldTub):
                 img = Image.fromarray(np.uint8(val))
                 name = self.make_file_name(key, ext='.jpg')
                 if key == FWD_CAMERA_KEY:
-                    name = name.replace('fwd', 'cam')
+                    name = name.replace(FWD_CAMERA_PREFIX, CAMERA_PREFIX)
                     img.save(os.path.join(self.camera_path, name))
                 else:
                     img.save(os.path.join(self.path, name))
@@ -64,19 +87,33 @@ class Tub(OldTub):
         return self.current_ix
 
     def erase_record(self, i):
-        print('arrived erase_record i={}'.format(str(i)))
+        """
+        引数iで指定された連番のTubデータを削除する。
+        同名のメソッドをオーバライド。
+        引数：
+            i   連番
+        戻り値：
+            なし
+        """
+        #print('arrived erase_record i={}'.format(str(i)))
         super().erase_record(i)
         img_filename = '%d_cam-image_array_.jpg' % (i)
         camera_img_path = os.path.join(self.camera_path, img_filename)
-        print(camera_img_path)
+        #print(camera_img_path)
         if os.path.exists(camera_img_path):
-            print('erase {}'.format(str(camera_img_path)))
+            #print('erase {}'.format(str(camera_img_path)))
             os.unlink(camera_img_path)
-        else:
-            print('not exists {}'.format(str(camera_img_path)))
+        #else:
+        #    print('not exists {}'.format(str(camera_img_path)))
 
     def get_record(self, ix):
-
+        """
+        連番ixに対応するTubデータ（辞書型）を返却する。
+        引数：
+            ix      連番
+        戻り値：
+            data    Tubデータ（辞書型）
+        """
         json_data = self.get_json_record(ix)
         data = self.read_record(json_data)
         return data
@@ -84,15 +121,24 @@ class Tub(OldTub):
 
 class TubWriter(Tub):
     def __init__(self, *args, **kwargs):
+        """
+        親クラスの初期処理を呼び出す。
+        引数：
+            可変（親クラスと同じ）
+        戻り値：
+            なし
+        """
         super().__init__(*args, **kwargs)
 
     def run(self, *args):
-        '''
-        API function needed to use as a Donkey part.
-
-        Accepts values, pairs them with their inputs keys and saves them
-        to disk.
-        '''
+        """
+        DonkeyパーツTemplate Method。
+        Tubデータを書き込む。
+        引数：
+            可変(meta.json定義と同じ数のデータ値)
+        戻り値：
+            なし
+        """
         assert len(self.inputs) == len(args)
 
         self.record_time = int(time.time() - self.start_time)
@@ -102,30 +148,67 @@ class TubWriter(Tub):
 
 
 class TubReader(Tub):
+    """
+    Tubデータを読み取るクラス。
+    """
     def __init__(self, path, *args, **kwargs):
+        """
+        親クラスの初期処理を呼び出す。
+        引数：
+            path    Tubデータパス
+            可変    親クラスと同じ
+        戻り値：
+            なし
+        """
         super().__init__(*args, **kwargs)
 
     def run(self, *args):
         '''
-        API function needed to use as a Donkey part.
-
-        Accepts keys to read from the tub and retrieves them sequentially.
+        DonkeyパーツTemplate Method。
+        Tubデータを書き込む。
+        引数：
+            可変(meta.json定義と同じ数のデータ値)
+        戻り値：
+            なし
         '''
-
         record = self.get_record(self.current_ix)
         record = [record[key] for key in args ]
         return record
 
 
 class TubHandler():
+    """
+    Tubデータ用ハンドラクラス。
+    """
     def __init__(self, path):
+        """
+        引数pathをインスタンス変数に格納する。
+        引数：
+            path    Tubデータディレクトリパス
+        戻り値：
+            なし
+        """
         self.path = os.path.expanduser(path)
 
     def get_tub_list(self,path):
+        """
+        引数path内のリストを返却する。
+        引数：
+            path    調査対象のパス
+        戻り値：
+            folders リスト
+        """
         folders = next(os.walk(path))[1]
         return folders
 
     def next_tub_number(self, path):
+        """
+        引数pathのフォルダ内にある連番の次の連番を返す。
+        引数：
+            path        Tubデータフォルダへのパス
+        戻り値：
+            next_number 連番（整数）
+        """
         def get_tub_num(tub_name):
             try:
                 num = int(tub_name.split('_')[1])
@@ -140,6 +223,13 @@ class TubHandler():
         return next_number
 
     def create_tub_path(self):
+        """
+        Tubディレクトリ名を返却する。
+        引数：
+            なし
+        戻り値：
+            Tubデータパス（フルパス）
+        """
         tub_num = self.next_tub_number(self.path)
         date = datetime.datetime.now().strftime('%y-%m-%d')
         name = '_'.join(['tub',str(tub_num),date])
@@ -147,11 +237,23 @@ class TubHandler():
         return tub_path
 
     def new_tub_writer(self, inputs, types, user_meta=[]):
+        """
+        前方画像、2D Map画像両方格納するライタークラスを返却する。
+        引数：
+            inputs      入力キー群
+            types       入力値タイプ群
+            user_meta   メタ配列
+        戻り値：
+            TubWriter インスタンス
+        """
         tub_path = self.create_tub_path()
         tw = TubWriter(path=tub_path, inputs=inputs, types=types, user_meta=user_meta)
         return tw
 
-
+'''
+以下donkeyrar.parts.datastoreの同名クラスと同じ。
+ただし、親クラスは本モジュール内Tubクラスとなる。
+'''
 
 class TubImageStacker(Tub):
     '''
