@@ -47,6 +47,7 @@ THING_GROUPS = [
 
 """ メッセージタイプ """
 MESSAGE_TYPE_TUB = 'tub'
+MESSAGE_TYPE_TUB_FWD = 'fwd'
 MESSAGE_TYPE_IMAGE = 'image'
 MESSAGE_TYPE_HEDGE_USNAV = 'usnav'
 MESSAGE_TYPE_HEDGE_USNAV_RAW = 'dist'
@@ -56,6 +57,7 @@ MESSAGE_TYPE_MPU9250 = 'mpu9250'
 MESSAGE_TYPE_JOYSTICK = 'joystick'
 MESSAGE_TYPES = [
     MESSAGE_TYPE_TUB,
+    MESSAGE_TYPE_TUB_FWD,
     MESSAGE_TYPE_IMAGE,
     MESSAGE_TYPE_HEDGE_USNAV,
     MESSAGE_TYPE_HEDGE_USNAV_RAW,
@@ -130,7 +132,7 @@ def sub_tub_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group
 
 def sub_tub_image_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """
-    Tubデータ(イメージ、nd.array型)を Subscribe する際に使用するトピック名を返却する。
+    Tubデータ(イメージ、nd.array型:cam/image_array)を Subscribe する際に使用するトピック名を返却する。
     引数：
         system      システムの種類
         thing_type  モノのタイプ
@@ -140,6 +142,19 @@ def sub_tub_image_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_grou
     """
     return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
         MESSAGE_TYPE_TUB, DATA_TYPE_IMAGE)
+
+def sub_tub_fwd_image_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
+    """
+    Tubデータ(イメージ、nd.array型:fwd/image_array)を Subscribe する際に使用するトピック名を返却する。
+    引数：
+        system      システムの種類
+        thing_type  モノのタイプ
+        thing_group モノのグループ
+    戻り値：
+        トピック名
+    """
+    return _sub_base_topic(system, thing_type, thing_group, WILDCARD_ONE, 
+        MESSAGE_TYPE_TUB_FWD, DATA_TYPE_IMAGE)
 
 def sub_mpu9250_json_topic(system=WILDCARD_ONE, thing_type=WILDCARD_ONE, thing_group=WILDCARD_ONE):
     """

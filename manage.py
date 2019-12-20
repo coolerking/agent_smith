@@ -1094,6 +1094,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_hedge=False, use_aws=Fal
             'cam/image_array',
         ])
 
+        # fwdイメージデータ送信
+        if write_both_images:
+            from parts.broker.pub import FwdImagePublisher
+            pub_fwd_img = FwdImagePublisher(factory, debug=use_debug)
+            from parts.datastore import FWD_CAMERA_KEY
+            V.add(pub_fwd_img, inputs=[
+                FWD_CAMERA_KEY,
+            ])
+
         '''
         ジョイスティックデータの送信
         '''

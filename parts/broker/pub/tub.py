@@ -5,7 +5,7 @@ TubデータをAWS IoT Core へ Publish するパーツクラスを定義する�
 import time
 import json
 from .base import PublisherBase, to_float, to_str, arr_to_bytearray
-from .topic import pub_tub_json_topic, pub_tub_image_topic
+from .topic import pub_tub_json_topic, pub_tub_image_topic, pub_tub_fwd_image_topic
 
 class UserPublisher(PublisherBase):
     """
@@ -125,7 +125,7 @@ class Publisher(PublisherBase):
 
 class ImagePublisher(PublisherBase):
     """
-    Tubデータ(辞書型、手動・自動運転データ両方)を
+    Tubデータ(nd.array:cam/image_array)を
     AWS IoT CoreへPublishするパーツクラス。
     """
     def __init__(self, aws_iot_client_factory, debug=False):
@@ -138,15 +138,9 @@ class ImagePublisher(PublisherBase):
 
     def run(self, image_array):
         """
-        手動・自動運転両方のTubデータをPublishする。
+        Tubデータ(nd.array:cam/image_array)をPublishする。
         引数：
-            user_angle          手動ステアリング値
-            user_throttle       手動スロットル値
-            user_lift_throttle  手動リフト値
-            pilot_angle         自動ステアリング値
-            pilot_throttle      自動スロットル値
-            pilot_lift_throttle 自動リフト値
-            user_mode           運転モード
+            image_array     fwd/image_arrayデータ(nd.array型)
         戻り値：
             なし
         """
@@ -157,3 +151,30 @@ class ImagePublisher(PublisherBase):
         if self.debug:
             print('[ImagePublisher] publish topic={} ret={}'.format(self.topic, str(ret)))
 
+class FwdImagePublisher(PublisherBase):
+    """
+    Tubデータ(nd.array:fwd/image_array)を
+    AWS IoT CoreへPublishするパーツクラス。
+    """
+    def __init__(self, aws_iot_client_factory, debug=False):
+        super().__init__(aws_iot_client_factory, 'Image', debug)
+        self.topic = pub_tub_fwd_image_topic(
+            self.system, self.thing_type, self.thing_group, self.thing_name)
+        if self.debug:
+            print('[FwdImagePublisher] topic name = {}'.format(self.topic))
+        self.qos = 0
+
+    def run(self, image_array):
+        """
+        Tubデータ(nd.array:fwd/image_array)をPublishする。
+        引数：
+            image_array     fwd/image_arrayデータ(nd.array型)
+        戻り値：
+            なし
+        """
+        ret = self.client.publish(
+            self.topic, 
+            arr_to_bytearray(image_array), 
+                self.qos)
+        if self.debug:
+            print('[FwdImagePublisher] publish topic={} ret={}'.format(self.topic, str(ret)))
