@@ -1,13 +1,42 @@
 # -*- coding: utf-8 -*-
+"""
+2D Map Pillwo(PIL) オブジェクトを取得するためのモジュールを提供する。
+また Tkinter canvasオブジェクトを指定した場合は、canvasを更新する。
+外部から利用する場合は、以下の情報が必要となる。
+* ベースイメージファイル(JPEG)
+* エージェントの座標(X, Y)および方向
+
+外部モジュールから使用する場合は、 `SpoolMobileVision` クラスのみをcallすればよい。
+"""
 from tkinter import *
 from PIL import Image, ImageDraw
 import numpy as np
 import math
+# 摩擦抵抗値に対する指定色を定義した辞書
 color_list = {0.001: '#E5E5E5', 0.3: '#00CB65', 0.002: '#00984C'}   # to be refactored
 
 
 class MobileVision:
+    """
+    描画オブジェクトの抽象クラス。
+    描画実装は円を描く処理となっている。
+    """
     def __init__(self, id, x, y, angle, margin_x, margin_y, scale, landscape, canvas):
+        """
+        2D マップ上のオブジェクトの初期情報をインスタンス変数へ格納する。
+        引数：
+            id          Marvelmind モバイルビーコンID
+            x           対象オブジェクトの開始時点のX座標
+            y           対象オブジェクトの開始時点のY座標
+            angle       画像左下を原点右をX軸、上をY軸としたときの角度(単位：度)
+            margin_x    画像左下を原点としたときの上下X座標
+            margin_y    画像左下を原点としたときの右左Y座標
+            scale       画像をスケールアップする場合の倍率
+            landscape   ベースイメージ(JPEG)
+            canvas      Tkinterキャンバスオブジェクト
+        戻り値：
+            なし
+        """
 
         # 移動体の識別id
         self.id = id
@@ -24,6 +53,13 @@ class MobileVision:
         self.w = canvas     # Canvasに表示する場合
 
     def drawImage(self, draw):
+        """
+        Pillow(PIL)Drawオブジェクト上に半径self.scaleの円を描く。
+        引数：
+            draw    Pillow(PIL) Draw オブジェクト  
+        戻り値：
+            なし
+        """
         # 回転中心の円とID
         mobile_radius = 2 * self.scale
         draw.ellipse((self.position[0, 0] * self.scale + self.margin_x - mobile_radius,
@@ -33,6 +69,13 @@ class MobileVision:
                      fill=(0, 255, 255), outline=(50, 50, 50))
 
     def drawCanvas(self, canvas):
+        """
+        Tkinter canvasオブジェクト上に半径self.scaleの円を描く。
+        引数：
+            canvas      Tkinter canvas オブジェクト  
+        戻り値：
+            なし
+        """
         # 回転中心の円とID
         mobile_radius = 2 * self.scale
         canvas.delete(str(self.id) + "oval")
@@ -44,6 +87,9 @@ class MobileVision:
 
 
 class Chassis(MobileVision):
+    """
+    エージェントのシャーシ描画オブジェクト。
+    """
     # シャーシの座標。箱庭座標系においてangle0度のときの重心（self.position[]）を原点とする座標
     polygon = np.zeros((2, 6))
     polygon[0, 0], polygon[1, 0] = 5.0, 2.5
@@ -54,6 +100,13 @@ class Chassis(MobileVision):
     polygon[0, 5], polygon[1, 5] = -5.0, 2.5
 
     def drawImage(self, draw):
+        """
+        Pillow(PIL)Drawオブジェクト上に6角形のポリゴン（シャーシ）を角度self.angle度傾けて描画する。
+        引数：
+            draw    Pillow(PIL) Draw オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -71,6 +124,13 @@ class Chassis(MobileVision):
                      fill=(255, 191, 0), outline=(76, 76, 76))
 
     def drawCanvas(self, canvas):
+        """
+        Tkinter canvasオブジェクト上に6角形のポリゴン（シャーシ）を角度self.angle度傾けて描画する。
+        引数：
+            canvas  Tkinter canvas オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -90,6 +150,9 @@ class Chassis(MobileVision):
 
 
 class Folk(MobileVision):
+    """
+    エージェントのフォーク部分描画オブジェクト。
+    """
     # フォークの座標。箱庭座標系においてangle0度のときの重心（self.position[]）を原点とする座標
     polygon = np.zeros((2,12))
     polygon[0, 0], polygon[1, 0] = -5.625, 3.5
@@ -106,6 +169,13 @@ class Folk(MobileVision):
     polygon[0, 11], polygon[1, 11] = 5.625, 3.5
 
     def drawImage(self, draw):
+        """
+        Pillow(PIL)Drawオブジェクト上に12角形のポリゴン（フォーク）を角度self.angle度傾けて描画する。
+        引数：
+            draw    Pillow(PIL) Draw オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -128,6 +198,13 @@ class Folk(MobileVision):
                      fill=(204, 255, 255), outline=(76, 76, 76))
 
     def drawCanvas(self, canvas):
+        """
+        Tkinter canvasオブジェクト上に12角形のポリゴン（フォーク）を角度self.angle度傾けて描画する。
+        引数：
+            canvas  Tkinter canvas オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -152,6 +229,10 @@ class Folk(MobileVision):
 
 
 class Left_wheel(MobileVision):
+    """
+    左駆動輪描画オブジェクト。
+    本体からの相対座標定義なので、各動輪ごとにオブジェクト定義している。
+    """
     # 左駆動輪の座標。箱庭座標系においてangle0度のときの重心（self.position[]）を原点とする座標
     polygon = np.zeros((2, 4))
     polygon[0, 0], polygon[1, 0] = 6.3125, 2.5
@@ -160,6 +241,13 @@ class Left_wheel(MobileVision):
     polygon[0, 3], polygon[1, 3] = 6.3125, -2.5
 
     def drawImage(self, draw):
+        """
+        Pillow(PIL)Drawオブジェクト上に4角形のポリゴン（左駆動輪）を角度self.angle度傾けて描画する。
+        引数：
+            draw    Pillow(PIL) Draw オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -175,6 +263,13 @@ class Left_wheel(MobileVision):
                      fill=(101, 101, 101), outline=(76, 76, 76))
 
     def drawCanvas(self, canvas):
+        """
+        Tkinter canvasオブジェクト上に4角形のポリゴン（左駆動輪）を角度self.angle度傾けて描画する。
+        引数：
+            canvas  Tkinter canvas オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -192,6 +287,10 @@ class Left_wheel(MobileVision):
 
 
 class Right_wheel(MobileVision):
+    """
+    右駆動輪描画オブジェクト。
+    本体からの相対座標定義なので、各動輪ごとにオブジェクト定義している。
+    """
     # 右駆動輪の座標。箱庭座標系においてangle0度のときの重心（self.position[]）を原点とする座標
     polygon = np.zeros((2, 4))
     polygon[0, 0], polygon[1, 0] = -4.3125, 2.5
@@ -200,6 +299,13 @@ class Right_wheel(MobileVision):
     polygon[0, 3], polygon[1, 3] = -4.3125, -2.5
 
     def drawImage(self, draw):
+        """
+        Pillow(PIL)Drawオブジェクト上に4角形のポリゴン（右駆動輪）を角度self.angle度傾けて描画する。
+        引数：
+            draw    Pillow(PIL) Draw オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -215,6 +321,13 @@ class Right_wheel(MobileVision):
                      fill=(101, 101, 101), outline=(76, 76, 76))
 
     def drawCanvas(self, canvas):
+        """
+        Tkinter canvasオブジェクト上に4角形のポリゴン（右駆動輪）を角度self.angle度傾けて描画する。
+        引数：
+            canvas  Tkinter canvas オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -232,6 +345,10 @@ class Right_wheel(MobileVision):
 
 
 class Tail_wheel(MobileVision):
+    """
+    尾輪（非駆動）描画オブジェクト。
+    本体からの相対座標定義なので、各動輪ごとにオブジェクト定義している。
+    """
     # 尾輪（従動輪）の座標。箱庭座標系においてangle0度のときの重心（self.position[]）を原点とする座標
     polygon = np.zeros((2, 4))
     polygon[0, 0], polygon[1, 0] = 1.0, -12.78
@@ -240,6 +357,13 @@ class Tail_wheel(MobileVision):
     polygon[0, 3], polygon[1, 3] = -1.0, -12.78
 
     def drawImage(self, draw):
+        """
+        Pillow(PIL)Drawオブジェクト上に4角形のポリゴン（尾輪）を角度self.angle度傾けて描画する。
+        引数：
+            draw    Pillow(PIL) Draw オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -254,6 +378,13 @@ class Tail_wheel(MobileVision):
                      fill=(101, 101, 101), outline=(76, 76, 76))
 
     def drawCanvas(self, canvas):
+        """
+        Tkinter canvasオブジェクト上に4角形のポリゴン（尾輪）を角度self.angle度傾けて描画する。
+        引数：
+            canvas  Tkinter canvas オブジェクト  
+        戻り値：
+            なし
+        """
         # -angleだけ回転する
         rot_matrix = [[math.cos(math.radians(self.angle)), math.sin(math.radians(self.angle))],
                       [-1 * math.sin(math.radians(self.angle)), math.cos(math.radians(self.angle))]]
@@ -270,12 +401,37 @@ class Tail_wheel(MobileVision):
 
 
 class ResistanceMap:
+    """
+    摩擦抵抗データをもとにした2Dマップ Pillow(PIL) draw オブジェクトを
+    生成するユーティリティクラス。
+    """
 
     def __init__(self, inputMapFile, colorMapList):
+        """
+        摩擦抵抗ベースの2Dマップの初期情報をインスタンス変数へ格納する。
+        引数：
+            inputMapFile    ベースマップの摩擦抵抗データファイルへのパス
+            colorMapFile    カラーマップファイル
+                            （摩擦抵抗によって指定色を変更したデータが
+                            格納されている）へのパス。本クラスでは使用されていない。
+        戻り値：
+            なし
+        """
         self.inputMapFile = inputMapFile
         self.colorMapList = colorMapList
 
     def init_resistance_data(self):
+        """
+        摩擦抵抗データファイルを読み取り、カラーマップと突き合わせて
+        摩擦抵抗データを作成・取得する。
+        self.colorMapListは使用せず、決め打ちデータを作成、返却している。
+        引数：
+            なし
+        戻り値：
+            摩擦抵抗データ、
+            (摩擦抵抗データファイル１行に含まれる要素数, 摩擦抵抗データファイル行数, 3)形式、
+            各要素は色情報
+        """
         f = open(self.inputMapFile)
         lines = f.readlines()
         datalen = len(lines)
@@ -292,6 +448,14 @@ class ResistanceMap:
         return data
 
     def generateImageFile(self, outfilepath):
+        """
+        摩擦抵抗マップ画像を引数で指定されたパスへ保存し、Pillow(PIL) イメージを
+        返却する。
+        引数；
+            outfilepath     摩擦抵抗マップ画像保存先ファイルパス
+        戻り値：
+            Pillow(PIL) イメージ（摩擦抵抗マップ画像）
+        """
         resistance_list = ResistanceMap.init_resistance_data(self)
         pil_img = Image.fromarray(np.uint8(resistance_list))
         pil_img.save(outfilepath)
@@ -299,7 +463,22 @@ class ResistanceMap:
 
 
 class Landscape:
+    """
+    背景オブジェクト生成ユーティリティクラス。
+    """
     def __init__(self, rrmap_img, weight_list, node_list, base_margin, ladder_margin, scale):
+        """
+        背景オブジェクトの初期情報をインスタンス変数へ格納する。
+        引数：
+            rrmap_img       摩擦抵抗カラーマップで彩色されたPillow(PIL)drawオブジェクト
+            weight_list     重み付け境界座標のリスト
+            node_list       エージェント（複数の可能性あり）座標のリスト
+            base_margin     端からはしご状ガイドラインまでのマージン距離
+            ladder_margin   はしご自体のマージン距離
+            scale           画像化するさいの拡大・縮小率
+        戻り値：
+            なし
+        """
         self.rrmap_img = rrmap_img # 走行抵抗イメージ
         self.weight_list = weight_list
         self.node_list = node_list
@@ -308,6 +487,14 @@ class Landscape:
         self.scale = scale
 
     def create_1x1_landscape_img(self, margin_x, margin_y):
+        """
+        背景オブジェクトを作成し返却する。
+        引数：
+            margin_x        左右マージン距離
+            margin_y        上下マージン距離
+        戻り値：
+            Pillow(PIL) 背景オブジェクト
+        """
         if margin_x != 0 or margin_y != 0:
             result_img = Image.new(self.rrmap_img.mode, (self.rrmap_img.size[0] + margin_x * 2, self.rrmap_img.size[1] + margin_y * 2), (255, 255, 255))
             result_img.paste(self.rrmap_img, (margin_x, margin_y))
@@ -342,7 +529,26 @@ class Landscape:
 
 
 class SpoolMobileVision(MobileVision):
+    """
+    2D Mapを作成するユーティリティクラス。
+    """
     def __init__(self, id, x, y, angle, margin_x, margin_y, scale, landscape=None, canvas=None):
+        """
+        エージェント画像を構成する描画オブジェクトを生成し、Pillow(PIL) drawオブジェクトを更新する。
+        Tkinter canvasオブジェクトを引数指定した場合は、canvasも更新する。
+        引数：
+            id          Marvelmind モバイルビーコンID
+            x           対象オブジェクトの開始時点のX座標
+            y           対象オブジェクトの開始時点のY座標
+            angle       画像左下を原点右をX軸、上をY軸としたときの角度(単位：度)
+            margin_x    画像左下を原点としたときの上下X座標
+            margin_y    画像左下を原点としたときの右左Y座標
+            scale       画像をスケールアップする場合の倍率
+            landscape   ベースイメージ(JPEG)
+            canvas      Tkinterキャンバスオブジェクト
+        戻り値：
+            なし
+        """
         super().__init__(id, x, y, angle, margin_x, margin_y, scale, landscape, canvas)
         # self.landscape_img = landscape
         self.loader = [Folk(self.id, self.x, self.y, self.angle, margin_x, margin_y, scale, landscape, canvas),
@@ -364,6 +570,15 @@ class SpoolMobileVision(MobileVision):
                 b.drawCanvas(self.w)
 
     def get_vision(self, x, y, angle):
+        """
+        最新の2D Map Pillow(PIL) draw オブジェクトを作成、返却する。
+        引数：
+            x           エージェントのX座標
+            y           エージェントのY座標
+            angle       エージェントの方向(単位：度、0から360)
+        戻り値：
+            vision      Pillow(PIL) drawオブジェクト（エージェント表示有2D Map）
+        """
         vision = self.landscape_img.copy()
         for b in self.loader:
             b.position[0, 0], b.position[1, 0], b.angle = x, y, angle
@@ -371,9 +586,15 @@ class SpoolMobileVision(MobileVision):
         return vision
 
     def update_vision(self, x, y, angle):
+        """
+        インスタンス変数self.canvasを最新の2D Map として更新する。
+        引数：
+            x           エージェントのX座標
+            y           エージェントのY座標
+            angle       エージェントの方向(単位：度、0から360)
+        戻り値：
+            なし
+        """
         for b in self.loader:
             b.position[0, 0], b.position[1, 0], b.angle = x, y, angle
             b.drawCanvas(self.w)
-
-
-
